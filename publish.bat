@@ -4,4 +4,4 @@
 
 git add .
 git commit -am "file change"
-git push origin main
+git push --force origin main
