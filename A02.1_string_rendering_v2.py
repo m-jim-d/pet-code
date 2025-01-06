@@ -249,7 +249,7 @@ def modify( car, env):
         env['CR'] = 0.7
 
         print_header(car)
-        explaination = ''' 
+        explanation = ''' 
         This first example has the car (represented by a "*") starting from
         rest and accelerating to the left. Stickiness correction is ON. There is
         energy loss (fractional reduction in v) after each wall collision.
@@ -272,7 +272,7 @@ def modify( car, env):
         ||
         p key: pause or resume  /  x key: stop
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(5.0)
         
     elif cl['example_index'] == 2:
@@ -282,14 +282,14 @@ def modify( car, env):
         env['CR'] = 1.0
         
         print_header(car)
-        explaination = ''' 
+        explanation = ''' 
         Stickiness correction is turned off which allows the overlap
         (penetration) to be seen. These are elastic collisions (CR=1), meaning
         this will run until a keyboard stop or the loop counter hits its limit.
         ||
         p key: pause or resume  /  x key: stop
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)        
         
         
@@ -302,7 +302,7 @@ def modify( car, env):
         env['CR'] = 0.6
         
         print_header(car)
-        explaination = ''' 
+        explanation = ''' 
         All parameters are identical to example 1 except that stickiness
         correction is OFF.
         ||
@@ -317,7 +317,7 @@ def modify( car, env):
         ||
         p key: pause or resume  /  x key: stop      
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(4.0)        
         
     elif cl['example_index'] == 4:
@@ -327,14 +327,14 @@ def modify( car, env):
         track['show_collision_mark'] = False
 
         print_header(car)
-        explaination = ''' 
+        explanation = ''' 
         The target frame rate is set high to give an interesting display of the
         time-series tail. The car loses speed from each wall collision.
         Acceleration (set high) to the left (negative).
         ||
         p key: pause or resume  /  x key: stop
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)        
 
         
@@ -343,7 +343,7 @@ def modify( car, env):
         env['CR'] = 0.7
         
         print_header(car)
-        explaination = ''' 
+        explanation = ''' 
         Acceleration is to the right (opposite direction from other examples).
         ||
         A collision mark (0) is displayed at the original collision
@@ -351,7 +351,7 @@ def modify( car, env):
         ||
         p key: pause or resume  /  x key: stop      
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)        
         
     elif cl['example_index'] == 6:
@@ -360,7 +360,7 @@ def modify( car, env):
         env['m_to_px'] = 30.0
         
         print_header(car)
-        explaination = ''' 
+        explanation = ''' 
         The scaling factor between the physics engine and the renderer has
         decreased from the level used in example 5. This effectively zooms out
         the view of the track and the car on it. The output from the physics
@@ -369,7 +369,7 @@ def modify( car, env):
         ||
         p key: pause or resume  /  x key: stop
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)   
 
     elif cl['example_index'] == 7:
@@ -379,7 +379,7 @@ def modify( car, env):
         track['show_start_mark'] = True
         
         print_header(car)
-        explaination = '''
+        explanation = '''
         The CR value of unity yields elastic collisions. The frame rate is set
         high to give the highest precision in the physics predictions. Note
         the car consistently returns to the initial starting point as marked by
@@ -387,7 +387,7 @@ def modify( car, env):
         ||
         p key: pause or resume  /  x key: stop    
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)        
         
     elif cl['example_index'] == 8:
@@ -397,7 +397,7 @@ def modify( car, env):
         track['show_start_mark'] = True
         
         print_header(car)
-        explaination = '''
+        explanation = '''
         This is like the previous example (7), except the target frame rate is
         reduced to give the lower precision in the physics predictions.
         Note the car does NOT return to the initial starting point (as marked
@@ -410,7 +410,7 @@ def modify( car, env):
         ||
         p key: pause or resume  /  x key: stop
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)        
         
     elif cl['example_index'] == 9:
@@ -421,7 +421,7 @@ def modify( car, env):
         track['show_start_mark'] = True
         
         print_header(car)
-        explaination = '''
+        explanation = '''
         The observed dt is used in the subsequent frame to calculate the
         physics engine motions. All other settings are identical to those in
         example 8. Note the car, again, does NOT return to the initial starting
@@ -430,7 +430,7 @@ def modify( car, env):
         ||
         p key: pause or resume  /  x key: stop    
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)        
         
     elif cl['example_index'] == 10:
@@ -441,7 +441,7 @@ def modify( car, env):
         env['exact_solution'] = True
         
         print_header(car)
-        explaination = '''
+        explanation = '''
         The Euler-method calculation has been replaced with an exact
         calculation method in this example. The calculation uses physics
         kinematics equations to model the motion between the ends of the track
@@ -451,7 +451,7 @@ def modify( car, env):
         ||
         p key: pause or resume  /  x key: stop   
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)        
         
     elif cl['example_index'] == 11:
@@ -463,14 +463,14 @@ def modify( car, env):
         env['use_observed_dt'] = True
         
         print_header(car)
-        explaination = '''
+        explanation = '''
         The observed dt is used in the calculations of subsequent frames. Note
         that in contrast to example 9, the car consistently returns to the
         initial starting point.
         ||
         p key: pause or resume  /  x key: stop
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)        
         
     elif cl['example_index'] == 12:
@@ -482,24 +482,24 @@ def modify( car, env):
         env['use_observed_dt'] = True
         
         print_header(car)
-        explaination = '''
+        explanation = '''
         Same as example 11 but with a CR of less than 1.0.
         ||
         p key: pause or resume  /  x key: stop    
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)        
         
     else:
         cl['example_index'] = "--> Defaults"
         print_header(car)
-        explaination = ''' 
+        explanation = ''' 
         No command line arguments were supplied or there was no
         match for the mode value. Default parameters will be used.
         ||
         p key: pause or resume  /  x key: stop
         '''
-        pretty_paragraphs( explaination, 1) 
+        pretty_paragraphs( explanation, 1) 
         try_sleep(3.0)
         
 def at_rest( car):
