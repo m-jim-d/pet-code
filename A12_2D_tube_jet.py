@@ -452,7 +452,7 @@ class AirTable:
                 # Parallel to the normal
                 puck_to_puck_2d_m = otherpuck.pos_2d_m - puck.pos_2d_m
                 # Parallel to the tangent
-                tanget_p_to_p_2d_m = Vec2D.rotate90(puck_to_puck_2d_m)
+                tangent_p_to_p_2d_m = Vec2D.rotate90(puck_to_puck_2d_m)
                 
                 p_to_p_m2 = puck_to_puck_2d_m.length_squared()
                 
@@ -465,10 +465,10 @@ class AirTable:
                     
                     # The calculate velocity components along and perpendicular to the normal.
                     puck_normal_2d_mps = puck.vel_2d_mps.projection_onto(puck_to_puck_2d_m)
-                    puck_tangent_2d_mps = puck.vel_2d_mps.projection_onto(tanget_p_to_p_2d_m)
+                    puck_tangent_2d_mps = puck.vel_2d_mps.projection_onto(tangent_p_to_p_2d_m)
                     
                     otherpuck_normal_2d_mps = otherpuck.vel_2d_mps.projection_onto(puck_to_puck_2d_m)
-                    otherpuck_tangent_2d_mps = otherpuck.vel_2d_mps.projection_onto(tanget_p_to_p_2d_m)
+                    otherpuck_tangent_2d_mps = otherpuck.vel_2d_mps.projection_onto(tangent_p_to_p_2d_m)
                     
                     relative_normal_vel_2d_mps = otherpuck_normal_2d_mps - puck_normal_2d_mps
                     
