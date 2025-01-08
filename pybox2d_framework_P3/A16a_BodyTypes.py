@@ -30,7 +30,7 @@ from math import cos, sin, pi
 from Box2D.examples.framework import (Framework, Keys, main)
 from Box2D import (b2EdgeShape, b2FixtureDef, b2PolygonShape, b2_dynamicBody,
                    b2_kinematicBody, b2_staticBody, 
-                   b2Filter, b2Vec2, b2CircleShape,   b2_velocityThreshold)
+                   b2Filter, b2Vec2, b2CircleShape)
 
                    
 class BodyTypes (Framework):
@@ -65,7 +65,6 @@ class BodyTypes (Framework):
                 shapes=b2EdgeShape(vertices=[(-30,0),(30,0)]) 
         )
 
-                
         # The attachment
         attachment_fixture = b2FixtureDef(
                 shape=b2PolygonShape( box=(0.5,2)), 
@@ -179,7 +178,6 @@ class BodyTypes (Framework):
                 y += deltaY
             x += deltaX
                 
-                
     def newbullet(self, location_init, angle_radians_init, speed_control):
         # Speed
         v = 30
@@ -213,8 +211,6 @@ class BodyTypes (Framework):
         self.bullet_list.append([self.bullet, self.time])
         
     def Keyboard(self, key):
-        global b2_velocityThreshold
-        
         if key==Keys.K_d:
             self.platform.type=b2_dynamicBody
         elif key==Keys.K_s:
@@ -236,11 +232,8 @@ class BodyTypes (Framework):
             self.newpyramid()
         elif key==Keys.K_r:
             self.newpayload()
-            print( "b2_velocityThreshold = ", b2_velocityThreshold)
         elif key==Keys.K_c:
             self.newCircle()
-            #b2_velocityThreshold = 0.0
-            b2_velocityThreshold = 0
             
     def Step(self, settings):
         super(BodyTypes, self).Step(settings)
@@ -267,5 +260,5 @@ class BodyTypes (Framework):
             del bullet_list_copy
 
         
-if __name__ == "__main__":
-     main( BodyTypes)
+if __name__=="__main__":
+     main(BodyTypes)
