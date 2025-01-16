@@ -355,10 +355,10 @@ class RunningAvg:
             self.values.pop(0)
         self.values.append(new_value)
         
-        raw_result = self.total / float(self.n_in_avg)
+        raw_result = self.total / self.n_in_avg
         
         # Round to nearest multiple of base
-        self.result = int(self.base * round(float(raw_result)/self.base))
+        self.result = self.base * round(raw_result/self.base)
     
     def reset(self):
         self.n_in_avg = 0

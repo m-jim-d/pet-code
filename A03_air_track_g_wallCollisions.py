@@ -179,7 +179,7 @@ class Environment:
     
     # Convert from meters to pixels
     def px_from_m(self, dx_m):
-        return int(round(dx_m * self.m_to_px))
+        return round(dx_m * self.m_to_px)
     
     # Convert from pixels to meters
     def m_from_px(self, dx_px):
@@ -255,7 +255,7 @@ def main():
         game_window.surface.fill(THECOLORS["black"])
 
         # Get the delta t for one frame (this changes depending on system load).
-        dt_s = float(myclock.tick(framerate_limit) * 1e-3)
+        dt_s = myclock.tick(framerate_limit) * 1e-3
         
         # Check for user initiated stop or demo change.
         resetmode = env.get_local_user_input()

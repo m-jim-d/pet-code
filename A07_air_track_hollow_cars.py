@@ -183,7 +183,7 @@ class Detroit:
         self.width_px  = width_px
         
         # Use y midpoint for drawing the cursor line.
-        self.center_y_px = int(round( float(game_window.height_px - self.height_px) + float(self.height_px)/2.0) )
+        self.center_y_px = round((game_window.height_px - self.height_px) + self.height_px/2.0)
         # For use with cursor-tethers selection.
         self.selected = False
         
@@ -239,14 +239,14 @@ class Detroit:
         # hole calculation. Notice the reference to the air_track's max_m_kg which is
         # the mass of the heaviest car.
         
-        self.density_kgppx2 = float(air_track.max_m_kg)/float(self.width_px * self.height_px)
+        self.density_kgppx2 = air_track.max_m_kg/(self.width_px * self.height_px)
         
         # Keep the hole width consistent for all the cars.
         hole_width_pxi = self.width_px - 2
         
         # Calculate the hole height based on the difference in mass it represents.
         hole_height_pxf = (air_track.max_m_kg - self.m_kg)/(self.density_kgppx2 * hole_width_pxi)
-        hole_height_pxi = int(round(hole_height_pxf))
+        hole_height_pxi = round(hole_height_pxf)
         
         # These shrink values will be used (relative to the main car rectangle) when time comes 
         # to draw the rectangle that represents the hole.
@@ -720,8 +720,8 @@ class Next_x:
 
 class Environment:
     def __init__(self, length_px, length_m):
-        self.px_to_m = length_m/float(length_px)
-        self.m_to_px = (float(length_px)/length_m)
+        self.px_to_m = length_m/length_px
+        self.m_to_px = length_px/length_m
         
         # Add a local (non-network) client to the client dictionary.
         self.clients = {'local':Client(THECOLORS["green"])}
@@ -729,11 +729,11 @@ class Environment:
     
     # Convert from meters to pixels
     def px_from_m(self, dx_m):
-        return int(round(dx_m * self.m_to_px))
+        return round(dx_m * self.m_to_px)
     
     # Convert from pixels to meters
     def m_from_px(self, dx_px):
-        return float(dx_px) * self.px_to_m
+        return dx_px * self.px_to_m
         
     def shift_key_down(self):
         keys = pygame.key.get_pressed()
@@ -760,7 +760,7 @@ class Environment:
                     if self.shift_key_down():
                         return "1p"
                     else:
-                        return 1           
+                        return 1
                 elif (event.key==K_2):
                     if self.shift_key_down():
                         return "2p"
@@ -770,12 +770,12 @@ class Environment:
                     if self.shift_key_down():
                         return "3p"
                     else:
-                        return 3           
+                        return 3
                 elif (event.key==K_4):
                     if self.shift_key_down():
                         return "4p"
                     else:
-                        return 4           
+                        return 4
                 elif (event.key==K_5):
                     return 5
                 elif (event.key==K_6):
@@ -903,7 +903,7 @@ def main():
         game_window.surface.fill(THECOLORS["black"])
 
         # Get the delta t for one frame (this changes depending on system load).
-        dt_s = float(myclock.tick(framerate_limit) * 1e-3)
+        dt_s = myclock.tick(framerate_limit) * 1e-3
         
         # This check avoids problem when dragging the game window.
         if (dt_s < 0.10):
@@ -943,7 +943,7 @@ def main():
                 nFinerTimeStepFactor = 1000 # 1000 works well for up to 5 digits of pi.
                 for j in range( nFinerTimeStepFactor):
                     for car in air_track.cars:
-                        air_track.update_SpeedandPosition(car, dt_s/float( nFinerTimeStepFactor))
+                        air_track.update_SpeedandPosition(car, dt_s/nFinerTimeStepFactor)
                     air_track.check_for_PI_collisions()
             else:
                 # Update velocity and x position of each car based on the dt_s for this frame.

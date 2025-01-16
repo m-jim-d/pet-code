@@ -276,8 +276,8 @@ class Environment:
         self.key_m = 'U'
         self.key_h = 'U'
     
-        self.px_to_m = length_x_m/float(self.screenSize_px.x)
-        self.m_to_px = (float(self.screenSize_px.x)/length_x_m)
+        self.px_to_m = length_x_m/self.screenSize_px.x
+        self.m_to_px = self.screenSize_px.x/length_x_m
         
         self.inhibit_screen_clears = False
         
@@ -301,7 +301,7 @@ class Environment:
     # Convert from pixels to meters
     # Note: still floating values here
     def m_from_px(self, dx_px):
-        return float(dx_px) * self.px_to_m / self.viewZoom
+        return dx_px * self.px_to_m / self.viewZoom
     
     def control_zoom_and_view(self):
         if self.key_h == "D":
@@ -567,7 +567,7 @@ def main():
     framerate_limit = 480.0   # 480
 
     while True:
-        env.dt_s = float(myclock.tick( framerate_limit) * 1e-3)
+        env.dt_s = myclock.tick( framerate_limit) * 1e-3
         
         # Listen to the user: establish the state of the keyboard and mouse and determine if a new demo is called for.
         resetmode = env.get_user_input()

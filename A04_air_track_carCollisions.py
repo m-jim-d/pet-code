@@ -252,7 +252,7 @@ class Environment:
                 if (event.key == K_ESCAPE):
                     return 'quit'
                 elif (event.key==K_1):            
-                    return 1           
+                    return 1
                 elif (event.key==K_2):                          
                     return 2
                 elif (event.key==K_3):                          
@@ -318,7 +318,7 @@ def main():
         game_window.surface.fill(THECOLORS["black"])
 
         # Get the delta t for one frame (this changes depending on system load).
-        dt_s = float(myclock.tick(framerate_limit) * 1e-3)
+        dt_s = myclock.tick(framerate_limit) * 1e-3
         
         # Check for user initiated stop or demo change.
         resetmode = env.get_local_user_input()

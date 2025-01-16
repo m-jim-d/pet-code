@@ -19,8 +19,8 @@ class Vec2D:
             self.y = y
 
         if int_flag == "int":
-            self.x = int(round(self.x))
-            self.y = int(round(self.y))
+            self.x = round(self.x)
+            self.y = round(self.y)
         else:
             self.x = float(self.x)
             self.y = float(self.y)

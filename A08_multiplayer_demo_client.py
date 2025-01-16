@@ -26,7 +26,7 @@ from A08_network import GameClient, RunningAvg, setClientColors
 def signoff(user_state):
     sys.exit()
     
-def checkforUserInput(user_state):
+def checkForUserInput(user_state):
     
     # Get all the events since the last call to get().
     for event in pygame.event.get():
@@ -37,7 +37,7 @@ def checkforUserInput(user_state):
                 signoff(user_state)
             
             elif (event.key==K_1):            
-                return 1           
+                return 1
             elif (event.key==K_2):                          
                 return 2
             elif (event.key==K_3):
@@ -108,9 +108,9 @@ def main():
     fr_avg = RunningAvg(100, pygame)
 
     while True:
-        dt_s = float( client_clock.tick( framerate_limit) * 1e-3)
+        dt_s = client_clock.tick(framerate_limit) * 1e-3
         
-        checkforUserInput( user_state)
+        checkForUserInput( user_state)
         
         client.send_state( user_state)
         

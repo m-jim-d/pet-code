@@ -41,7 +41,7 @@ def checkforUserInput(client_state):
                 mydisplay.fill(THECOLORS["yellow"])  
             
             elif (event.key==K_1):            
-                return 1           
+                return 1
             elif (event.key==K_2):                          
                 return 2
             elif (event.key==K_3):
@@ -167,7 +167,7 @@ def main():
     flip_timer = 0.0
 
     while True:
-        dt_s = float(myclock.tick(framerate_limit) * 1e-3)
+        dt_s = myclock.tick(framerate_limit) * 1e-3
         
         checkforUserInput( client_state)
         

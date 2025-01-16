@@ -6,6 +6,7 @@ import sys
 import pygame
 import math
 import socket
+import platform, subprocess
 
 # PyGame Constants
 from pygame.locals import (
@@ -95,7 +96,7 @@ class Client:
 class Puck:
     def __init__(self, pos_2d_m, radius_m, density_kgpm2, puck_color = THECOLORS["grey"]):
         self.radius_m = radius_m
-        self.radius_px = int(round(env.px_from_m(self.radius_m * env.viewZoom)))
+        self.radius_px = round(env.px_from_m(self.radius_m * env.viewZoom))
 
         self.density_kgpm2 = density_kgpm2    # mass per unit area
         self.mass_kg = self.density_kgpm2 * math.pi * self.radius_m ** 2
@@ -124,7 +125,7 @@ class Puck:
         self.pos_2d_px = env.ConvertWorldToScreen( self.pos_2d_m)
         
         # Update based on zoom factor
-        self.radius_px = int(round(env.px_from_m( self.radius_m)))
+        self.radius_px = round(env.px_from_m( self.radius_m))
         if (self.radius_px < 3):
             self.radius_px = 3
                     
@@ -406,8 +407,8 @@ class Environment:
         self.viewZoom = 1
         self.viewZoom_rate = 0.01
     
-        self.px_to_m = length_x_m/float(self.screenSize_px.x)
-        self.m_to_px = (float(self.screenSize_px.x)/length_x_m)
+        self.px_to_m = length_x_m/self.screenSize_px.x
+        self.m_to_px = self.screenSize_px.x/length_x_m
         
         self.client_colors = setClientColors()
                               
@@ -423,7 +424,7 @@ class Environment:
     # Convert from pixels to meters
     # Note: still floating values here)
     def m_from_px(self, dx_px):
-        return float(dx_px) * self.px_to_m / self.viewZoom
+        return dx_px * self.px_to_m / self.viewZoom
     
     def control_zoom_and_view(self):
         if self.clients['local'].key_h == "D":
@@ -680,10 +681,6 @@ def main():
     
     # Add some pucks to the table.
     make_some_pucks( 6)
-
-    # Setup network server.
-    local_ip = socket.gethostbyname(socket.gethostname())
-    print("Server IP address:", local_ip)
     
     # For displaying a smoothed framerate.
     fr_avg = RunningAvg(300, pygame, colorScheme='light')
@@ -698,12 +695,19 @@ def main():
         c_name = 'C' + str(m)
         env.clients[ c_name] = Client( env.client_colors[ c_name])
 
+    # Setup network server.
+    if platform.system() == 'Linux':
+        local_ip = subprocess.check_output(["hostname", "-I"]).decode().strip()
+    else:
+        local_ip = socket.gethostbyname(socket.gethostname())
+    print("Server IP address:", local_ip)
+
     server = GameServer(host='0.0.0.0', port=5000, 
                         update_function=custom_update, clientStates=env.clients, 
                         signInOut_function=signInOut_function)
 
     while True:
-        dt_physics_s = float(myclock.tick( framerate_limit) * 1e-3)
+        dt_physics_s = myclock.tick( framerate_limit) * 1e-3
         
         #This check avoids problem when dragging the game window.
         if (dt_physics_s < 0.10):

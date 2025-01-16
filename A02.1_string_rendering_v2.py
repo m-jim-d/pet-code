@@ -26,7 +26,7 @@ import pygame
 from pygame.locals import K_p, K_x, K_c, K_s, K_LCTRL, K_RCTRL, K_ESCAPE
 
 def px_from_m( x_m):
-    return int(round( x_m * env['m_to_px']))
+    return round( x_m * env['m_to_px'])
         
 def move( car):
     v_i = car['v_mps']
@@ -191,7 +191,7 @@ def render( car):
 def pos_avg_10( car):
     x_list.append( car['x_m'])
     if len(x_list) > 10: x_list.pop(0)
-    return sum(x_list)/float(len(x_list))
+    return sum(x_list)/len(x_list)
     
 def pretty_paragraphs( text_string, n_blanklines):
     paragraph_list = text_string.split('||')

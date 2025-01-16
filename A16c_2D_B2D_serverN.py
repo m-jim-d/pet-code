@@ -9,6 +9,8 @@ import math
 from typing import Optional, Union, Tuple
 import socket
 import random
+import platform
+import subprocess
 
 # PyGame Constants
 from pygame.locals import (
@@ -644,12 +646,18 @@ class Gun( RotatingTube):
             self.gun_recharge_start_time_s = air_table.time_s
             self.gun_recharging = True
             self.bullet_count = 0
+            # At the beginning of the charging period, find a new target. This gives a human player an indication
+            # of what the drone is targeting. And since this is at the beginning of the gun charging period, it gives
+            # the player some time for evasive maneuvers.
             if self.client.drone:
                 self.findNewTarget()
-        
+    
         # If recharged.
         if (self.gun_recharging and (air_table.time_s - self.gun_recharge_start_time_s) > self.gun_recharge_wait_s):
             self.gun_recharging = False
+            # If the puck the drone is aiming at has been destroyed, find a new target before starting to shoot.
+            if self.client.drone and not (self.targetPuck in air_table.target_pucks):
+                self.findNewTarget()
                 
     def fire_gun(self):
         bullet_radius_m = 0.05
@@ -1569,8 +1577,9 @@ def make_some_pucks(demo):
                 
     elif demo == 7:        
         density = 0.8
-        #                   , r_m , density
-        Puck(Vec2D(5.0, 1.0), 0.35, density, show_health=True, hit_limit=10)
+        #                              , r_m , density
+        tempPuck = Puck(Vec2D(4.0, 1.0), 0.55, density, color=THECOLORS["orange"], show_health=True, hit_limit=10)
+        Spring(tempPuck, Vec2D(4.0, 1.0), strength_Npm=300.0, width_m=0.02, c_drag = 1.5)
 
         tempPuck = Puck(Vec2D(8.2, 4.0), 1.5, density, rect_fixture=True, aspect_ratio=0.3, show_health=True)
         tempPuck.b2d_body.angularVelocity = 0.5
@@ -1583,7 +1592,7 @@ def make_some_pucks(demo):
         # Make some pinned-spring pucks.
         for m in range(0, 6): 
             pinPoint_2d = Vec2D(2.0 + float(m) * 0.65, 4.0)
-            tempPuck = Puck(pinPoint_2d, 0.25, density,  color=THECOLORS["orange"], show_health=True, hit_limit=15)
+            tempPuck = Puck(pinPoint_2d, 0.25, density, color=THECOLORS["orange"], show_health=True, hit_limit=15)
             Spring(tempPuck, pinPoint_2d, strength_Npm=300.0, width_m=0.02, c_drag=1.5)
         
         # Make user/client controllable pucks
@@ -1762,7 +1771,10 @@ def main():
     make_some_pucks( demo_index)
 
     # Setup network server.
-    local_ip = socket.gethostbyname(socket.gethostname())
+    if platform.system() == 'Linux':
+        local_ip = subprocess.check_output(["hostname", "-I"]).decode().strip()
+    else:
+        local_ip = socket.gethostbyname(socket.gethostname())
     print("Server IP address:", local_ip)
 
     server = GameServer(host='0.0.0.0', port=5000, 

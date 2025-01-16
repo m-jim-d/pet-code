@@ -4,6 +4,8 @@
 
 import sys, os
 import pygame
+import socket
+import platform, subprocess
 
 # PyGame Constants
 from pygame.locals import (
@@ -17,8 +19,9 @@ from pygame.color import THECOLORS
 
 from A08_network import GameServer, RunningAvg, setClientColors
 
-import socket
-
+#=====================================================================
+# Classes
+#=====================================================================
 
 class Client:
     def __init__(self, cursor_color, ID):
@@ -27,7 +30,8 @@ class Client:
         self.ID = ID
         
         self.mouseXY = (0,0)   # (x_px, y_px)
-        self.mouse_button = 1  # 1, 2, or 3
+        #self.mouse_button = 1  # 1, 2, or 3
+        self.mouseB1 = "U"
         
         self.active = False
         
@@ -60,7 +64,7 @@ class Client:
             pygame.draw.circle( server_display, self.cursor_color, mouse_xy, 10, 0)
 
     def render_keys(self):
-        y_offset = 10 + (self.ID - 1) * 37
+        y_offset = 10 + (self.ID - 0) * 37
         
         # The W row...
         pygame.draw.rect(server_display, self.cursor_color, pygame.Rect(10, y_offset, 30, 20))
@@ -76,11 +80,13 @@ class Client:
         server_display.blit( txt_surface, [11, y_offset + 20])  
             
 #=======================================================================
-# Functions.        
+# Functions
 #=======================================================================
         
-def checkforLocalUserInput(): 
+def checkForLocalUserInput(): 
     global background_color
+
+    local_user = clients['local']
     
     # Get all the events since the last call to get().
     for event in pygame.event.get():
@@ -95,17 +101,48 @@ def checkforLocalUserInput():
                 background_color = THECOLORS["blue"]
             elif (event.key==K_y):
                 background_color = THECOLORS["yellow"]
+
+            elif (event.key==K_a):
+                local_user.key_a = 'D'
+            elif (event.key==K_s):
+                local_user.key_s = 'D'
+            elif (event.key==K_d):
+                local_user.key_d = 'D'
             elif (event.key==K_w):
-                background_color = THECOLORS["white"]
+                local_user.key_w = 'D'
+                
+        elif (event.type == pygame.KEYUP):
+            if (event.key==K_a):
+                local_user.key_a = 'U'
+            elif (event.key==K_s):
+                local_user.key_s = 'U'
+            elif (event.key==K_d):
+                local_user.key_d = 'U'
+            elif (event.key==K_w):
+                local_user.key_w = 'U'
+        
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            local_user.mouseB1 = 'D'
+        
+        elif event.type == pygame.MOUSEBUTTONUP:
+            local_user.mouseB1 = 'U'
+
+        # cursor x,y
+        local_user.mouseXY = pygame.mouse.get_pos()
 
 def custom_update_example(self, client_name, state_dict):
     # Store current client state
     self.CS_data[client_name].mouseXY = state_dict['mouseXY']
+
+    self.CS_data[ client_name].key_a = state_dict['a']
+    self.CS_data[ client_name].key_s = state_dict['s']
+    self.CS_data[ client_name].key_d = state_dict['d']
+    self.CS_data[ client_name].key_w = state_dict['w']
     
     # Add to drawing history if client is drawing
     if state_dict['mouseB1'] == 'D':
         self.CS_data[client_name].historyXY.append(state_dict['mouseXY'])
-        # Maintain fixed history length for memory efficiency
+        # Maintain fixed history length
         if len(self.CS_data[client_name].historyXY) > 200:
             self.CS_data[client_name].historyXY.pop(0)
     
@@ -132,7 +169,10 @@ def main():
     pygame.init()
 
     server_display = pygame.display.set_mode((600,400))
-    pygame.display.set_caption("SERVER: render state of all clients")
+    pygame.display.set_caption("SERVER: render state of network clients")
+    
+    # Hide the system cursor since we're drawing our own
+    pygame.mouse.set_visible(False)
 
     # Instantiate clock to help control the framerate.
     server_clock = pygame.time.Clock()
@@ -146,30 +186,42 @@ def main():
     # For displaying a smoothed framerate.
     fr_avg = RunningAvg(100, pygame)
 
-    # Setup network server.
-    local_ip = socket.gethostbyname(socket.gethostname())
-    local_port = 5000
-    print("Server IP address and port:", local_ip, local_port)
-
     client_colors = setClientColors()
 
-    # Initialize clients, a dictionary of client objects.
+    # Initialize the network clients, a dictionary of client objects.
     clients = {}
     for m in range(1,11):
         c_name = 'C' + str(m)
         clients[ c_name] = Client( client_colors[ c_name], m)
-              
-    server = GameServer(host='0.0.0.0', port=local_port, 
+
+    # Add a local (non-network) client to the client dictionary.
+    clients['local'] = Client( THECOLORS["green"], 0)
+    clients['local'].active = True
+
+    # Setup network server.
+    if platform.system() == 'Linux':
+        local_ip = subprocess.check_output(["hostname", "-I"]).decode().strip()
+    else:
+        local_ip = socket.gethostbyname(socket.gethostname())
+    print("Server IP address:", local_ip)
+
+    server = GameServer(host='0.0.0.0', port=5000, 
                         update_function=custom_update_example, clientStates=clients, 
                         signInOut_function=signInOut_function)
 
     while True:
-        dt_s = float( server_clock.tick(framerate_limit) * 1e-3)
+        dt_s = server_clock.tick(framerate_limit) * 1e-3
         
         if server.running:
             server.accept_clients()
         
-        checkforLocalUserInput()
+        checkForLocalUserInput()
+
+        if clients['local'].mouseB1 == 'D':
+            clients['local'].historyXY.append(clients['local'].mouseXY)
+            # Maintain fixed history length
+            if len(clients['local'].historyXY) > 200:
+                clients['local'].historyXY.pop(0)
         
         server_display.fill( background_color)
         

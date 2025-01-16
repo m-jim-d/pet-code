@@ -31,8 +31,7 @@ mouse_button_UD = "U"
 
 while not user_done:
 
-    dt_s = float(myclock.tick( framerate_limit) * 1e-3)
-    #myclock.tick(framerate_limit)
+    dt_s = myclock.tick( framerate_limit) * 1e-3
     
     #=====================================================
     # Get user input
