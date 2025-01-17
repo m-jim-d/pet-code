@@ -3,16 +3,15 @@
 # Filename: A08_network.py
 
 """
-Network Module for Multiplayer Drawing Demo (A08_network_P3.py)
+Network Module for Multiplayer
 
-This module provides real-time networking support for a multi-client drawing application
+This module provides real-time networking support for a multi-client application
 where clients share mouse movements and keyboard states through a central server.
 The server maintains client states and renders a shared view of all client activities.
 
 Key Features:
 - Low-latency mouse position tracking using TCP_NODELAY
 - Support for up to 10 simultaneous clients
-- Maintains drawing history for each client
 - Custom state update handlers for extended functionality
 - Stable window-drag handling through socket draining
 - FPS monitoring with smoothed display
