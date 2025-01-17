@@ -9,8 +9,7 @@ import math
 from typing import Optional, Union, Tuple
 import socket
 import random
-import platform
-import subprocess
+import platform, subprocess
 
 # PyGame Constants
 from pygame.locals import (
