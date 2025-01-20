@@ -872,7 +872,7 @@ class AirTable:
         self.springs = []
         self.walls = walls_dic
         self.collision_count = 0
-        self.coef_friction_puck = 0.2
+        self.coef_friction_puck = 0.2 # all pucks
         
         self.color_transfer = False
         
@@ -1223,7 +1223,8 @@ class Environment:
             for eachpuck in air_table.pucks:
                 if not eachpuck.CR_fixed:
                     eachpuck.b2d_body.fixtures[0].restitution = 1.0
-                eachpuck.b2d_body.fixtures[0].friction = 0
+                    # Apply this also to the puck friction. There is no corresponding "fixed" setting for friction.
+                    eachpuck.b2d_body.fixtures[0].friction = 0
 
     def get_local_user_input(self):
         local_user = self.clients['local']
