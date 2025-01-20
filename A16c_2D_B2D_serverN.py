@@ -367,13 +367,13 @@ class Puck:
             
         # Just after a hit, fill the whole circle with RED (i.e., thickness = 0).
         if self.hit:
-            puck_circle_thickness = 0
+            puck_border_thickness = 0
             puck_color = THECOLORS["red"]
             self.hitflash_duration_timer_s += env.dt_render_limit_s
             if self.hitflash_duration_timer_s > self.hitflash_duration_timer_limit_s:
                 self.hit = False
         else:
-            puck_circle_thickness = 3
+            puck_border_thickness = 3
             puck_color = self.color
         
         if self.rect_fixture:
@@ -384,11 +384,11 @@ class Puck:
                 vertex_world_2d_m = self.b2d_body.transform * vertex_object_2d_m  # Overload operation
                 vertex_screen_2d_px = env.ConvertWorldToScreen( Vec2D(vertex_world_2d_m.x, vertex_world_2d_m.y)) # This returns a tuple
                 vertices_screen_2d_px.append( vertex_screen_2d_px) # Append to the list.
-            pygame.draw.polygon(game_window.surface, puck_color, vertices_screen_2d_px, puck_circle_thickness)
+            pygame.draw.polygon(game_window.surface, puck_color, vertices_screen_2d_px, env.zoomLineThickness(puck_border_thickness))
             
         else:
             # Draw main puck body.
-            pygame.draw.circle( game_window.surface, puck_color, self.pos_2d_px, self.radius_px, env.zoomLineThickness(puck_circle_thickness))
+            pygame.draw.circle( game_window.surface, puck_color, self.pos_2d_px, self.radius_px, env.zoomLineThickness(puck_border_thickness))
             
             # If it's not a bullet and not a rectangle, draw a line on the puck to indicate rotational orientation.
             if ((self.bullet == False) and (self.rect_fixture==False)):
@@ -400,7 +400,7 @@ class Puck:
                 point_at_center_2d_m = Vec2D( point_at_center_b2d_m.x, point_at_center_b2d_m.y)
                 point_at_center_2d_px = env.ConvertWorldToScreen( point_at_center_2d_m)
                 
-                pygame.draw.line(game_window.surface, puck_color, point_on_radius_2d_px, point_at_center_2d_px, 2)
+                pygame.draw.line(game_window.surface, puck_color, point_on_radius_2d_px, point_at_center_2d_px, env.zoomLineThickness(2))
         
         # Draw life (poor health) indicator circle.
         if (not self.bullet and self.show_health):
@@ -1210,6 +1210,21 @@ class Environment:
         if (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]):
             return True
             
+    def adjust_restitution_for_gravity(self):
+        if air_table.g_ON:
+            air_table.g_2d_mps2 = air_table.gON_2d_mps2
+            # Box2d...
+            for eachpuck in air_table.pucks:
+                eachpuck.b2d_body.fixtures[0].restitution = eachpuck.coef_rest
+                eachpuck.b2d_body.fixtures[0].friction = air_table.coef_friction_puck
+        else:
+            air_table.g_2d_mps2 = air_table.gOFF_2d_mps2
+            # Box2d...
+            for eachpuck in air_table.pucks:
+                if not eachpuck.CR_fixed:
+                    eachpuck.b2d_body.fixtures[0].restitution = 1.0
+                eachpuck.b2d_body.fixtures[0].friction = 0
+
     def get_local_user_input(self):
         local_user = self.clients['local']
         
@@ -1262,20 +1277,7 @@ class Environment:
                     # Toggle the logical flag for g.
                     air_table.g_ON = not air_table.g_ON
                     print("g", air_table.g_ON)
-                    
-                    if air_table.g_ON:
-                        air_table.g_2d_mps2 = air_table.gON_2d_mps2
-                        # Box2d...
-                        for eachpuck in air_table.pucks:
-                            eachpuck.b2d_body.fixtures[0].restitution = eachpuck.coef_rest
-                            eachpuck.b2d_body.fixtures[0].friction    = air_table.coef_friction_puck
-                    else:
-                        air_table.g_2d_mps2 = air_table.gOFF_2d_mps2
-                        # Box2d...
-                        for eachpuck in air_table.pucks:
-                            if not eachpuck.CR_fixed:
-                                eachpuck.b2d_body.fixtures[0].restitution = 1.0
-                            eachpuck.b2d_body.fixtures[0].friction    = 0
+                    self.adjust_restitution_for_gravity()
                 
                 elif (event.key==K_F1):
                     # Toggle FPS display on/off
@@ -1484,6 +1486,10 @@ def make_some_pucks(demo):
     env.fr_avg.reset()
     env.tickCount = 0
     
+    # These two Puck-Popper demos should NOT have gravity unless turned on during the game.
+    if demo in [7,9]:
+        air_table.g_ON = False
+
     for client_name in env.clients:
         client = env.clients[client_name]
         if client.drone:
@@ -1634,19 +1640,29 @@ def make_some_pucks(demo):
         Spring(air_table.pucks[10], Vec2D(9.7, 8.4), length_m=0.0, strength_Npm=800.0, width_m=0.02)
     
     elif demo == 0:
+        air_table.g_ON = True
+
         density = 0.7
         width_m = 0.01
         aspect_ratio = 9.0
         x_position_m = 0.3
         for j in range(0, 9):
-            y_puck_position_m = (width_m * aspect_ratio / 1.0) + 0.1
+            y_puck_position_m = (width_m * aspect_ratio) + 0.01
             Puck(Vec2D(x_position_m, y_puck_position_m), width_m, density, rect_fixture=True, aspect_ratio=aspect_ratio)
             width_m *= 1.5
             x_position_m *= 1.5
         # Tilt the first rectangle a bit so when gravity is turned on it starts the chain reaction (dominoes).
-        air_table.pucks[0].b2d_body.angle = -7.0/180.0 * math.pi
+        #air_table.pucks[0].b2d_body.angle = -7.0/180.0 * math.pi
+
+        tempPuck = Puck(Vec2D(0.1, 0.2), 0.06, density, rect_fixture=False)
+        tempPuck.b2d_body.angularVelocity = -10.0
+
     else:
         print("Nothing set up for this key.")
+
+    # Now, after creating the pucks, set the restitution for gravity conditions.
+    env.adjust_restitution_for_gravity()
+    
 
 def display_number(numeric_value, font_object,  mode='FPS'):
     if mode=='FPS':
@@ -1892,11 +1908,9 @@ def main():
                 
                 # Erase the blackboard.
                 if not air_table.g_ON:
-                    game_window.surface.fill((0,0,0))  # Black
+                    game_window.surface.fill((0,0,0))  # black
                 else:
-                    #grayscale = 50
-                    #game_window.surface.fill((grayscale,grayscale,grayscale))  # Gray
-                    game_window.surface.fill((0,82,110))  # Blue
+                    game_window.surface.fill((20,20,70))  # dark blue
 
                 #print(f"{len(air_table.target_pucks)}, {len(air_table.controlled_pucks)}, {len(air_table.pucks)}, s:{len(air_table.springs)}")
 

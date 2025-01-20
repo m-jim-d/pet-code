@@ -475,13 +475,13 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             
         <span class="c1"># Just after a hit, fill the whole circle with RED (i.e., thickness = 0).</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hit</span><span class="p">:</span>
-            <span class="n">puck_circle_thickness</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">puck_border_thickness</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">puck_color</span> <span class="o">=</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hitflash_duration_timer_s</span> <span class="o">+=</span> <span class="n">env</span><span class="o">.</span><span class="n">dt_render_limit_s</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hitflash_duration_timer_s</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">hitflash_duration_timer_limit_s</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">hit</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">puck_circle_thickness</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">puck_border_thickness</span> <span class="o">=</span> <span class="mi">3</span>
             <span class="n">puck_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span>
         
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect_fixture</span><span class="p">:</span>
@@ -492,11 +492,11 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="n">vertex_world_2d_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">transform</span> <span class="o">*</span> <span class="n">vertex_object_2d_m</span>  <span class="c1"># Overload operation</span>
                 <span class="n">vertex_screen_2d_px</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">ConvertWorldToScreen</span><span class="p">(</span> <span class="n">Vec2D</span><span class="p">(</span><span class="n">vertex_world_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">vertex_world_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">))</span> <span class="c1"># This returns a tuple</span>
                 <span class="n">vertices_screen_2d_px</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">vertex_screen_2d_px</span><span class="p">)</span> <span class="c1"># Append to the list.</span>
-            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">puck_color</span><span class="p">,</span> <span class="n">vertices_screen_2d_px</span><span class="p">,</span> <span class="n">puck_circle_thickness</span><span class="p">)</span>
+            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">puck_color</span><span class="p">,</span> <span class="n">vertices_screen_2d_px</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">zoomLineThickness</span><span class="p">(</span><span class="n">puck_border_thickness</span><span class="p">))</span>
             
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Draw main puck body.</span>
-            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span> <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">puck_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_2d_px</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">zoomLineThickness</span><span class="p">(</span><span class="n">puck_circle_thickness</span><span class="p">))</span>
+            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span> <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">puck_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_2d_px</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">zoomLineThickness</span><span class="p">(</span><span class="n">puck_border_thickness</span><span class="p">))</span>
             
             <span class="c1"># If it&#39;s not a bullet and not a rectangle, draw a line on the puck to indicate rotational orientation.</span>
             <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">bullet</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect_fixture</span><span class="o">==</span><span class="kc">False</span><span class="p">)):</span>
@@ -508,7 +508,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="n">point_at_center_2d_m</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span> <span class="n">point_at_center_b2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">point_at_center_b2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
                 <span class="n">point_at_center_2d_px</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">ConvertWorldToScreen</span><span class="p">(</span> <span class="n">point_at_center_2d_m</span><span class="p">)</span>
                 
-                <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">puck_color</span><span class="p">,</span> <span class="n">point_on_radius_2d_px</span><span class="p">,</span> <span class="n">point_at_center_2d_px</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">puck_color</span><span class="p">,</span> <span class="n">point_on_radius_2d_px</span><span class="p">,</span> <span class="n">point_at_center_2d_px</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">zoomLineThickness</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
         
         <span class="c1"># Draw life (poor health) indicator circle.</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bullet</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_health</span><span class="p">):</span>
@@ -1318,6 +1318,21 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="k">if</span> <span class="p">(</span><span class="n">keys</span><span class="p">[</span><span class="n">pygame</span><span class="o">.</span><span class="n">K_LSHIFT</span><span class="p">]</span> <span class="ow">or</span> <span class="n">keys</span><span class="p">[</span><span class="n">pygame</span><span class="o">.</span><span class="n">K_RSHIFT</span><span class="p">]):</span>
             <span class="k">return</span> <span class="kc">True</span>
             
+    <span class="k">def</span> <span class="nf">adjust_restitution_for_gravity</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span><span class="p">:</span>
+            <span class="n">air_table</span><span class="o">.</span><span class="n">g_2d_mps2</span> <span class="o">=</span> <span class="n">air_table</span><span class="o">.</span><span class="n">gON_2d_mps2</span>
+            <span class="c1"># Box2d...</span>
+            <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
+                <span class="n">eachpuck</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">restitution</span> <span class="o">=</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">coef_rest</span>
+                <span class="n">eachpuck</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">friction</span> <span class="o">=</span> <span class="n">air_table</span><span class="o">.</span><span class="n">coef_friction_puck</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">air_table</span><span class="o">.</span><span class="n">g_2d_mps2</span> <span class="o">=</span> <span class="n">air_table</span><span class="o">.</span><span class="n">gOFF_2d_mps2</span>
+            <span class="c1"># Box2d...</span>
+            <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">CR_fixed</span><span class="p">:</span>
+                    <span class="n">eachpuck</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">restitution</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">eachpuck</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">friction</span> <span class="o">=</span> <span class="mi">0</span>
+
     <span class="k">def</span> <span class="nf">get_local_user_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">local_user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">]</span>
         
@@ -1370,20 +1385,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                     <span class="c1"># Toggle the logical flag for g.</span>
                     <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span><span class="p">)</span>
-                    
-                    <span class="k">if</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span><span class="p">:</span>
-                        <span class="n">air_table</span><span class="o">.</span><span class="n">g_2d_mps2</span> <span class="o">=</span> <span class="n">air_table</span><span class="o">.</span><span class="n">gON_2d_mps2</span>
-                        <span class="c1"># Box2d...</span>
-                        <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                            <span class="n">eachpuck</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">restitution</span> <span class="o">=</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">coef_rest</span>
-                            <span class="n">eachpuck</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">friction</span>    <span class="o">=</span> <span class="n">air_table</span><span class="o">.</span><span class="n">coef_friction_puck</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">air_table</span><span class="o">.</span><span class="n">g_2d_mps2</span> <span class="o">=</span> <span class="n">air_table</span><span class="o">.</span><span class="n">gOFF_2d_mps2</span>
-                        <span class="c1"># Box2d...</span>
-                        <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">CR_fixed</span><span class="p">:</span>
-                                <span class="n">eachpuck</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">restitution</span> <span class="o">=</span> <span class="mf">1.0</span>
-                            <span class="n">eachpuck</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">friction</span>    <span class="o">=</span> <span class="mi">0</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">adjust_restitution_for_gravity</span><span class="p">()</span>
                 
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_F1</span><span class="p">):</span>
                     <span class="c1"># Toggle FPS display on/off</span>
@@ -1592,6 +1594,10 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">env</span><span class="o">.</span><span class="n">fr_avg</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
     <span class="n">env</span><span class="o">.</span><span class="n">tickCount</span> <span class="o">=</span> <span class="mi">0</span>
     
+    <span class="c1"># These two Puck-Popper demos should NOT have gravity unless turned on during the game.</span>
+    <span class="k">if</span> <span class="n">demo</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">9</span><span class="p">]:</span>
+        <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">for</span> <span class="n">client_name</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">drone</span><span class="p">:</span>
@@ -1742,19 +1748,29 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="n">Spring</span><span class="p">(</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mf">9.7</span><span class="p">,</span> <span class="mf">8.4</span><span class="p">),</span> <span class="n">length_m</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">strength_Npm</span><span class="o">=</span><span class="mf">800.0</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="mf">0.02</span><span class="p">)</span>
     
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="n">density</span> <span class="o">=</span> <span class="mf">0.7</span>
         <span class="n">width_m</span> <span class="o">=</span> <span class="mf">0.01</span>
         <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="mf">9.0</span>
         <span class="n">x_position_m</span> <span class="o">=</span> <span class="mf">0.3</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
-            <span class="n">y_puck_position_m</span> <span class="o">=</span> <span class="p">(</span><span class="n">width_m</span> <span class="o">*</span> <span class="n">aspect_ratio</span> <span class="o">/</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.1</span>
+            <span class="n">y_puck_position_m</span> <span class="o">=</span> <span class="p">(</span><span class="n">width_m</span> <span class="o">*</span> <span class="n">aspect_ratio</span><span class="p">)</span> <span class="o">+</span> <span class="mf">0.01</span>
             <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="n">x_position_m</span><span class="p">,</span> <span class="n">y_puck_position_m</span><span class="p">),</span> <span class="n">width_m</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">rect_fixture</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="o">=</span><span class="n">aspect_ratio</span><span class="p">)</span>
             <span class="n">width_m</span> <span class="o">*=</span> <span class="mf">1.5</span>
             <span class="n">x_position_m</span> <span class="o">*=</span> <span class="mf">1.5</span>
         <span class="c1"># Tilt the first rectangle a bit so when gravity is turned on it starts the chain reaction (dominoes).</span>
-        <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">angle</span> <span class="o">=</span> <span class="o">-</span><span class="mf">7.0</span><span class="o">/</span><span class="mf">180.0</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+        <span class="c1">#air_table.pucks[0].b2d_body.angle = -7.0/180.0 * math.pi</span>
+
+        <span class="n">tempPuck</span> <span class="o">=</span> <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span> <span class="mf">0.06</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">rect_fixture</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">tempPuck</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">angularVelocity</span> <span class="o">=</span> <span class="o">-</span><span class="mf">10.0</span>
+
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing set up for this key.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Now, after creating the pucks, set the restitution for gravity conditions.</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">adjust_restitution_for_gravity</span><span class="p">()</span>
+    
 
 <span class="k">def</span> <span class="nf">display_number</span><span class="p">(</span><span class="n">numeric_value</span><span class="p">,</span> <span class="n">font_object</span><span class="p">,</span>  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;FPS&#39;</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">mode</span><span class="o">==</span><span class="s1">&#39;FPS&#39;</span><span class="p">:</span>
@@ -2000,11 +2016,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 
                 <span class="c1"># Erase the blackboard.</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span><span class="p">:</span>
-                    <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># Black</span>
+                    <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># black</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="c1">#grayscale = 50</span>
-                    <span class="c1">#game_window.surface.fill((grayscale,grayscale,grayscale))  # Gray</span>
-                    <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">82</span><span class="p">,</span><span class="mi">110</span><span class="p">))</span>  <span class="c1"># Blue</span>
+                    <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">70</span><span class="p">))</span>  <span class="c1"># dark blue</span>
 
                 <span class="c1">#print(f&quot;{len(air_table.target_pucks)}, {len(air_table.controlled_pucks)}, {len(air_table.pucks)}, s:{len(air_table.springs)}&quot;)</span>
 

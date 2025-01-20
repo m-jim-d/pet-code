@@ -311,20 +311,20 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             
         <span class="c1"># Just after a hit, fill the whole circle with RED (i.e., thickness = 0).</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hit</span><span class="p">:</span>
-            <span class="n">puck_circle_thickness</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">puck_border_thickness</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">puck_color</span> <span class="o">=</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hitflash_duration_timer_s</span> <span class="o">+=</span> <span class="n">env</span><span class="o">.</span><span class="n">dt_render_limit_s</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hitflash_duration_timer_s</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">hitflash_duration_timer_limit_s</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">hit</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">puck_circle_thickness</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">puck_border_thickness</span> <span class="o">=</span> <span class="mi">3</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">tempColor</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="n">puck_color</span> <span class="o">=</span> <span class="n">tempColor</span>
             <span class="k">else</span><span class="p">:</span>    
                 <span class="n">puck_color</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span>
         
         <span class="c1"># Draw main puck body.</span>
-        <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span> <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">puck_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_2d_px</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">zoomLineThickness</span><span class="p">(</span><span class="n">puck_circle_thickness</span><span class="p">))</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span> <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">puck_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_2d_px</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">zoomLineThickness</span><span class="p">(</span><span class="n">puck_border_thickness</span><span class="p">))</span>
         
         <span class="c1"># Draw life (poor health) indicator circle.</span>
         <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">bullet</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">show_health</span><span class="p">):</span>
@@ -1909,11 +1909,10 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                         <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="n">gray_level</span><span class="p">,</span><span class="n">gray_level</span><span class="p">,</span><span class="n">gray_level</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span><span class="p">:</span>
-                            <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># Black</span>
+                            <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># black</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="c1">#gray_level = 50</span>
-                            <span class="c1">#game_window.surface.fill((gray_level,gray_level,gray_level))</span>
-                            <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">82</span><span class="p">,</span><span class="mi">110</span><span class="p">))</span>  <span class="c1"># Blue</span>
+                            <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">70</span><span class="p">))</span>  <span class="c1"># dark blue</span>
+                
                 <span class="c1">#print(f&quot;{len(air_table.target_pucks)}, {len(air_table.controlled_pucks)}, {len(air_table.pucks)}, s:{len(air_table.springs)}&quot;)</span>
 
                 <span class="c1"># Clean out old bullets.</span>

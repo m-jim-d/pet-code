@@ -202,17 +202,17 @@ class Puck:
             
         # Just after a hit, fill the whole circle with RED (i.e., thickness = 0).
         if self.hit:
-            puck_circle_thickness = 0
+            puck_border_thickness = 0
             puck_color = THECOLORS["red"]
             self.hitflash_duration_timer_s += env.dt_render_limit_s
             if self.hitflash_duration_timer_s > self.hitflash_duration_timer_limit_s:
                 self.hit = False
         else:
-            puck_circle_thickness = 3
+            puck_border_thickness = 3
             puck_color = self.color
         
         # Draw main puck body.
-        pygame.draw.circle( game_window.surface, puck_color, self.pos_2d_px, self.radius_px, env.zoomLineThickness(puck_circle_thickness))
+        pygame.draw.circle( game_window.surface, puck_color, self.pos_2d_px, self.radius_px, env.zoomLineThickness(puck_border_thickness))
         
         # Draw life (poor health) indicator circle.
         if (not self.bullet and self.show_health):
@@ -1575,7 +1575,10 @@ def main():
             if (env.render_timer_s > env.dt_render_limit_s):
                 
                 # Erase the blackboard.
-                game_window.surface.fill((0,0,0))
+                if not air_table.g_ON:
+                    game_window.surface.fill((0,0,0))  # black
+                else:
+                    game_window.surface.fill((20,20,70))  # dark blue
                 
                 #print(f"{len(air_table.target_pucks)}, {len(air_table.controlled_pucks)}, {len(air_table.pucks)}, s:{len(air_table.springs)}")
 
