@@ -1951,7 +1951,7 @@ def main():
                         client.draw_cursor_string()
                     
                     # Draw cursors for network clients.
-                    if ((client_name != 'local') and client.active):
+                    if ((client_name != 'local') and client.active and not client.drone):
                         client.draw_fancy_server_cursor()
                     
                 pygame.display.flip()

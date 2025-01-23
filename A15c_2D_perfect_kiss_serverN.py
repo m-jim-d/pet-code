@@ -1207,9 +1207,9 @@ class Environment:
                     if self.shift_key_down():
                         return "3p"
                     else:
-                        return 3           
+                        return 3
                 elif (event.key==K_4):
-                    return 4           
+                    return 4
                 elif (event.key==K_5):
                     return 5
                 elif (event.key==K_6):
@@ -1848,7 +1848,7 @@ def main():
                     client.draw_cursor_string()
                     
                     # Draw cursors for network clients.
-                    if ((client_name != 'local') and client.active):
+                    if ((client_name != 'local') and client.active and not client.drone):
                         client.draw_fancy_server_cursor()
                     
                 pygame.display.flip()
