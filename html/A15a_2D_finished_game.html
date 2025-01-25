@@ -1357,7 +1357,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="c1">#===========================================================</span>
         
 <span class="k">def</span> <span class="nf">make_some_pucks</span><span class="p">(</span><span class="n">demo</span><span class="p">):</span>
-    <span class="n">game_window</span><span class="o">.</span><span class="n">update_caption</span><span class="p">(</span><span class="s2">&quot;Air Table: Demo #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">demo</span><span class="p">))</span>
+    <span class="n">game_window</span><span class="o">.</span><span class="n">update_caption</span><span class="p">(</span><span class="s2">&quot;Air-Table Server A15a     Demo #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">demo</span><span class="p">))</span>
     <span class="n">env</span><span class="o">.</span><span class="n">fr_avg</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
     <span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span> <span class="mf">1.00</span>
     <span class="n">env</span><span class="o">.</span><span class="n">tickCount</span> <span class="o">=</span> <span class="mi">0</span>
@@ -1724,7 +1724,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                     <span class="n">client</span><span class="o">.</span><span class="n">draw_cursor_string</span><span class="p">()</span>
                     
                     <span class="c1"># Draw cursors for network clients.</span>
-                    <span class="k">if</span> <span class="p">((</span><span class="n">client_name</span> <span class="o">!=</span> <span class="s1">&#39;local&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">client</span><span class="o">.</span><span class="n">active</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">((</span><span class="n">client_name</span> <span class="o">!=</span> <span class="s1">&#39;local&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">client</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">client</span><span class="o">.</span><span class="n">drone</span><span class="p">):</span>
                         <span class="n">client</span><span class="o">.</span><span class="n">draw_fancy_server_cursor</span><span class="p">()</span>
                     
                 <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
@@ -1741,7 +1741,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="n">air_table</span><span class="o">.</span><span class="n">game_time_s</span> <span class="o">+=</span> <span class="n">dt_physics_s</span>
                 
 <span class="c1">#============================================================</span>
-<span class="c1"># Run the main program.    </span>
+<span class="c1"># Run the main program.  </span>
 <span class="c1">#============================================================</span>
         
 <span class="n">main</span><span class="p">()</span>
