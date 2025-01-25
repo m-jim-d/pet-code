@@ -1249,7 +1249,7 @@ class GameWindow:
 #===========================================================
         
 def make_some_pucks(demo):
-    game_window.update_caption("Air Table: Demo #" + str(demo))
+    game_window.update_caption("Air-Table Server A15a     Demo #" + str(demo))
     env.fr_avg.reset()
     air_table.coef_rest = 1.00
     env.tickCount = 0
@@ -1633,7 +1633,7 @@ def main():
                 air_table.game_time_s += dt_physics_s
                 
 #============================================================
-# Run the main program.    
+# Run the main program.  
 #============================================================
         
 main()

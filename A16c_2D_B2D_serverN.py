@@ -1481,7 +1481,7 @@ class myContactListener(b2ContactListener):
 #===========================================================
         
 def make_some_pucks(demo):
-    game_window.update_caption("PyBox2D Air Table: Demo #" + str(demo)) 
+    game_window.update_caption("PyBox2D Air-Table Server A16c     Demo #" + str(demo))
     env.constant_dt_s = None
 
     env.fr_avg.reset()
@@ -1555,7 +1555,7 @@ def make_some_pucks(demo):
         density = 1.5
         radius = 0.7
         
-        coef_rest_puck =  0.70
+        coef_rest_puck = 0.3
         
         spring_strength_Npm2 = 400.0
         spring_length_m = 2.5
@@ -1740,7 +1740,7 @@ def main():
     # Create the first user/client and the methods for moving between the screen and the world.
     env = Environment(window_dimensions_px, 10.0) # 10m in along the x axis.
 
-    game_window = GameWindow(window_dimensions_px, 'nothing yet...')
+    game_window = GameWindow(window_dimensions_px, 'Air Table Server')
 
     # Define the Left, Right, Bottom, and Top boundaries of the game window.
     air_table = AirTable({"L_m":0.0, "R_m":game_window.UR_2d_m.x, "B_m":0.0, "T_m":game_window.UR_2d_m.y})
@@ -1947,8 +1947,7 @@ def main():
                 
                 for client_name in env.clients:
                     client = env.clients[client_name]
-                    if (client.selected_puck != None):
-                        client.draw_cursor_string()
+                    client.draw_cursor_string()
                     
                     # Draw cursors for network clients.
                     if ((client_name != 'local') and client.active and not client.drone):

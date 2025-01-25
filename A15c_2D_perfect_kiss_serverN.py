@@ -1422,7 +1422,7 @@ def setup_pool_shot():
     Puck(Vec2D(4.0,                 4.30), 0.45, 0.3,                            coef_rest=1.0, CR_fixed=True, vel_2d_mps=Vec2D(   0.0, 0.0))
        
 def make_some_pucks(demo):
-    game_window.update_caption("Air Table: Demo #" + str(demo))
+    game_window.update_caption("Air-Table Server A15c     Demo #" + str(demo))
     env.fr_avg.reset()
     air_table.coef_rest = 1.00
     env.tickCount = 0
@@ -1865,7 +1865,7 @@ def main():
                 air_table.game_time_s += dt_physics_s
                 
 #============================================================
-# Run the main program.    
+# Run the main program.  
 #============================================================
         
 main()
