@@ -4,14 +4,14 @@
 
 from cgi import test
 import sys, os
-import pygame
 import math
 from typing import Optional, Union, Tuple
 import socket
 import random
 import platform, subprocess
 
-# PyGame Constants
+import pygame
+# key constants
 from pygame.locals import (
     K_ESCAPE,
     K_a, K_s, K_d, K_w,
@@ -225,7 +225,7 @@ class Puck:
                        c_drag=0.0, c_angularDrag=0.0, coef_rest=0.85, CR_fixed=False,
                        hit_limit=50.0, show_health=False,
                        color=THECOLORS["gray"], client_name=None, bullet=False, pin=False,
-                       rect_fixture=False, aspect_ratio=1.0):
+                       rect_fixture=False, aspect_ratio=1.0, border_px=3):
         
         self.radius_m = radius_m
         self.radius_px = round(env.px_from_m(self.radius_m * env.viewZoom))
@@ -254,6 +254,7 @@ class Puck:
         self.impulse_2d_Ns = Vec2D(0.0,0.0)
         
         self.color = color
+        self.border_thickness_px = border_px
         
         self.client_name = client_name
         self.jet: Optional[Jet] = None
@@ -373,7 +374,7 @@ class Puck:
             if self.hitflash_duration_timer_s > self.hitflash_duration_timer_limit_s:
                 self.hit = False
         else:
-            puck_border_thickness = 3
+            puck_border_thickness = self.border_thickness_px
             puck_color = self.color
         
         if self.rect_fixture:
@@ -390,17 +391,19 @@ class Puck:
             # Draw main puck body.
             pygame.draw.circle( game_window.surface, puck_color, self.pos_2d_px, self.radius_px, env.zoomLineThickness(puck_border_thickness))
             
-            # If it's not a bullet and not a rectangle, draw a line on the puck to indicate rotational orientation.
+            # If it's not a bullet and not a rectangle, draw a spoke to indicate rotational orientation.
             if ((self.bullet == False) and (self.rect_fixture==False)):
-                point_on_radius_b2d_m = self.b2d_body.GetWorldPoint( b2Vec2(0.0, self.radius_m))
+                # Shorten the spoke by a fraction of the thickness so that the end (and its blocky rendering) is hidden in the border.
+                reduction_m = env.m_from_px( self.border_thickness_px) * 0.85
+                point_on_radius_b2d_m = self.b2d_body.GetWorldPoint( b2Vec2(0.0, self.radius_m - reduction_m))
                 point_on_radius_2d_m = Vec2D( point_on_radius_b2d_m.x, point_on_radius_b2d_m.y)
                 point_on_radius_2d_px = env.ConvertWorldToScreen( point_on_radius_2d_m)
                 
                 point_at_center_b2d_m = self.b2d_body.GetWorldPoint( b2Vec2(0.0, 0.0))
                 point_at_center_2d_m = Vec2D( point_at_center_b2d_m.x, point_at_center_b2d_m.y)
                 point_at_center_2d_px = env.ConvertWorldToScreen( point_at_center_2d_m)
-                
-                pygame.draw.line(game_window.surface, puck_color, point_on_radius_2d_px, point_at_center_2d_px, env.zoomLineThickness(2))
+
+                pygame.draw.line(game_window.surface, puck_color, point_on_radius_2d_px, point_at_center_2d_px, env.zoomLineThickness(puck_border_thickness))
         
         # Draw life (poor health) indicator circle.
         if (not self.bullet and self.show_health):
@@ -1518,16 +1521,17 @@ def make_some_pucks(demo):
                 Puck(Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)), 0.75, 0.3, color=puck_color_value)
     
     elif demo == 3:
-        spacing_factor = 1.5
-        grid_size = 5,3
-        for j in range(grid_size[0]):
-            for k in range(grid_size[1]):
-                if ((j,k) == (2,2)):
-                    puck_color_value = THECOLORS["orange"]
-                else:
-                    puck_color_value = THECOLORS["grey"]
+        p1 = Puck(Vec2D(2.0, 2.0), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["brown"])
+        p1.b2d_body.angularVelocity = 4.0
+        p1.b2d_body.fixtures[0].friction = 2.0
+        
+        p2 = Puck(Vec2D(8.0, 6.75), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["tan"])
+        p2.b2d_body.angularVelocity = 2.0
+        p2.b2d_body.fixtures[0].friction = 2.0
 
-                Puck(Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)), 0.55, 0.3, color=puck_color_value)
+        spring_strength_Npm2 = 15.0
+        spring_length_m = 1.0
+        Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=0.15, c_damp=50.0, color=THECOLORS["yellow"])
     
     elif demo == 4:
         spacing_factor = 1.0
@@ -1923,7 +1927,7 @@ def main():
                     display_number(air_table.game_time_s, fnt_gameTimer, mode='gameTimer')
                 
                 # Clean out old bullets.
-                for thisPuck in air_table.pucks[:]:
+                for thisPuck in air_table.pucks[:]:  # [:] indicates a copy 
                     if (thisPuck.bullet) and ((air_table.time_s - thisPuck.birth_time_s) > thisPuck.age_limit_s):
                         thisPuck.delete()
 
