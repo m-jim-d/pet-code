@@ -146,7 +146,7 @@ def main():
 
     client_ID = 0
 
-    client = GameClient( host=args.serverIP, port=5000)
+    client = GameClient( host=args.serverIP, port=8888)
     client.connect()
     
     if client.running and client.client_name is not None:

@@ -393,8 +393,8 @@ class Puck:
             
             # If it's not a bullet and not a rectangle, draw a spoke to indicate rotational orientation.
             if ((self.bullet == False) and (self.rect_fixture==False)):
-                # Shorten the spoke by a fraction of the thickness so that the end (and its blocky rendering) is hidden in the border.
-                reduction_m = env.m_from_px( self.border_thickness_px) * 0.85
+                # Shorten the spoke by a fraction of the thickness so that its end (and the blocky rendering) is hidden in the border.
+                reduction_m = env.px_to_m * self.border_thickness_px * 0.50
                 point_on_radius_b2d_m = self.b2d_body.GetWorldPoint( b2Vec2(0.0, self.radius_m - reduction_m))
                 point_on_radius_2d_m = Vec2D( point_on_radius_b2d_m.x, point_on_radius_b2d_m.y)
                 point_on_radius_2d_px = env.ConvertWorldToScreen( point_on_radius_2d_m)
@@ -404,6 +404,8 @@ class Puck:
                 point_at_center_2d_px = env.ConvertWorldToScreen( point_at_center_2d_m)
 
                 pygame.draw.line(game_window.surface, puck_color, point_on_radius_2d_px, point_at_center_2d_px, env.zoomLineThickness(puck_border_thickness))
+                # Round the end of the spoke that is at the center of the puck.
+                #pygame.draw.circle( game_window.surface, puck_color, self.pos_2d_px, 0.7 *env.zoomLineThickness(puck_border_thickness), 0)
         
         # Draw life (poor health) indicator circle.
         if (not self.bullet and self.show_health):
@@ -1151,7 +1153,7 @@ class Environment:
         return dx_m * self.m_to_px * self.viewZoom
     
     # Convert from pixels to meters
-    # Note: still floating values here)
+    # Note: still floating values here
     def m_from_px(self, dx_px):
         return float(dx_px) * self.px_to_m / self.viewZoom
     
@@ -1509,6 +1511,7 @@ def make_some_pucks(demo):
         Puck(Vec2D(7.5, 7.5), 0.95, 0.3)
     
     elif demo == 2:
+        """
         spacing_factor = 2.0
         grid_size = 4,2
         for j in range(grid_size[0]):
@@ -1519,6 +1522,26 @@ def make_some_pucks(demo):
                     puck_color_value = THECOLORS["grey"]
                 
                 Puck(Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)), 0.75, 0.3, color=puck_color_value)
+        """
+        p1 = Puck(Vec2D(2.0, 2.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["white"])
+        p1.b2d_body.angularVelocity = 4.0
+        p1.b2d_body.fixtures[0].friction = 2.0
+        
+        p2 = Puck(Vec2D(8.0, 2.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["darkred"])
+        p2.b2d_body.angularVelocity = 30.0
+        p2.b2d_body.fixtures[0].friction = 2.0
+
+        p3 = Puck(Vec2D(5.0, 7.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["blue"])
+        p3.b2d_body.angularVelocity = -34.0
+        p3.b2d_body.fixtures[0].friction = 2.0
+
+        spring_strength_Npm2 = 15.0
+        spring_length_m = 1.0
+        spring_width_m = 0.10
+        Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
+        Spring(p1, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
+        Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
+
     
     elif demo == 3:
         p1 = Puck(Vec2D(2.0, 2.0), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["brown"])
@@ -1797,7 +1820,7 @@ def main():
         local_ip = socket.gethostbyname(socket.gethostname())
     print("Server IP address:", local_ip)
 
-    server = GameServer(host='0.0.0.0', port=5000, 
+    server = GameServer(host='0.0.0.0', port=8888, 
                         update_function=custom_update, clientStates=env.clients, 
                         signInOut_function=signInOut_function)
     
@@ -1805,7 +1828,6 @@ def main():
     fnt_gameTimer = pygame.font.SysFont("Courier", 50)
         
     while True:
-        #print dt_physics_s, myclock.get_fps()
         if (env.constant_dt_s != None):
             gameLoop_FR_limit = int(1.0/env.constant_dt_s)
         else:

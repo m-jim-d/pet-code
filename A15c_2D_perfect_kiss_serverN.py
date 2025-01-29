@@ -1696,7 +1696,7 @@ def main():
         local_ip = socket.gethostbyname(socket.gethostname())
     print("Server IP address:", local_ip)
 
-    server = GameServer(host='0.0.0.0', port=5000, 
+    server = GameServer(host='0.0.0.0', port=8888, 
                         update_function=custom_update, clientStates=env.clients, 
                         signInOut_function=signInOut_function)
 

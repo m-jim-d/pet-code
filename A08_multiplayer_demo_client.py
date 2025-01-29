@@ -95,7 +95,7 @@ def main():
     args = parser.parse_args()
     print("args:", args.serverIP)
                                   
-    client = GameClient( host=args.serverIP, port=5000)
+    client = GameClient( host=args.serverIP, port=8888)
     client.connect()
     
     pygame.display.set_caption(f"CLIENT {client.client_name} : send mouse and keyboard state")

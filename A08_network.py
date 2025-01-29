@@ -19,12 +19,12 @@ Key Features:
 Example Usage:
     Server side:
         clientStates = ClientData()  # Create state container
-        server = GameServer(clientStates, host='0.0.0.0', port=5000)
+        server = GameServer(clientStates, host='0.0.0.0', port=8888)
         while True:
             server.accept_clients()  # Non-blocking client acceptance
 
     Client side:
-        client = GameClient(host='server_ip', port=5000)
+        client = GameClient(host='server_ip', port=8888)
         client.connect()
         while running:
             client.send_state({'mouseXY': (x,y), 'mouseB1': 'U'/'D', ...})
@@ -68,7 +68,7 @@ class GameServer:
     mouse movement latency and includes special handling for window drag operations.
     """
     
-    def __init__(self, host='localhost', port=5000, 
+    def __init__(self, host='localhost', port=8888, 
                        update_function=None, clientStates=None, signInOut_function=None):
         """
         Initialize the server with state management and optional custom behavior.
@@ -242,7 +242,7 @@ class GameClient:
     for minimal latency in mouse position transmission.
     """
     
-    def __init__(self, host='localhost', port=5000):
+    def __init__(self, host='localhost', port=8888):
         """
         Initialize client networking.
         
