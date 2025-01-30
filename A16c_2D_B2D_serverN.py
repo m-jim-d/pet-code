@@ -1579,7 +1579,7 @@ def make_some_pucks(demo):
              "p2": {"rps": 2.0,    "color": THECOLORS["tan"]}},
 
             {"p1": {"rps": 2.0,    "color": THECOLORS["tan"]},
-             "p2": {"rps": 4.0,    "color": THECOLORS["brown"]}},
+             "p2": {"rps": -2.0,    "color": THECOLORS["brown"]}},
 
             {"p1": {"rps": onePi,  "color": THECOLORS["tan"]},
              "p2": {"rps": onePi,  "color": THECOLORS["tan"]}},
