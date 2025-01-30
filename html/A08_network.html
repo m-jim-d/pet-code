@@ -127,12 +127,12 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">Example Usage:</span>
 <span class="sd">    Server side:</span>
 <span class="sd">        clientStates = ClientData()  # Create state container</span>
-<span class="sd">        server = GameServer(clientStates, host=&#39;0.0.0.0&#39;, port=5000)</span>
+<span class="sd">        server = GameServer(clientStates, host=&#39;0.0.0.0&#39;, port=8888)</span>
 <span class="sd">        while True:</span>
 <span class="sd">            server.accept_clients()  # Non-blocking client acceptance</span>
 
 <span class="sd">    Client side:</span>
-<span class="sd">        client = GameClient(host=&#39;server_ip&#39;, port=5000)</span>
+<span class="sd">        client = GameClient(host=&#39;server_ip&#39;, port=8888)</span>
 <span class="sd">        client.connect()</span>
 <span class="sd">        while running:</span>
 <span class="sd">            client.send_state({&#39;mouseXY&#39;: (x,y), &#39;mouseB1&#39;: &#39;U&#39;/&#39;D&#39;, ...})</span>
@@ -176,7 +176,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">    mouse movement latency and includes special handling for window drag operations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">,</span> 
                        <span class="n">update_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clientStates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">signInOut_function</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the server with state management and optional custom behavior.</span>
@@ -350,7 +350,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">    for minimal latency in mouse position transmission.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize client networking.</span>
 <span class="sd">        </span>

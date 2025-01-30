@@ -2,7 +2,6 @@
 
 # Filename: A16c_2D_B2D_serverN.py
 
-from cgi import test
 import sys, os
 import math
 from typing import Optional, Union, Tuple
@@ -20,7 +19,8 @@ from pygame.locals import (
     K_f, K_g, K_r, K_x, K_e, K_q, K_c,
     K_n, K_h, K_LCTRL, K_z,
     K_p, K_m,
-    K_t, K_LSHIFT, K_RSHIFT, K_F1
+    K_t, K_LSHIFT, K_RSHIFT, K_F1,
+    K_RIGHT, K_LEFT
 )
 from pygame.color import THECOLORS
 
@@ -1135,13 +1135,15 @@ class Environment:
         
         self.fr_avg = RunningAvg(300, pygame, colorScheme='light')
         
-        self.loopsSinceLastQuietCheck = 0
         self.constant_dt_s = None
 
         self.tickCount = 0
 
         self.dt_render_limit_s = 1.0/120.0
         self.render_timer_s = 0.0
+
+        self.demo2_variation_index = 0
+        self.demo3_variation_index = 0
                         
     def remove_healthless_pucks(self):
         for puck in air_table.pucks[:]:  # [:] indicates a copy 
@@ -1231,7 +1233,7 @@ class Environment:
                     # Apply this also to the puck friction. There is no corresponding "fixed" setting for friction.
                     eachpuck.b2d_body.fixtures[0].friction = 0
 
-    def get_local_user_input(self):
+    def get_local_user_input(self, demo_index):
         local_user = self.clients['local']
         
         # Get all the events since the last call to get().
@@ -1347,6 +1349,21 @@ class Environment:
                 elif (event.key==K_t):
                     local_user.key_t = 'D'
                 
+                # Increment the variation indices for demos 2 and 3, but keep the main
+                # demo index as it is.
+                elif (event.key==K_RIGHT):
+                    if demo_index == 2:
+                        env.demo2_variation_index = (env.demo2_variation_index + 1) % env.d2_state_cnt
+                    elif demo_index == 3:
+                        env.demo3_variation_index = (env.demo3_variation_index + 1) % env.d3_state_cnt
+                    return demo_index
+                elif (event.key==K_LEFT):
+                    if demo_index == 2:
+                        env.demo2_variation_index = (env.demo2_variation_index - 1) % env.d2_state_cnt
+                    elif demo_index == 3:
+                        env.demo3_variation_index = (env.demo3_variation_index - 1) % env.d3_state_cnt
+                    return demo_index
+                    
                 else:
                     return "nothing set up for this key"
             
@@ -1511,28 +1528,41 @@ def make_some_pucks(demo):
         Puck(Vec2D(7.5, 7.5), 0.95, 0.3)
     
     elif demo == 2:
-        """
-        spacing_factor = 2.0
-        grid_size = 4,2
-        for j in range(grid_size[0]):
-            for k in range(grid_size[1]):
-                if ((j,k) == (1,1)):
-                    puck_color_value = THECOLORS["orange"]
-                else:
-                    puck_color_value = THECOLORS["grey"]
-                
-                Puck(Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)), 0.75, 0.3, color=puck_color_value)
-        """
-        p1 = Puck(Vec2D(2.0, 2.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["white"])
-        p1.b2d_body.angularVelocity = 4.0
+        initial_states = [
+            {"p1": {"rps": 4.0,  "color": THECOLORS["white"]},
+             "p2": {"rps": 30.0, "color": THECOLORS["darkred"]},
+             "p3": {"rps": -34.0, "color": THECOLORS["blue"]}},
+
+            {"p1": {"rps": 2.0,  "color": THECOLORS["white"]},
+             "p2": {"rps": 4.0,  "color": THECOLORS["darkred"]},
+             "p3": {"rps": -6.0, "color": THECOLORS["blue"]}},
+
+            {"p1": {"rps": 11.0,  "color": THECOLORS["white"]},
+             "p2": {"rps": 0.0,  "color": THECOLORS["blue"]},
+             "p3": {"rps": 0.0, "color": THECOLORS["blue"]}},
+
+            {"p1": {"rps": 2.0,  "color": THECOLORS["darkred"]},
+             "p2": {"rps": 2.0,  "color": THECOLORS["darkred"]},
+             "p3": {"rps": 2.0,  "color": THECOLORS["darkred"]}}
+        ]
+        env.d2_state_cnt = len(initial_states)
+
+        state = initial_states[env.demo2_variation_index]
+        print("Variation", env.demo2_variation_index + 1, 
+              "   p1_rps =", state["p1"]["rps"], 
+              "   p2_rps =", state["p2"]["rps"],
+              "   p3_rps =", state["p3"]["rps"])
+        
+        p1 = Puck(Vec2D(2.0, 2.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p1"]["color"])
+        p1.b2d_body.angularVelocity = state["p1"]["rps"]
         p1.b2d_body.fixtures[0].friction = 2.0
         
-        p2 = Puck(Vec2D(8.0, 2.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["darkred"])
-        p2.b2d_body.angularVelocity = 30.0
+        p2 = Puck(Vec2D(8.0, 2.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p2"]["color"])
+        p2.b2d_body.angularVelocity = state["p2"]["rps"]
         p2.b2d_body.fixtures[0].friction = 2.0
 
-        p3 = Puck(Vec2D(5.0, 7.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["blue"])
-        p3.b2d_body.angularVelocity = -34.0
+        p3 = Puck(Vec2D(5.0, 7.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p3"]["color"])
+        p3.b2d_body.angularVelocity = state["p3"]["rps"]
         p3.b2d_body.fixtures[0].friction = 2.0
 
         spring_strength_Npm2 = 15.0
@@ -1541,15 +1571,38 @@ def make_some_pucks(demo):
         Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
         Spring(p1, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
         Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
-
     
     elif demo == 3:
-        p1 = Puck(Vec2D(2.0, 2.0), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["brown"])
-        p1.b2d_body.angularVelocity = 4.0
+        onePi = round( 1.0 * math.pi, 2)
+        initial_states = [
+            {"p1": {"rps": 4.0,    "color": THECOLORS["brown"]},
+             "p2": {"rps": 2.0,    "color": THECOLORS["tan"]}},
+
+            {"p1": {"rps": 2.0,    "color": THECOLORS["tan"]},
+             "p2": {"rps": 4.0,    "color": THECOLORS["brown"]}},
+
+            {"p1": {"rps": onePi,  "color": THECOLORS["tan"]},
+             "p2": {"rps": onePi,  "color": THECOLORS["tan"]}},
+
+            {"p1": {"rps": 0.0,    "color": THECOLORS["white"]},
+             "p2": {"rps": 2.0,    "color": THECOLORS["tan"]}},
+
+            {"p1": {"rps": -onePi, "color": THECOLORS["tan"]},
+             "p2": {"rps": -onePi, "color": THECOLORS["tan"]}}
+        ]
+        env.d3_state_cnt = len(initial_states)
+
+        state = initial_states[env.demo3_variation_index]
+        print("Variation", env.demo3_variation_index + 1, 
+              "   p1_rps =", state["p1"]["rps"], 
+              "   p2_rps =", state["p2"]["rps"])
+
+        p1 = Puck(Vec2D(2.0, 2.0), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p1"]["color"])
+        p1.b2d_body.angularVelocity = state["p1"]["rps"]
         p1.b2d_body.fixtures[0].friction = 2.0
         
-        p2 = Puck(Vec2D(8.0, 6.75), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=THECOLORS["tan"])
-        p2.b2d_body.angularVelocity = 2.0
+        p2 = Puck(Vec2D(8.0, 6.75), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p2"]["color"])
+        p2.b2d_body.angularVelocity = state["p2"]["rps"]
         p2.b2d_body.fixtures[0].friction = 2.0
 
         spring_strength_Npm2 = 15.0
@@ -1691,7 +1744,6 @@ def make_some_pucks(demo):
     # Now, after creating the pucks, set the restitution for gravity conditions.
     env.adjust_restitution_for_gravity()
     
-
 def display_number(numeric_value, font_object,  mode='FPS'):
     if mode=='FPS':
         fps_value = "%.0f" % numeric_value
@@ -1845,7 +1897,7 @@ def main():
             env.fr_avg.update(1.0/dt_gameLoop_s)
         
         # Get input from local user.
-        resetmode = env.get_local_user_input()
+        resetmode = env.get_local_user_input(demo_index)
         
         # This check avoids problem when dragging the game window.
         if ((dt_gameLoop_s < 0.10) and (not air_table.stop_physics)):

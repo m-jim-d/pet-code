@@ -810,7 +810,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="n">local_ip</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostbyname</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">())</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Server IP address:&quot;</span><span class="p">,</span> <span class="n">local_ip</span><span class="p">)</span>
 
-    <span class="n">server</span> <span class="o">=</span> <span class="n">GameServer</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> 
+    <span class="n">server</span> <span class="o">=</span> <span class="n">GameServer</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">,</span> 
                         <span class="n">update_function</span><span class="o">=</span><span class="n">custom_update</span><span class="p">,</span> <span class="n">clientStates</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">,</span> 
                         <span class="n">signInOut_function</span><span class="o">=</span><span class="n">signInOut_function</span><span class="p">)</span>
 
