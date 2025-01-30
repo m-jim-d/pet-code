@@ -1529,21 +1529,25 @@ def make_some_pucks(demo):
     
     elif demo == 2:
         initial_states = [
-            {"p1": {"rps": 4.0,  "color": THECOLORS["white"]},
-             "p2": {"rps": 30.0, "color": THECOLORS["darkred"]},
-             "p3": {"rps": -34.0, "color": THECOLORS["blue"]}},
+            {"p1": {"rps":   4.0, "color": THECOLORS["white"]},
+             "p2": {"rps": -34.0, "color": THECOLORS["darkred"]},
+             "p3": {"rps":  30.0, "color": THECOLORS["blue"]}},
 
-            {"p1": {"rps": 2.0,  "color": THECOLORS["white"]},
-             "p2": {"rps": 4.0,  "color": THECOLORS["darkred"]},
-             "p3": {"rps": -6.0, "color": THECOLORS["blue"]}},
+            {"p1": {"rps":   0.0, "color": THECOLORS["white"]},
+             "p2": {"rps":   4.0, "color": THECOLORS["darkred"]},
+             "p3": {"rps": -15.0, "color": THECOLORS["blue"]}},
 
-            {"p1": {"rps": 11.0,  "color": THECOLORS["white"]},
-             "p2": {"rps": 0.0,  "color": THECOLORS["blue"]},
-             "p3": {"rps": 0.0, "color": THECOLORS["blue"]}},
+            {"p1": {"rps":  11.0, "color": THECOLORS["white"]},
+             "p2": {"rps":   0.0, "color": THECOLORS["blue"]},
+             "p3": {"rps":   0.0, "color": THECOLORS["blue"]}},
 
-            {"p1": {"rps": 2.0,  "color": THECOLORS["darkred"]},
-             "p2": {"rps": 2.0,  "color": THECOLORS["darkred"]},
-             "p3": {"rps": 2.0,  "color": THECOLORS["darkred"]}}
+            {"p1": {"rps":  30.0, "color": THECOLORS["white"]},
+             "p2": {"rps":   0.0, "color": THECOLORS["blue"]},
+             "p3": {"rps": -30.0, "color": THECOLORS["white"]}},
+
+            {"p1": {"rps":   2.0, "color": THECOLORS["darkred"]},
+             "p2": {"rps":   2.0, "color": THECOLORS["darkred"]},
+             "p3": {"rps":   2.0, "color": THECOLORS["darkred"]}}
         ]
         env.d2_state_cnt = len(initial_states)
 
@@ -1557,11 +1561,11 @@ def make_some_pucks(demo):
         p1.b2d_body.angularVelocity = state["p1"]["rps"]
         p1.b2d_body.fixtures[0].friction = 2.0
         
-        p2 = Puck(Vec2D(8.0, 2.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p2"]["color"])
+        p2 = Puck(Vec2D(5.0, 7.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p2"]["color"])
         p2.b2d_body.angularVelocity = state["p2"]["rps"]
         p2.b2d_body.fixtures[0].friction = 2.0
 
-        p3 = Puck(Vec2D(5.0, 7.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p3"]["color"])
+        p3 = Puck(Vec2D(8.0, 2.5), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p3"]["color"])
         p3.b2d_body.angularVelocity = state["p3"]["rps"]
         p3.b2d_body.fixtures[0].friction = 2.0
 
@@ -1571,24 +1575,31 @@ def make_some_pucks(demo):
         Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
         Spring(p1, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
         Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
-    
+
+        game_window.update_caption( game_window.caption + 
+            f"     Variation {env.demo2_variation_index + 1}" +
+            f"     rps = ({state['p1']['rps']:.1f}, {state['p2']['rps']:.1f}, {state['p3']['rps']:.1f})"
+        )
+
     elif demo == 3:
-        onePi = round( 1.0 * math.pi, 2)
         initial_states = [
-            {"p1": {"rps": 4.0,    "color": THECOLORS["brown"]},
-             "p2": {"rps": 2.0,    "color": THECOLORS["tan"]}},
+            {"p1": {"rps":  4.0, "color": THECOLORS["brown"]},
+             "p2": {"rps":  2.0, "color": THECOLORS["tan"]}},
 
-            {"p1": {"rps": 2.0,    "color": THECOLORS["tan"]},
-             "p2": {"rps": -2.0,    "color": THECOLORS["brown"]}},
+            {"p1": {"rps":  2.0, "color": THECOLORS["tan"]},
+             "p2": {"rps": -2.0, "color": THECOLORS["brown"]}},
 
-            {"p1": {"rps": onePi,  "color": THECOLORS["tan"]},
-             "p2": {"rps": onePi,  "color": THECOLORS["tan"]}},
+            {"p1": {"rps":  3.1, "color": THECOLORS["tan"]},
+             "p2": {"rps":  3.1, "color": THECOLORS["tan"]}},
 
-            {"p1": {"rps": 0.0,    "color": THECOLORS["white"]},
-             "p2": {"rps": 2.0,    "color": THECOLORS["tan"]}},
+            {"p1": {"rps":  0.0, "color": THECOLORS["white"]},
+             "p2": {"rps":  2.0, "color": THECOLORS["tan"]}},
 
-            {"p1": {"rps": -onePi, "color": THECOLORS["tan"]},
-             "p2": {"rps": -onePi, "color": THECOLORS["tan"]}}
+            {"p1": {"rps":  3.0, "color": THECOLORS["white"]},
+             "p2": {"rps":  6.0, "color": THECOLORS["tan"]}},
+
+            {"p1": {"rps": -3.1, "color": THECOLORS["tan"]},
+             "p2": {"rps": -3.1, "color": THECOLORS["tan"]}}
         ]
         env.d3_state_cnt = len(initial_states)
 
@@ -1605,9 +1616,14 @@ def make_some_pucks(demo):
         p2.b2d_body.angularVelocity = state["p2"]["rps"]
         p2.b2d_body.fixtures[0].friction = 2.0
 
-        spring_strength_Npm2 = 15.0
+        spring_strength_Npm2 = 20.0
         spring_length_m = 1.0
         Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=0.15, c_damp=50.0, color=THECOLORS["yellow"])
+    
+        game_window.update_caption( game_window.caption + 
+            f"     Variation {env.demo3_variation_index + 1}" +
+            f"     rps = ({state['p1']['rps']:.1f}, {state['p2']['rps']:.1f})"
+        )
     
     elif demo == 4:
         spacing_factor = 1.0
