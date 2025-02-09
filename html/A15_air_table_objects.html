@@ -110,6 +110,22 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
 <span class="c1"># Filename: A15_air_table_objects.py</span>
 
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Core objects for the air table physics simulation.</span>
+
+<span class="sd">This module defines the physical objects that can exist in the simulation:</span>
+
+<span class="sd">Classes:</span>
+<span class="sd">    Wall: Static boundary objects with collision detection</span>
+<span class="sd">    Puck: Dynamic objects with physics properties (mass, velocity, etc.)</span>
+<span class="sd">    Spring: Elastic connections between pucks with customizable properties</span>
+<span class="sd">    Jet: Propulsion system that can be attached to pucks</span>
+<span class="sd">    Gun: Weapon system that can be mounted on pucks</span>
+<span class="sd">    RotatingTube: Base class for rotatable attachments (Jet/Gun)</span>
+
+<span class="sd">Each object supports Box2D integration for advanced physics simulation when enabled.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">random</span>
 

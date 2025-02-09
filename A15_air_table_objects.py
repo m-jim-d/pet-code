@@ -2,6 +2,22 @@
 
 # Filename: A15_air_table_objects.py
 
+"""
+Core objects for the air table physics simulation.
+
+This module defines the physical objects that can exist in the simulation:
+
+Classes:
+    Wall: Static boundary objects with collision detection
+    Puck: Dynamic objects with physics properties (mass, velocity, etc.)
+    Spring: Elastic connections between pucks with customizable properties
+    Jet: Propulsion system that can be attached to pucks
+    Gun: Weapon system that can be mounted on pucks
+    RotatingTube: Base class for rotatable attachments (Jet/Gun)
+
+Each object supports Box2D integration for advanced physics simulation when enabled.
+"""
+
 import math
 import random
 

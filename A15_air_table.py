@@ -2,6 +2,23 @@
 
 # Filename: A15_air_table.py
 
+"""
+Physics simulation module implementing various air table environments.
+
+This module provides different air table implementations for 2D physics simulations,
+including simple collision detection, perfect-kiss collisions, and Box2D-based
+physics. Features include:
+
+Classes:
+    BaseAirTable: Core simulation features including gravity, pucks, and springs
+    SimpleAirTable: Basic collision detection and resolution
+    PerfectKissAirTable: Precise collision handling for perfect elastic collisions
+    Box2DAirTable: Advanced physics using the Box2D engine
+
+Each table type supports walls, pucks, springs, and customizable physics parameters
+for different simulation needs.
+"""
+
 import math
 import random
 
