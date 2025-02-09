@@ -25,12 +25,11 @@ from pygame.locals import (
 
 from pygame.color import THECOLORS
 
-# Import the vector class from a local module (in this same directory)
 from A09_vec2d import Vec2D
-
 from A08_network import GameServer, RunningAvg, setClientColors
-
-from A15_airTable import init_globals, Wall, Puck, RotatingTube, Jet, Gun, Spring
+from A15_air_table import Box2DAirTable
+from A15_air_table_objects import Wall, Puck, Spring
+import A15_globals
 
 from Box2D import (b2World, b2Vec2, b2PolygonShape, b2_dynamicBody, b2AABB,
                    b2QueryCallback, b2ContactListener)
@@ -223,283 +222,6 @@ class Client:
         pygame.draw.polygon(game_window.surface, color, cursor_outline_vertices, edge_px)
 
 
-class fwQueryCallback( b2QueryCallback):
-    # Box2D checks for objects at particular location (p), e.g. under the cursor.
-    def __init__(self, p): 
-        super().__init__()
-        self.point = p
-        self.fixture = None  # Initialize fixture attribute
-
-    def ReportFixture(self, fixture):
-        body = fixture.body
-        if body.type == b2_dynamicBody:
-            inside=fixture.TestPoint(self.point)
-            if inside:
-                self.fixture=fixture
-                # We found the object, so stop the query
-                return False
-        # Continue the query
-        return True
-            
-
-class AirTable:
-    def __init__(self, walls_dic):
-        self.gON_2d_mps2 = Vec2D(-0.0, -9.8)
-        self.gOFF_2d_mps2 = Vec2D(-0.0, -0.0)
-        self.g_2d_mps2 = self.gOFF_2d_mps2
-        self.g_ON = False
-        
-        self.pucks = []
-        self.puck_dictionary = {}
-        self.controlled_pucks = []
-        self.target_pucks = []
-        self.springs = []
-        self.walls_dic = walls_dic
-        self.walls = []
-        self.collision_count = 0
-        self.coef_friction_puck = 0.2 # all pucks
-        
-        self.color_transfer = False
-        
-        self.stop_physics = False
-        self.tangled = False
-
-        self.jello_tangle_checking_enabled = False
-        
-        self.FPS_display = True
-
-        # General clock time for determining bullet age.
-        self.time_s = 0.0
-        # Timer for the Jello Madness game.
-        self.game_time_s = 0.0
-        self.tangle_checker_time_s = 0.0
-
-        # Create the Box2D world
-        self.b2d_world = b2World(gravity=(-0.0, -0.0), doSleep=True, contactListener=myContactListener())
-
-    def buildFence(self):
-        width_m = 0.05 # 0.05
-        fenceColor = THECOLORS['orangered1']
-        border_px = 2
-        nudge_m = env.px_to_m * 1 # nudge of 1 pixel
-        # Left and right walls
-        Wall( Vec2D( self.walls_dic["L_m"] - (width_m + nudge_m), self.walls_dic["T_m"]/2.0), width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
-        Wall( Vec2D( self.walls_dic["R_m"] + width_m, self.walls_dic["T_m"]/2.0), width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
-        # Top and bottom walls
-        Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["T_m"] + (width_m + nudge_m)), self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
-        Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["B_m"] - width_m), self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
-    
-    def buildControlledPuck(self, x_m=1.0, y_m=1.0, r_m=0.45, density=0.7, c_drag=0.7, client_name=None, sf_abs=True):
-        tempPuck = Puck( Vec2D( x_m, y_m), r_m, density, c_drag=c_drag, c_angularDrag=0.5,
-                         client_name=client_name, show_health=True)
-        
-        # Let the puck reference the jet and the jet reference the puck.
-        tempPuck.jet = Jet( tempPuck, sf_abs=sf_abs)
-        # Same with the gun.
-        tempPuck.gun = Gun( tempPuck, sf_abs=sf_abs)
-        
-    def buildJelloGrid(self, angle: Union[int, Tuple[int, int]] = 0, 
-                             pos_initial_2d_m: Vec2D = Vec2D(2.5, 1.0),
-                             grid_x_n: int = 4, grid_y_n: int = 3,
-                             speed: Union[int, Tuple[int, int]] = 0, 
-                             puck_drag: float = 0.2,
-                             coef_rest: float = 0.3,
-                             show_health: bool = False):
-
-        if type(angle) is tuple:                           
-            angleOfGrid = random.uniform( angle[0], angle[1])
-        else:
-            angleOfGrid = angle
-
-        # pos_x_delta_2d_m and pos_y_delta_2d_m are the vectors that take
-        # us from one column of pucks to the next and from one puck to the
-        # next in a column, respectively. They are rotated by the angleOfGrid
-        # so that we can create a grid of pucks at an angle relative to the
-        # table.
-        pos_x_delta_2d_m = Vec2D(1.2, 0.0)
-        pos_x_delta_2d_m.rotated( angleOfGrid, sameVector=True)
-        pos_y_delta_2d_m = Vec2D(0.0, 1.2)
-        pos_y_delta_2d_m.rotated( angleOfGrid, sameVector=True)
-
-        pos_2d_m = pos_initial_2d_m
-
-        spacing_factor = 1.2 # same as spring length
-
-        # Create a grid of pucks. Starting at the initial position, populate a column of pucks, increasing the y position.
-        # Then reset the y position and increase the x position, adding additional columns. k ranges over each puck in a column.
-        # j ranges over the columns.
-
-        for j in range(grid_x_n):
-            for k in range(grid_y_n):
-                #print(f"j,k=({j},{k}) pos_2d_m=({pos_2d_m.x:.2f},{pos_2d_m.y:.2f})")
-                # corners
-                if ((j,k)==(0,0) or (j,k)==(grid_x_n-1,0) or (j,k)==(0,grid_y_n-1) or (j,k)==(grid_x_n-1,grid_y_n-1)):
-                    color=THECOLORS["red"]
-                # edges
-                elif (j==0) or (j==grid_x_n-1) or (k==0) or (k==grid_y_n-1):
-                    color=THECOLORS["orange"]
-                # center
-                else:
-                    color=THECOLORS["gray"]
-
-                Puck( pos_2d_m, 0.25, 5.0, color=color,
-                      c_drag=puck_drag, c_angularDrag=0.3,
-                      show_health=show_health, hit_limit=10,
-                      coef_rest=coef_rest, CR_fixed=True)
-                pos_2d_m = pos_2d_m + pos_y_delta_2d_m
-            
-            pos_2d_m = pos_2d_m - (pos_y_delta_2d_m * grid_y_n) # Reset the y position for the next column
-            pos_2d_m = pos_2d_m + pos_x_delta_2d_m
-            
-        spring_strength_Npm2 = 800.0
-        spring_length_m = 1.2
-        spring_damping = 10
-
-        # Springs on pucks in same y position, next to each other in x position.
-        for m in range(grid_y_n * (grid_x_n-1)):
-            Spring( self.pucks[m], self.pucks[m+grid_y_n], spring_length_m, spring_strength_Npm2, 
-                    color=THECOLORS["blue"], c_damp=spring_damping)
-        
-        # Springs on pucks in same x position, next to each other in y position.
-        for m in range(grid_x_n):
-            for n in range(grid_y_n-1):
-                o_index = n + (m * (grid_y_n))
-                #print(f"m:{m}, n:{n}, o_index:{o_index},{o_index+1}")
-                Spring( self.pucks[o_index], self.pucks[o_index+1], spring_length_m, spring_strength_Npm2, 
-                        color=THECOLORS["blue"], c_damp=spring_damping)
-        
-        # Springs connected on diagonals (springs are longer).
-        spring_length_m = 1.2 * 2**0.5
-
-        for m in range(0,grid_x_n-1):
-            for n in range(1,grid_y_n):
-                o_index = n + (m * (grid_y_n))
-                #print(f"m:{m}, n:{n}, o_index:{o_index},{o_index+(grid_y_n-1)}")
-                # Connect to a nearby puck: down one, right one.
-                Spring( self.pucks[o_index], self.pucks[o_index+(grid_y_n-1)], spring_length_m, spring_strength_Npm2, 
-                        color=THECOLORS["lightblue"], c_damp=spring_damping)
-                # Connect to a nearby puck: up one, right one.
-                Spring( self.pucks[o_index-1], self.pucks[o_index+(grid_y_n)], spring_length_m, spring_strength_Npm2, 
-                        color=THECOLORS["lightblue"], c_damp=spring_damping)
-
-        # Throw the jello. Use a random speed.
-        if type(speed) is tuple:
-            speed_mps = random.uniform(speed[0], speed[1])
-        else:
-            speed_mps = speed
-
-        # Use the angle of the grid to determine the direction.
-        velocity_2d_mps = pos_x_delta_2d_m.set_magnitude( speed_mps)
-        if velocity_2d_mps.length_squared() > 0.1:
-            print("Throwing the jello against the wall.")
-
-        for puck in self.pucks:
-            puck.vel_2d_mps = velocity_2d_mps
-            puck.b2d_body.linearVelocity = velocity_2d_mps.tuple()
-    
-    def checkForPuckAtThisPosition_b2d(self, x_px_or_tuple, y_px = None):
-        # This is used for cursor selection at a particular point on the puck.  #b2d
-        # Return the selected puck and also the local point on the puck.
-        
-        selected_puck = None
-        
-        if y_px == None:
-            self.x_px = x_px_or_tuple[0]
-            self.y_px = x_px_or_tuple[1]
-        else:
-            self.x_px = x_px_or_tuple
-            self.y_px = y_px
-        
-        # Convert to a world point.
-        test_position_2d_m = env.ConvertScreenToWorld(Vec2D(self.x_px, self.y_px))
-        
-        # Convert this to a box2d vector.
-        p = b2Vec2( test_position_2d_m.tuple())
-        
-        # Make a small box.
-        aabb = b2AABB( lowerBound=p-(0.001, 0.001), upperBound=p+(0.001, 0.001))
-
-        # Query the world for overlapping shapes.
-        query = fwQueryCallback( p)
-        air_table.b2d_world.QueryAABB( query, aabb)
-        
-        # If the query was successful and found a body at the cursor point.
-        if query.fixture:
-            selected_b2d_body = query.fixture.body
-            selected_b2d_body.awake = True
-        
-            # Find the local point in the body's coordinate system.
-            local_b2d_m = selected_b2d_body.GetLocalPoint( p)
-        
-            # Use a dictionary to identify the puck based on the b2d body.
-            # Bullets have not been added to the dictionary.
-            if not selected_b2d_body.bullet:
-                selected_puck = air_table.puck_dictionary[ selected_b2d_body]
-                selected_puck.selected = True
-        
-            # Return a dictionary with the puck and local selection point on it.
-            return {'puck': selected_puck, 'b2d_xy_m': local_b2d_m}
-        
-        else:
-            return {'puck': None, 'b2d_xy_m': b2Vec2(0,0)}
-    
-    def update_TotalForceVectorOnPuck(self, puck, dt_s):
-        # Net resulting force on the puck.
-        puck_forces_2d_N = (self.g_2d_mps2 * puck.mass_kg) + (puck.SprDamp_force_2d_N + 
-                                                              puck.jet_force_2d_N +
-                                                              puck.puckDrag_force_2d_N +
-                                                              puck.cursorString_spring_force_2d_N +
-                                                              puck.cursorString_puckDrag_force_2d_N +
-                                                              puck.impulse_2d_Ns/dt_s)
-        
-        # Apply this force to the puck's center of mass (COM) in the Box2d world
-        force_point_b2d_m = puck.b2d_body.GetWorldPoint( b2Vec2(0,0))
-        force_vector_b2d_N = b2Vec2( puck_forces_2d_N.tuple())
-        puck.b2d_body.ApplyForce( force=force_vector_b2d_N, point=force_point_b2d_m, wake=True)
-        
-        # Apply any non-COM forces.   #b2d
-        for force_dict in puck.nonCOM_N:
-            force_point_b2d_m = puck.b2d_body.GetWorldPoint( force_dict['local_b2d_m'])
-            force_vector_b2d_N = b2Vec2( force_dict['force_2d_N'].tuple())
-            puck.b2d_body.ApplyForce( force=force_vector_b2d_N, point=force_point_b2d_m, wake=True)
-        
-        # Apply torques.   #b2d
-        puck.b2d_body.ApplyTorque( puck.cursorString_torque_force_Nm, wake=True)
-        
-        # Now reset the aggregate forces.
-        puck.SprDamp_force_2d_N = Vec2D(0.0,0.0)
-        puck.cursorString_spring_force_2d_N = Vec2D(0.0,0.0)
-        puck.nonCOM_N = []
-        puck.cursorString_puckDrag_force_2d_N = Vec2D(0.0,0.0)
-        puck.cursorString_torque_force_Nm = 0.0
-        
-        puck.impulse_2d_Ns = Vec2D(0.0,0.0)
-    
-    def check_for_jello_tangle(self):
-        if air_table.tangle_checker_time_s > 0.1:
-            air_table.tangle_checker_time_s = 0.0
-            
-            self.tangled = False
-            for i, puck in enumerate(self.pucks):
-                # Contacts with other pucks. 
-                for otherpuck in self.pucks[i+1:]:
-                    # Check if the two puck circles are overlapping.
-                    # parallel to the normal
-                    puck_to_puck_2d_m = otherpuck.pos_2d_m - puck.pos_2d_m
-                    
-                    # Keep the following checks fast by avoiding square roots.
-                    # separation between the pucks, squared (not a vector)
-                    p_to_p_m2 = puck_to_puck_2d_m.length_squared()
-                    
-                    # sum of the radii of the two pucks, squared
-                    r_plus_r_m2 = (puck.radius_m + otherpuck.radius_m)**2
-                    
-                    # A check for the Jello-madness game. If it's tangled, balls
-                    # will be close and this will be set to True.
-                    if (p_to_p_m2 < 1.1 * r_plus_r_m2):
-                        self.tangled = True
-                
-
 class Environment:
     def __init__(self, screenSize_px, length_x_m):
         self.screenSize_px = Vec2D(screenSize_px)
@@ -599,7 +321,14 @@ class Environment:
         keys = pygame.key.get_pressed()
         if (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT]):
             return True
-            
+
+    def set_gravity(self, onOff):
+        if (onOff == "on"):
+            air_table.g_ON = True
+        else:
+            air_table.g_ON = False
+        self.adjust_restitution_for_gravity()
+
     def adjust_restitution_for_gravity(self):
         if air_table.g_ON:
             air_table.g_2d_mps2 = air_table.gON_2d_mps2
@@ -607,14 +336,15 @@ class Environment:
             for eachpuck in air_table.pucks:
                 if not eachpuck.CR_fixed:
                     eachpuck.b2d_body.fixtures[0].restitution = eachpuck.coef_rest
-                    eachpuck.b2d_body.fixtures[0].friction = air_table.coef_friction_puck
+                if not eachpuck.friction_fixed:
+                    eachpuck.b2d_body.fixtures[0].friction = eachpuck.friction
         else:
             air_table.g_2d_mps2 = air_table.gOFF_2d_mps2
             # Box2d...
             for eachpuck in air_table.pucks:
                 if not eachpuck.CR_fixed:
                     eachpuck.b2d_body.fixtures[0].restitution = 1.0
-                    # Apply this also to the puck friction. There is no corresponding "fixed" setting for friction.
+                if not eachpuck.friction_fixed:
                     eachpuck.b2d_body.fixtures[0].friction = 0
 
     def get_local_user_input(self, demo_index):
@@ -709,7 +439,7 @@ class Environment:
                     env.viewOffset_2d_px = Vec2D(0,0)
                     env.viewZoom = 1
                     
-                # Control physics for Jello Madness
+                # Pause the game loop
                 elif ((event.key==K_p) and not self.shift_key_down()):
                     air_table.stop_physics = not air_table.stop_physics
                     if (not air_table.stop_physics):
@@ -718,6 +448,7 @@ class Environment:
                     else:
                         print("game loop is paused")
                 
+                # Set equal-interval physics (more stability for Jello Madness)
                 elif ((event.key==K_p) and self.shift_key_down()):
                     if (env.constant_dt_s == None):
                         env.constant_dt_s = 1.0/env.fr_avg.result
@@ -847,44 +578,6 @@ class GameWindow:
         self.surface.fill(THECOLORS["black"])
         pygame.display.update()
 
-
-class myContactListener(b2ContactListener):
-    def __init__(self):
-        super().__init__()
-
-    def BeginContact(self, contact):
-        # Check if both bodies are in the puck dictionary
-        bodyA = contact.fixtureA.body
-        bodyB = contact.fixtureB.body
-
-        if (bodyA in air_table.puck_dictionary) and (bodyB in air_table.puck_dictionary):
-            puckA = air_table.puck_dictionary[bodyA]
-            puckB = air_table.puck_dictionary[bodyB]
-
-            # Handle bullet collisions from either puck
-            # Exclude the case where it's your own bullet hitting you.
-            if puckA.client_name != puckB.client_name:
-                # Case 1: puckB is bullet, puckA is target
-                if (puckB.client_name != None) and (puckB.bullet and (not puckA.bullet)):
-                    if puckA.gun and puckA.gun.shield:
-                        puckA.gun.shield_hit_count += 1
-                        puckA.gun.shield_hit = True
-                        puckA.gun.shield_hit_duration_s = 0.0
-                    else:
-                        puckA.bullet_hit_count += 1
-                        puckA.hit = True
-                        puckA.hitflash_duration_timer_s = 0.0
-                # Case 2: puckA is bullet, puckB is target
-                elif (puckA.client_name != None) and (puckA.bullet and (not puckB.bullet)):
-                    if puckB.gun and puckB.gun.shield:
-                        puckB.gun.shield_hit_count += 1
-                        puckB.gun.shield_hit = True
-                        puckB.gun.shield_hit_duration_s = 0.0
-                    else:
-                        puckB.bullet_hit_count += 1
-                        puckB.hit = True
-                        puckB.hitflash_duration_timer_s = 0.0
-
 #===========================================================
 # Functions
 #===========================================================
@@ -908,10 +601,6 @@ def make_some_pucks(demo):
 
     env.fr_avg.reset()
     env.tickCount = 0
-    
-    # These two Puck-Popper demos should NOT have gravity unless turned on during the game.
-    if demo in [7,9]:
-        air_table.g_ON = False
 
     for client_name in env.clients:
         client = env.clients[client_name]
@@ -1008,13 +697,11 @@ def make_some_pucks(demo):
               "   p1_rps =", state["p1"]["rps"], 
               "   p2_rps =", state["p2"]["rps"])
 
-        p1 = Puck(Vec2D(2.0, 2.0), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p1"]["color"])
+        p1 = Puck(Vec2D(2.0, 2.0), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, friction=2.0, friction_fixed=True, border_px=10, color=state["p1"]["color"])
         p1.b2d_body.angularVelocity = state["p1"]["rps"]
-        p1.b2d_body.fixtures[0].friction = 2.0
         
-        p2 = Puck(Vec2D(8.0, 6.75), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p2"]["color"])
+        p2 = Puck(Vec2D(8.0, 6.75), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, friction=2.0, friction_fixed=True, border_px=10, color=state["p2"]["color"])
         p2.b2d_body.angularVelocity = state["p2"]["rps"]
-        p2.b2d_body.fixtures[0].friction = 2.0
 
         spring_strength_Npm2 = 20.0
         spring_length_m = 1.0
@@ -1041,11 +728,7 @@ def make_some_pucks(demo):
 
                 Puck(position_2d_m, radius_m=0.25, density_kgpm2=1.0, 
                            color=puck_color_value,
-                           CR_fixed=True, coef_rest=0.8)
-
-        # note: CR_fixed=True will also keep friction constant through gravity toggles. 
-        for eachpuck in air_table.pucks:
-            eachpuck.b2d_body.fixtures[0].friction = 0.05
+                           CR_fixed=True, coef_rest=0.8, friction=0.05, friction_fixed=True)
 
         Wall(Vec2D(4.0, 4.5), half_width_m=4.0, half_height_m=0.04, angle_radians=-2*(math.pi/180), border_px=0)
         Wall(Vec2D(7.0, 2.5), half_width_m=3.0, half_height_m=0.04, angle_radians=+2*(math.pi/180), border_px=0)
@@ -1128,6 +811,8 @@ def make_some_pucks(demo):
         env.clients[client_name].active = True
         env.clients[client_name].drone = True
         air_table.buildControlledPuck( x_m=8.5, y_m=7.0, r_m=0.55, client_name=client_name, sf_abs=False)
+
+        env.set_gravity("off")
             
     elif demo == 8:
         air_table.game_time_s = 0
@@ -1148,10 +833,10 @@ def make_some_pucks(demo):
         # Pin two corners of the jello grid.
         Spring(air_table.pucks[ 1], Vec2D(0.3, 0.3), length_m=0.0, strength_Npm=800.0, width_m=0.02)
         Spring(air_table.pucks[10], Vec2D(9.7, 8.4), length_m=0.0, strength_Npm=800.0, width_m=0.02)
+
+        env.set_gravity("off")
     
     elif demo == 0:
-        air_table.g_ON = True
-
         density = 0.7
         width_m = 0.01
         aspect_ratio = 9.0
@@ -1166,13 +851,12 @@ def make_some_pucks(demo):
 
         tempPuck = Puck(Vec2D(0.1, 0.2), 0.06, density, rect_fixture=False)
         tempPuck.b2d_body.angularVelocity = -10.0
+        
+        env.set_gravity("on")
 
     else:
         print("Nothing set up for this key.")
 
-    # Now, after creating the pucks, set the restitution for gravity conditions.
-    env.adjust_restitution_for_gravity()
-    
 def display_number(numeric_value, font_object,  mode='FPS'):
     if mode=='FPS':
         fps_value = "%.0f" % numeric_value
@@ -1237,7 +921,7 @@ def signInOut_function(self, client_name, activate=True):
 def main():
 
     # A few globals.
-    global env, game_window, air_table, engineType
+    global env, game_window, air_table
     
     pygame.init()
 
@@ -1247,16 +931,15 @@ def main():
     
     # Create the first user/client and the methods for moving between the screen and the world.
     env = Environment(window_dimensions_px, 10.0) # 10m in along the x axis.
+    A15_globals.env = env
 
     game_window = GameWindow(window_dimensions_px, 'Air Table Server')
-    
-    # Create the table (and corresponding box2d world) on which things will be placed. 
-    # Define the Left, Right, Bottom, and Top boundaries of the game window.
-    air_table = AirTable({"L_m":0.0, "R_m":game_window.UR_2d_m.x, "B_m":0.0, "T_m":game_window.UR_2d_m.y})
+    A15_globals.game_window = game_window
 
-    # Initialize the global namespace in the A15_table module.
-    engineType = 'box2d'
-    init_globals(env, game_window, air_table, engineType)
+    # Define the Left, Right, Bottom, and Top boundaries of the game window.
+    air_table = Box2DAirTable({"L_m":0.0, "R_m":game_window.UR_2d_m.x, "B_m":0.0, "T_m":game_window.UR_2d_m.y})
+    A15_globals.air_table = air_table
+    A15_globals.engine_type = "box2d"
 
     air_table.buildFence() # walls at the window boundaries.
 

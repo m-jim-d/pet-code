@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
-# Filename: A15_airTable.py
+# Filename: A15_air_table_objects.py
 
 import math
 import random
+
+from typing import Optional, Union, Tuple, Dict, List
 
 import pygame
 from pygame.color import THECOLORS
@@ -11,30 +13,11 @@ from pygame.color import THECOLORS
 # Import the vector class from a local module
 from A09_vec2d import Vec2D
 
+# Global variables shared across scripts
+import A15_globals as A15
+
 from Box2D import (b2World, b2Vec2, b2PolygonShape, b2_dynamicBody, b2AABB,
                    b2QueryCallback, b2ContactListener)
-
-# Global variables shared across scripts
-env = None
-game_window = None
-air_table = None
-engineType = None
-
-def init_globals(_env, _game_window, _air_table, _engineType='circular'):
-    """Initialize the module's global variables.
-    
-    Args:
-        _env: The environment (instance of Environment)
-        _game_window: The game window (instance of GameWindow)
-        _air_table: The air table (instance of AirTable)
-        engineType: The engine type (string): box2d or circular
-    """
-    global env, game_window, air_table, engineType
-
-    env = _env
-    game_window = _game_window
-    air_table = _air_table
-    engineType = _engineType
 
 
 class Wall:
@@ -49,11 +32,11 @@ class Wall:
         self.fence = fence
 
         self.b2d_body = self.create_Box2d_Wall()
-        air_table.walls.append(self)
+        A15.air_table.walls.append(self)
 
     def create_Box2d_Wall(self):
         # Create a static body
-        static_body = air_table.b2d_world.CreateStaticBody(position=b2Vec2(self.pos_2d_m.tuple()), angle=self.angle_radians )
+        static_body = A15.air_table.b2d_world.CreateStaticBody(position=b2Vec2(self.pos_2d_m.tuple()), angle=self.angle_radians )
         
         # And add a box fixture onto it.
         static_body.CreatePolygonFixture(box=(self.half_width_m, self.half_height_m))
@@ -61,17 +44,17 @@ class Wall:
 
     def delete(self):
         # Remove the wall from the world in box2d.
-        air_table.b2d_world.DestroyBody(self.b2d_body)        
-        air_table.walls.remove( self)
+        A15.air_table.b2d_world.DestroyBody(self.b2d_body)        
+        A15.air_table.walls.remove( self)
 
     def draw(self):
         fixture_shape = self.b2d_body.fixtures[0].shape
         vertices_screen_2d_px = []
         for vertex_object_2d_m in fixture_shape.vertices:
             vertex_world_2d_m = self.b2d_body.transform * vertex_object_2d_m  # Overload operation
-            vertex_screen_2d_px = env.ConvertWorldToScreen( Vec2D(vertex_world_2d_m.x, vertex_world_2d_m.y)) # This returns a tuple
+            vertex_screen_2d_px = A15.env.ConvertWorldToScreen( Vec2D(vertex_world_2d_m.x, vertex_world_2d_m.y)) # This returns a tuple
             vertices_screen_2d_px.append( vertex_screen_2d_px) # Append to the list.
-        pygame.draw.polygon(game_window.surface, self.color, vertices_screen_2d_px, env.zoomLineThickness(self.border_px))
+        pygame.draw.polygon(A15.game_window.surface, self.color, vertices_screen_2d_px, A15.env.zoomLineThickness(self.border_px))
 
 
 class Puck:
@@ -79,18 +62,21 @@ class Puck:
                        c_drag=0.0, coef_rest=0.85, CR_fixed=False,
                        hit_limit=50.0, show_health=False,
                        color=THECOLORS["gray"], client_name=None, bullet=False, pin=False, border_px=3,
-                       rect_fixture=False, aspect_ratio=1.0, c_angularDrag=0.0):
+                       rect_fixture=False, aspect_ratio=1.0, friction=0.2, friction_fixed=False, c_angularDrag=0.0):
         
         self.radius_m = radius_m
-        self.radius_px = round(env.px_from_m(self.radius_m * env.viewZoom))
+        self.radius_px = round(A15.env.px_from_m(self.radius_m * A15.env.viewZoom))
 
         self.density_kgpm2 = density_kgpm2    # mass per unit area
         self.mass_kg = self.density_kgpm2 * math.pi * self.radius_m ** 2
         self.c_drag = c_drag
         
         self.coef_rest = coef_rest
-        # This parameter inhibits the changing of the puck's CR when gravity is toggled on and off.
         self.CR_fixed = CR_fixed
+        # For a Box2d puck.
+        self.friction = friction
+        self.friction_fixed = friction_fixed
+
         self.pos_2d_m = pos_2d_m
         self.vel_2d_mps = vel_2d_mps
         
@@ -104,6 +90,7 @@ class Puck:
         
         self.selected = False
         
+        # For a Box2d puck.
         self.rotation_speed = 0.0
         self.c_angularDrag = c_angularDrag
         self.cursorString_torque_force_Nm = 0
@@ -127,7 +114,7 @@ class Puck:
         
         # bullet nature
         self.bullet = bullet
-        self.birth_time_s = air_table.time_s
+        self.birth_time_s = A15.air_table.time_s
         self.age_limit_s = 3.0
         
         # Keep track of health.
@@ -140,18 +127,18 @@ class Puck:
 
         # Add puck to the lists of pucks, controlled pucks, and target pucks.
         if not pin:
-            if (engineType == 'box2d'):
+            if (A15.engine_type == 'box2d'):
                 self.b2d_body = self.create_Box2d_Puck()
-                air_table.puck_dictionary[self.b2d_body] = self
+                A15.air_table.puck_dictionary[self.b2d_body] = self
             else:
                 self.b2d_body = None
 
-            air_table.pucks.append(self)
+            A15.air_table.pucks.append(self)
             
             if not self.bullet:
-                air_table.target_pucks.append(self)
+                A15.air_table.target_pucks.append(self)
                 if self.client_name:
-                    air_table.controlled_pucks.append(self)
+                    A15.air_table.controlled_pucks.append(self)
                 
     # If you print an object instance...
     def __str__(self):
@@ -160,16 +147,13 @@ class Puck:
     # Box2d
     def create_Box2d_Puck(self):
         # Create a dynamic body
-        dynamic_body = air_table.b2d_world.CreateDynamicBody(position=b2Vec2(self.pos_2d_m.tuple()), angle=0, 
+        dynamic_body = A15.air_table.b2d_world.CreateDynamicBody(position=b2Vec2(self.pos_2d_m.tuple()), angle=0, 
                                                              linearVelocity=b2Vec2(self.vel_2d_mps.tuple()))
-        
-        # Surface friction
-        coef_friction = air_table.coef_friction_puck
         
         if self.rect_fixture:
             # And add a box fixture onto it.
             dynamic_body.CreatePolygonFixture(box=(self.radius_m, self.radius_m * self.aspect_ratio), density=self.density_kgpm2, 
-                                              friction=coef_friction, restitution=self.coef_rest)
+                                              friction=self.friction, restitution=self.coef_rest)
                                               
             # Set the mass attribute based on what box2d calculates.
             self.mass_kg = dynamic_body.mass
@@ -177,7 +161,7 @@ class Puck:
         else:
             # And add a circle fixture onto it.
             dynamic_body.CreateCircleFixture(radius=self.radius_m , density=self.density_kgpm2, 
-                                             friction=coef_friction, restitution=self.coef_rest)
+                                             friction=self.friction, restitution=self.coef_rest)
         
         # fluid drag inside Box2D
         # Note that linear damping is accounted for external to box2d using the c_drag attribute.
@@ -201,35 +185,35 @@ class Puck:
         self.rotation_speed = self.b2d_body.angularVelocity
     
     def delete(self):
-        if (engineType == 'box2d'):
+        if (A15.engine_type == 'box2d'):
             # Remove the puck from the dictionary.
-            del air_table.puck_dictionary[self.b2d_body]
+            del A15.air_table.puck_dictionary[self.b2d_body]
             # Remove the puck from the world in box2d.
-            air_table.b2d_world.DestroyBody(self.b2d_body)
+            A15.air_table.b2d_world.DestroyBody(self.b2d_body)
 
         if (not self.bullet):
             # Delete any springs that connect this puck to other pucks.
-            for spring in air_table.springs[:]:
+            for spring in A15.air_table.springs[:]:
                 if (spring.p1 == self) or (spring.p2 == self):
-                    air_table.springs.remove( spring)
+                    A15.air_table.springs.remove( spring)
             
             # Remove the puck from special lists.
-            if self in air_table.controlled_pucks: 
-                air_table.controlled_pucks.remove(self)
-            if self in air_table.target_pucks:
-                air_table.target_pucks.remove(self)
+            if self in A15.air_table.controlled_pucks: 
+                A15.air_table.controlled_pucks.remove(self)
+            if self in A15.air_table.target_pucks:
+                A15.air_table.target_pucks.remove(self)
         
-        air_table.pucks.remove(self)
+        A15.air_table.pucks.remove(self)
     
     def calc_regularDragForce(self):  
         self.puckDrag_force_2d_N = self.vel_2d_mps * -1 * self.c_drag
     
     def draw(self, tempColor=None):
         # Convert x,y to pixel screen location and then draw.
-        self.pos_2d_px = env.ConvertWorldToScreen( self.pos_2d_m)
+        self.pos_2d_px = A15.env.ConvertWorldToScreen( self.pos_2d_m)
         
         # Update based on zoom factor in px_from_m.
-        self.radius_px = round(env.px_from_m( self.radius_m))
+        self.radius_px = round(A15.env.px_from_m( self.radius_m))
         if (self.radius_px < 2):
             self.radius_px = 2
             
@@ -237,7 +221,7 @@ class Puck:
         if self.hit:
             puck_border_thickness = 0
             puck_color = THECOLORS["red"]
-            self.hitflash_duration_timer_s += env.dt_render_limit_s
+            self.hitflash_duration_timer_s += A15.env.dt_render_limit_s
             if self.hitflash_duration_timer_s > self.hitflash_duration_timer_limit_s:
                 self.hit = False
         else:
@@ -253,30 +237,30 @@ class Puck:
             vertices_screen_2d_px = []
             for vertex_object_2d_m in fixture_shape.vertices:
                 vertex_world_2d_m = self.b2d_body.transform * vertex_object_2d_m  # Overload operation
-                vertex_screen_2d_px = env.ConvertWorldToScreen( Vec2D(vertex_world_2d_m.x, vertex_world_2d_m.y)) # This returns a tuple
+                vertex_screen_2d_px = A15.env.ConvertWorldToScreen( Vec2D(vertex_world_2d_m.x, vertex_world_2d_m.y)) # This returns a tuple
                 vertices_screen_2d_px.append( vertex_screen_2d_px) # Append to the list.
-            pygame.draw.polygon(game_window.surface, puck_color, vertices_screen_2d_px, env.zoomLineThickness(puck_border_thickness))
+            pygame.draw.polygon(A15.game_window.surface, puck_color, vertices_screen_2d_px, A15.env.zoomLineThickness(puck_border_thickness))
             
         else:
             # Draw main puck body.
-            pygame.draw.circle( game_window.surface, puck_color, self.pos_2d_px, self.radius_px, env.zoomLineThickness(puck_border_thickness))
+            pygame.draw.circle( A15.game_window.surface, puck_color, self.pos_2d_px, self.radius_px, A15.env.zoomLineThickness(puck_border_thickness))
             
-            if (engineType == 'box2d'):
+            if (A15.engine_type == 'box2d'):
                 # If it's not a bullet and not a rectangle, draw a spoke to indicate rotational orientation.
                 if ((self.bullet == False) and (self.rect_fixture==False)):
                     # Shorten the spoke by a fraction of the thickness so that its end (and the blocky rendering) is hidden in the border.
-                    reduction_m = env.px_to_m * self.border_thickness_px * 0.50
+                    reduction_m = A15.env.px_to_m * self.border_thickness_px * 0.50
                     point_on_radius_b2d_m = self.b2d_body.GetWorldPoint( b2Vec2(0.0, self.radius_m - reduction_m))
                     point_on_radius_2d_m = Vec2D( point_on_radius_b2d_m.x, point_on_radius_b2d_m.y)
-                    point_on_radius_2d_px = env.ConvertWorldToScreen( point_on_radius_2d_m)
+                    point_on_radius_2d_px = A15.env.ConvertWorldToScreen( point_on_radius_2d_m)
                     
                     point_at_center_b2d_m = self.b2d_body.GetWorldPoint( b2Vec2(0.0, 0.0))
                     point_at_center_2d_m = Vec2D( point_at_center_b2d_m.x, point_at_center_b2d_m.y)
-                    point_at_center_2d_px = env.ConvertWorldToScreen( point_at_center_2d_m)
+                    point_at_center_2d_px = A15.env.ConvertWorldToScreen( point_at_center_2d_m)
 
-                    pygame.draw.line(game_window.surface, puck_color, point_on_radius_2d_px, point_at_center_2d_px, env.zoomLineThickness(puck_border_thickness))
+                    pygame.draw.line(A15.game_window.surface, puck_color, point_on_radius_2d_px, point_at_center_2d_px, A15.env.zoomLineThickness(puck_border_thickness))
                     # Round the end of the spoke that is at the center of the puck.
-                    #pygame.draw.circle( game_window.surface, puck_color, self.pos_2d_px, 0.7 *env.zoomLineThickness(puck_border_thickness), 0)
+                    #pygame.draw.circle( A15.game_window.surface, puck_color, self.pos_2d_px, 0.7 *A15.env.zoomLineThickness(puck_border_thickness), 0)
         
         # Draw life (poor health) indicator circle.
         if (not self.bullet and self.show_health):
@@ -290,7 +274,7 @@ class Puck:
             if (life_radius_px < 2.0):
                 life_radius_px = 2.0
             
-            pygame.draw.circle(game_window.surface, THECOLORS["red"], self.pos_2d_px, life_radius_px, env.zoomLineThickness(2))
+            pygame.draw.circle(A15.game_window.surface, THECOLORS["red"], self.pos_2d_px, life_radius_px, A15.env.zoomLineThickness(2))
 
 
 class RotatingTube:
@@ -298,7 +282,7 @@ class RotatingTube:
         # Associate the tube with the puck.
         self.puck = puck
     
-        self.color = env.clients[self.puck.client_name].cursor_color
+        self.color = A15.env.clients[self.puck.client_name].cursor_color
         
         # Degrees of rotation per second.
         self.rotation_rate_dps = 360.0
@@ -336,16 +320,16 @@ class RotatingTube:
         vertices_2d_px = []
         for vertex_2d_m in vertices_2d_m:
             # Calculate absolute position of this vertex.
-            vertices_2d_px.append( env.ConvertWorldToScreen(vertex_2d_m + base_point_2d_m))
+            vertices_2d_px.append( A15.env.ConvertWorldToScreen(vertex_2d_m + base_point_2d_m))
         return vertices_2d_px
         
     def draw_tube(self, line_thickness=3):
         # Draw the tube on the game-window surface. Establish the base_point as the center of the puck.
-        pygame.draw.polygon(game_window.surface, self.color, 
-                            self.convert_from_world_to_screen(self.tube_vertices_2d_m, self.puck.pos_2d_m), env.zoomLineThickness(line_thickness))
+        pygame.draw.polygon(A15.game_window.surface, self.color, 
+                            self.convert_from_world_to_screen(self.tube_vertices_2d_m, self.puck.pos_2d_m), A15.env.zoomLineThickness(line_thickness))
 
 
-class Jet( RotatingTube):
+class Jet(RotatingTube):
     def __init__(self, puck, sf_abs=True):
         # Associate the jet with the puck (referenced in the RotatingTube class).
         super().__init__(puck, sf_abs=sf_abs)
@@ -366,12 +350,12 @@ class Jet( RotatingTube):
                                   Vec2D(-0.00 * self.sf_x, -1.40 * self.sf_y)]
                                    
         # Scaler magnitude of jet force.
-        self.jet_force_N = 1.3 * self.puck.mass_kg * abs(air_table.gON_2d_mps2.y)
+        self.jet_force_N = 1.3 * self.puck.mass_kg * abs(A15.air_table.gON_2d_mps2.y)
         
         # Point everything down for starters.
         self.rotate_everything( 180)
         
-        self.client = env.clients[self.puck.client_name]
+        self.client = A15.env.clients[self.puck.client_name]
         
     def turn_jet_forces_onoff(self):
         if (self.client.key_w == "D"):
@@ -382,9 +366,9 @@ class Jet( RotatingTube):
             
     def client_rotation_control(self):
         if (self.client.key_a == "D"):
-            self.rotate_everything( +1 * self.rotation_rate_dps * env.dt_render_limit_s)
+            self.rotate_everything( +1 * self.rotation_rate_dps * A15.env.dt_render_limit_s)
         if (self.client.key_d == "D"):
-            self.rotate_everything( -1 * self.rotation_rate_dps * env.dt_render_limit_s)
+            self.rotate_everything( -1 * self.rotation_rate_dps * A15.env.dt_render_limit_s)
         if (self.client.key_s == "D"):
             # Rotate jet tube to be in the same direction as the motion of the puck.
             puck_velocity_angle = self.puck.vel_2d_mps.get_angle()
@@ -421,12 +405,12 @@ class Jet( RotatingTube):
         
         # Draw a little nose cone on the other side of the puck from the jet. This is a visual aid
         # to help the player see the direction the puck will go when the jet is on.
-        pygame.draw.polygon(game_window.surface, THECOLORS["yellow1"], 
+        pygame.draw.polygon(A15.game_window.surface, THECOLORS["yellow1"], 
                             self.convert_from_world_to_screen(self.nose_vertices_2d_m, self.puck.pos_2d_m), 0)
         
         # Draw the red flame.
         if (self.client.key_w == "D"):
-            pygame.draw.polygon(game_window.surface, THECOLORS["red"], 
+            pygame.draw.polygon(A15.game_window.surface, THECOLORS["red"], 
                                 self.convert_from_world_to_screen(self.flame_vertices_2d_m, self.puck.pos_2d_m), 0)
                                 
 
@@ -438,18 +422,18 @@ class Gun( RotatingTube):
         # Degrees of rotation per second.
         self.rotation_rate_dps = 180.0
         
-        self.color = env.clients[self.puck.client_name].cursor_color
+        self.color = A15.env.clients[self.puck.client_name].cursor_color
         
         # Run this method of the RotationTube class to set the initial angle of each new gun.
         self.rotate_everything( 45)
         
         self.bullet_speed_mps = 5.0
-        self.fire_time_s = air_table.time_s
+        self.fire_time_s = A15.air_table.time_s
         self.firing_delay_s = 0.1
         self.bullet_count = 0
         self.bullet_count_limit = 10
         self.gun_recharge_wait_s = 2.5
-        self.gun_recharge_start_time_s = air_table.time_s
+        self.gun_recharge_start_time_s = A15.air_table.time_s
         self.gun_recharging = False
         
         self.shield = False
@@ -461,16 +445,16 @@ class Gun( RotatingTube):
         self.shield_hit_count_limit = 20
         self.shield_recharging = False
         self.shield_recharge_wait_s = 4.0
-        self.shield_recharge_start_time_s = air_table.time_s
+        self.shield_recharge_start_time_s = A15.air_table.time_s
         self.shield_thickness = 5
         self.targetPuck = None
-        self.client = env.clients[self.puck.client_name]
+        self.client = A15.env.clients[self.puck.client_name]
         
     def client_rotation_control(self):
         if (self.client.key_j == "D"):
-            self.rotate_everything( +self.rotation_rate_dps * env.dt_render_limit_s)
+            self.rotate_everything( +self.rotation_rate_dps * A15.env.dt_render_limit_s)
         if (self.client.key_l == "D"):
-            self.rotate_everything( -self.rotation_rate_dps * env.dt_render_limit_s)
+            self.rotate_everything( -self.rotation_rate_dps * A15.env.dt_render_limit_s)
         if (self.client.key_k == "D"):
             # Rotate jet tube to be in the same direction as the motion of the puck.
             puck_velocity_angle = self.puck.vel_2d_mps.get_angle()
@@ -493,32 +477,32 @@ class Gun( RotatingTube):
             self.rotate_everything( angle_change + 1.0)
         
     def findNewTarget(self):
-        puck_indexes = list( range( len( air_table.target_pucks)))
+        puck_indexes = list( range( len( A15.air_table.target_pucks)))
         # Shuffle them.
         random.shuffle( puck_indexes)
         
         for puck_index in puck_indexes:
-            puck = air_table.target_pucks[ puck_index]
+            puck = A15.air_table.target_pucks[ puck_index]
             # Other than itself, pick a new target.
             if (puck != self.puck) and (puck != self.targetPuck):
                 self.targetPuck = puck
                 break
         
     def control_firing(self):
-        droneShooting = self.client.drone and (len(air_table.target_pucks) > 1)
+        droneShooting = self.client.drone and (len(A15.air_table.target_pucks) > 1)
         
         # Fire only if the shield is off.
         if ((self.client.key_i == "D") and (not self.shield)) or droneShooting:
             # Fire the gun.
-            if ((air_table.time_s - self.fire_time_s) > self.firing_delay_s) and (not self.gun_recharging):
+            if ((A15.air_table.time_s - self.fire_time_s) > self.firing_delay_s) and (not self.gun_recharging):
                 self.fire_gun()
                 self.bullet_count += 1
                 # Timestamp the firing event.
-                self.fire_time_s = air_table.time_s
+                self.fire_time_s = A15.air_table.time_s
     
         # Check to see if gun bullet count indicates the need to start recharging.
         if (self.bullet_count > self.bullet_count_limit):
-            self.gun_recharge_start_time_s = air_table.time_s
+            self.gun_recharge_start_time_s = A15.air_table.time_s
             self.gun_recharging = True
             self.bullet_count = 0
             # At the beginning of the charging period, find a new target. This gives a human player an indication
@@ -528,10 +512,10 @@ class Gun( RotatingTube):
                 self.findNewTarget()
     
         # If recharged.
-        if (self.gun_recharging and (air_table.time_s - self.gun_recharge_start_time_s) > self.gun_recharge_wait_s):
+        if (self.gun_recharging and (A15.air_table.time_s - self.gun_recharge_start_time_s) > self.gun_recharge_wait_s):
             self.gun_recharging = False
             # If the puck the drone is aiming at has been destroyed, find a new target before starting to shoot.
-            if self.client.drone and not (self.targetPuck in air_table.target_pucks):
+            if self.client.drone and not (self.targetPuck in A15.air_table.target_pucks):
                 self.findNewTarget()
                 
     def fire_gun(self):
@@ -563,15 +547,15 @@ class Gun( RotatingTube):
         
         # Check to see if the shield hit count indicates the need to start recharging.
         if self.shield_hit_count > self.shield_hit_count_limit:
-            self.shield_recharge_start_time_s = air_table.time_s
+            self.shield_recharge_start_time_s = A15.air_table.time_s
             self.shield = False
             self.shield_recharging = True
             self.shield_hit_count = 0
         else:
-            self.shield_thickness = env.zoomLineThickness(5 * (1 - self.shield_hit_count/self.shield_hit_count_limit), noFill=True)
+            self.shield_thickness = A15.env.zoomLineThickness(5 * (1 - self.shield_hit_count/self.shield_hit_count_limit), noFill=True)
         
         # If recharged.
-        if (self.shield_recharging and (air_table.time_s - self.shield_recharge_start_time_s) > self.shield_recharge_wait_s):
+        if (self.shield_recharging and (A15.air_table.time_s - self.shield_recharge_start_time_s) > self.shield_recharge_wait_s):
             self.shield_recharging = False
     
     def draw(self):
@@ -589,14 +573,14 @@ class Gun( RotatingTube):
         if (self.shield):
             if self.shield_hit:
                 # Don't draw the shield for a moment after the hit. This visualizes the shield hit.
-                self.shield_hit_duration_s += env.dt_render_limit_s
+                self.shield_hit_duration_s += A15.env.dt_render_limit_s
                 if (self.shield_hit_duration_s > self.shield_hit_duration_limit_s):
                     self.shield_hit = False
                     
             else:
                 # Display the shield 5px outside of the puck.
-                shield_radius_px = self.puck.radius_px + round(5 * env.viewZoom)
-                pygame.draw.circle(game_window.surface, self.color, 
+                shield_radius_px = self.puck.radius_px + round(5 * A15.env.viewZoom)
+                pygame.draw.circle(A15.game_window.surface, self.color, 
                                    self.puck.pos_2d_px, shield_radius_px, self.shield_thickness)
                                    
                                    
@@ -633,7 +617,7 @@ class Spring:
         self.draw_as_line = False
         
         # Automatically add this spring to the air_table springs list
-        air_table.springs.append(self)
+        A15.air_table.springs.append(self)
     
     def calc_spring_forces_on_pucks(self):
         self.p1p2_separation_2d_m = self.p1.pos_2d_m - self.p2.pos_2d_m
@@ -698,12 +682,11 @@ class Spring:
         # Transform from world to screen.
         self.spring_vertices_2d_px = []
         for vertice_2d_m in self.spring_vertices_2d_m:
-            self.spring_vertices_2d_px.append( env.ConvertWorldToScreen( vertice_2d_m))
+            self.spring_vertices_2d_px.append( A15.env.ConvertWorldToScreen( vertice_2d_m))
         
         # Draw the spring
         if self.draw_as_line == True:
-            pygame.draw.aaline(game_window.surface, self.color, env.ConvertWorldToScreen(self.p1.pos_2d_m),
-                                                                       env.ConvertWorldToScreen(self.p2.pos_2d_m))
+            pygame.draw.aaline(A15.game_window.surface, self.color, A15.env.ConvertWorldToScreen(self.p1.pos_2d_m),
+                                                                       A15.env.ConvertWorldToScreen(self.p2.pos_2d_m))
         else:
-            pygame.draw.polygon(game_window.surface, self.color, self.spring_vertices_2d_px)
-
+            pygame.draw.polygon(A15.game_window.surface, self.color, self.spring_vertices_2d_px)
