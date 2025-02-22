@@ -39,7 +39,7 @@ Executable Scripts:
 - `A09_2D_vector_class_testing.py`: Test suite for vector class
 - `A09b_2D_vector_sandbox.py`: Sandbox for experimenting with vector operations
 
-### 2D Physics Development the Client (A10)
+### 2D Physics Development and the Client (A10)
 - `A10_2D_baseline_client.py`: Basic 2D physics client (use this client for all the following servers)
 - `A10_2D_baseline_server.py`: Basic 2D physics server
 
