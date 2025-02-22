@@ -12,7 +12,7 @@ https://pet.triquence.org/
 The codebase consists of both executable scripts and supporting module files.
 
 This progression, originally a series of assignments, shows how the codebase evolves from simple PyGame demonstrations and 1D physics (air track), to 2D physics (air table) and multiplayer games. 
-The A15 modules form a reusable framework that supports multiple physics implementations, from basic circular collisions to perfect elastic collisions and Box2D integration.
+The A15 modules form a reusable framework that supports multiple physics implementations, from basic circular collisions to Box2D integration.
 
 ### Basic Framework and Concepts (A01-A07)
 - `A01_game_loop_and_events.py`: Introduces basic PyGame game loop and event handling
@@ -23,20 +23,27 @@ The A15 modules form a reusable framework that supports multiple physics impleme
 - `A06_air_track_gui_controls.py`: Implements GUI controls for simulation parameters
 - `A07_air_track_hollow_cars.py`: Adds hollow car objects with internal physics
 
-### Networking and Vectors (A08-A09)
+### Networking (A08)
 Core Modules:
 - `A08_network.py`: Core networking functionality for multiplayer support
-- `A09_vec2d.py`: 2D vector class
 
 Executable Scripts:
 - `A08_multiplayer_demo_client.py`: Demo client for multiplayer
 - `A08_multiplayer_demo_server.py`: Demo server for multiplayer
+
+### Vectors (A09)
+Core Modules:
+- `A09_vec2d.py`: 2D vector class
+
+Executable Scripts:
 - `A09_2D_vector_class_testing.py`: Test suite for vector class
 - `A09b_2D_vector_sandbox.py`: Sandbox for experimenting with vector operations
 
-### 2D Physics Development (A10-A14)
+### 2D Physics Development the Client (A10)
 - `A10_2D_baseline_client.py`: Basic 2D physics client (use this client for all the following servers)
 - `A10_2D_baseline_server.py`: Basic 2D physics server
+
+### 2D Puck Popper Game Features (A11-A14)
 - `A11_2D_rotating_tubes.py`: Adds rotating tube objects
 - `A12_2D_tube_jet.py`: Implements jet propulsion through tubes
 - `A13_2D_jet_forces.py`: Enhanced jet force calculations
