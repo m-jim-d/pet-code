@@ -3,26 +3,25 @@
 # Filename: A15_air_table.py
 
 """
-Physics simulation module implementing various air table environments.
+Modeling of 2D physics.
 
-This module provides different air table implementations for 2D physics simulations,
-including simple collision detection, perfect-kiss collisions, and Box2D-based
+This module provides different air-table implementations for 2D physics simulations,
+including basic collisions with circular objects, perfect-kiss collisions, and Box2D-based
 physics. Features include:
 
 Classes:
-    BaseAirTable: Core simulation features including gravity, pucks, and springs
-    SimpleAirTable: Basic collision detection and resolution
+    AirTable: Core simulation features including gravity, pucks, and springs
+    CircularAirTable: Basic collision detection and resolution for circular pucks
     PerfectKissAirTable: Precise collision handling for perfect elastic collisions
-    Box2DAirTable: Advanced physics using the Box2D engine
+    Box2DAirTable: Advanced simulation of non-circular objects using the Box2D engine
 
-Each table type supports walls, pucks, springs, and customizable physics parameters
+Each table type supports puck and spring objects, and customizable physics parameters
 for different simulation needs.
 """
 
-import math
 import random
 
-from typing import Optional, Union, Tuple, Dict, List
+from typing import Union, Tuple
 
 import pygame
 from pygame.color import THECOLORS
@@ -31,13 +30,13 @@ from pygame.color import THECOLORS
 from A09_vec2d import Vec2D
 
 # Global variables shared across scripts
-import A15_globals as A15
+import A15_globals as A_g
 from A15_air_table_objects import Wall, Puck, Spring, Gun, Jet
 
-from Box2D import (b2World, b2Vec2, b2PolygonShape, b2_dynamicBody, b2AABB,
-                   b2QueryCallback, b2ContactListener)
+from Box2D import (b2World, b2Vec2, b2_dynamicBody, b2AABB, b2QueryCallback, b2ContactListener)
 
-class BaseAirTable:
+
+class AirTable:
     def __init__(self, walls_dic):
         self.gON_2d_mps2 = Vec2D(-0.0, -9.8)
         self.gOFF_2d_mps2 = Vec2D(-0.0, -0.0)
@@ -65,6 +64,8 @@ class BaseAirTable:
         self.time_s = 0.0
         # Timer for the Jello Madness game.
         self.game_time_s = 0.0
+
+        self.FPS_display = True
 
     def buildControlledPuck(self, x_m=1.0, y_m=1.0, r_m=0.45, density=0.7, c_drag=0.7, client_name=None, sf_abs=True):
         tempPuck = Puck( Vec2D( x_m, y_m), r_m, density, c_drag=c_drag, c_angularDrag=0.5,
@@ -128,7 +129,6 @@ class BaseAirTable:
             pos_2d_m = pos_2d_m - (pos_y_delta_2d_m * grid_y_n) # Reset the y position for the next column
             pos_2d_m = pos_2d_m + pos_x_delta_2d_m
             
-
         spring_strength_Npm2 = 800.0
         spring_length_m = 1.2
         spring_damping = 10
@@ -173,22 +173,54 @@ class BaseAirTable:
 
         for puck in self.pucks:
             puck.vel_2d_mps = velocity_2d_mps
-            if (A15.engine_type == 'box2d'): puck.b2d_body.linearVelocity = velocity_2d_mps.tuple()
+            if (A_g.engine_type == 'box2d'): puck.b2d_body.linearVelocity = velocity_2d_mps.tuple()
+
+        return {'angle':angleOfGrid, 'speed_mps':speed_mps}
+
+    def makeJello_variations(self):
+        initial_states = [
+            {'x_n':4, 'y_n':3, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
+            {'x_n':4, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
+            {'x_n':4, 'y_n':4, 'ang_min':-10, 'ang_max':55, 'spd_min': 0,'spd_max': 90},
+            {'x_n':5, 'y_n':3, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
+            {'x_n':5, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
+            {'x_n':6, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
+            {'x_n':3, 'y_n':3, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
+            {'x_n':3, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
+            {'x_n':2, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min': 0,'spd_max':200}
+        ]
+        A_g.env.d8_state_cnt = len(initial_states)
+        state = initial_states[A_g.env.demo8_variation_index]
+
+        self.game_time_s = 0
+        self.jello_tangle_checking_enabled = True
+        throw = self.buildJelloGrid( 
+            angle=(state['ang_min'], state['ang_max']), 
+            speed=(state['spd_min'], state['spd_max']),
+            pos_initial_2d_m=Vec2D(3.0, 1.0), 
+            grid_x_n=state['x_n'], grid_y_n=state['y_n']
+        )
+
+        A_g.game_window.update_caption( A_g.game_window.caption + 
+            f"     Variation {A_g.env.demo8_variation_index + 1}" +
+            f"     grid = ({state['x_n']}, {state['y_n']})" +
+            f"  angle = {throw['angle']:.1f}  speed = {throw['speed_mps']:.1f}"
+        )
 
     """
     The following methods are used (only) by the circular versions of the air table (Simple and PerfectKiss).
     """
     def draw(self):
         #{"L_m":0.0, "R_m":10.0, "B_m":0.0, "T_m":10.0}
-        topLeft_2d_px =   A15.env.ConvertWorldToScreen( Vec2D( self.walls['L_m'],        self.walls['T_m']))
-        topRight_2d_px =  A15.env.ConvertWorldToScreen( Vec2D( self.walls['R_m']-0.01,   self.walls['T_m']))
-        botLeft_2d_px =   A15.env.ConvertWorldToScreen( Vec2D( self.walls['L_m'],        self.walls['B_m']+0.01))
-        botRight_2d_px =  A15.env.ConvertWorldToScreen( Vec2D( self.walls['R_m']-0.01,   self.walls['B_m']+0.01))
+        topLeft_2d_px =   A_g.env.ConvertWorldToScreen( Vec2D( self.walls['L_m'],        self.walls['T_m']))
+        topRight_2d_px =  A_g.env.ConvertWorldToScreen( Vec2D( self.walls['R_m']-0.01,   self.walls['T_m']))
+        botLeft_2d_px =   A_g.env.ConvertWorldToScreen( Vec2D( self.walls['L_m'],        self.walls['B_m']+0.01))
+        botRight_2d_px =  A_g.env.ConvertWorldToScreen( Vec2D( self.walls['R_m']-0.01,   self.walls['B_m']+0.01))
         
-        pygame.draw.line(A15.game_window.surface, THECOLORS["orangered1"], topLeft_2d_px,  topRight_2d_px, 1)
-        pygame.draw.line(A15.game_window.surface, THECOLORS["orangered1"], topRight_2d_px, botRight_2d_px, 1)
-        pygame.draw.line(A15.game_window.surface, THECOLORS["orangered1"], botRight_2d_px, botLeft_2d_px,  1)
-        pygame.draw.line(A15.game_window.surface, THECOLORS["orangered1"], botLeft_2d_px,  topLeft_2d_px,  1)
+        pygame.draw.line(A_g.game_window.surface, THECOLORS["orangered1"], topLeft_2d_px,  topRight_2d_px, 1)
+        pygame.draw.line(A_g.game_window.surface, THECOLORS["orangered1"], topRight_2d_px, botRight_2d_px, 1)
+        pygame.draw.line(A_g.game_window.surface, THECOLORS["orangered1"], botRight_2d_px, botLeft_2d_px,  1)
+        pygame.draw.line(A_g.game_window.surface, THECOLORS["orangered1"], botLeft_2d_px,  topLeft_2d_px,  1)
     
     def checkForPuckAtThisPosition(self, x_px_or_tuple, y_px = None):
         if y_px == None:
@@ -198,7 +230,7 @@ class BaseAirTable:
             self.x_px = x_px_or_tuple
             self.y_px = y_px
         
-        test_position_m = A15.env.ConvertScreenToWorld(Vec2D(self.x_px, self.y_px))
+        test_position_m = A_g.env.ConvertScreenToWorld(Vec2D(self.x_px, self.y_px))
         for puck in self.pucks:
             vector_difference_m = test_position_m - puck.pos_2d_m
             # Use squared lengths for speed (avoid square root)
@@ -259,7 +291,7 @@ class BaseAirTable:
         return A, B
 
 
-class SimpleAirTable(BaseAirTable):
+class CircularAirTable(AirTable):
     def __init__(self, walls_dic):
         super().__init__(walls_dic)
 
@@ -381,14 +413,13 @@ class SimpleAirTable(BaseAirTable):
                     otherpuck.vel_2d_mps = otherpuck_normal_2d_mps + otherpuck_tangent_2d_mps
 
 
-class PerfectKissAirTable(BaseAirTable):
+class PerfectKissAirTable(AirTable):
     def __init__(self, walls_dic):
         super().__init__(walls_dic)
 
         # For perfect kiss
         self.perfect_kiss = False
         self.count_direction = 1
-        self.constant_dt_s: Optional[float] = None
         self.timeDirection = 1
 
     def time_past_kiss(self, dt_s, puckA, puckB):
@@ -623,6 +654,7 @@ class fwQueryCallback(b2QueryCallback):
         # Continue the query
         return True
 
+
 class myContactListener(b2ContactListener):
     def __init__(self, air_table):
         super().__init__()
@@ -661,7 +693,8 @@ class myContactListener(b2ContactListener):
                         puckB.hit = True
                         puckB.hitflash_duration_timer_s = 0.0
 
-class Box2DAirTable(BaseAirTable):
+
+class Box2DAirTable(AirTable):
     def __init__(self, walls_dic):
         super().__init__(walls_dic)
 
@@ -669,12 +702,8 @@ class Box2DAirTable(BaseAirTable):
         self.walls_dic = walls_dic
         self.walls = []
 
-        self.color_transfer = False
-
         self.jello_tangle_checking_enabled = False
         self.tangle_checker_time_s = 0.0
-
-        self.FPS_display = True
 
         # Create the Box2D world
         self.b2d_world = b2World(gravity=(-0.0, -0.0), doSleep=True, contactListener=myContactListener(self))
@@ -683,7 +712,7 @@ class Box2DAirTable(BaseAirTable):
         width_m = 0.05 # 0.05
         fenceColor = THECOLORS['orangered1']
         border_px = 2
-        nudge_m = A15.env.px_to_m * 1 # nudge of 1 pixel
+        nudge_m = A_g.env.px_to_m * 1 # nudge of 1 pixel
         # Left and right walls
         Wall( Vec2D( self.walls_dic["L_m"] - (width_m + nudge_m), self.walls_dic["T_m"]/2.0), width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
         Wall( Vec2D( self.walls_dic["R_m"] + width_m, self.walls_dic["T_m"]/2.0), width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
@@ -705,7 +734,7 @@ class Box2DAirTable(BaseAirTable):
             self.y_px = y_px
         
         # Convert to a world point.
-        test_position_2d_m = A15.env.ConvertScreenToWorld(Vec2D(self.x_px, self.y_px))
+        test_position_2d_m = A_g.env.ConvertScreenToWorld(Vec2D(self.x_px, self.y_px))
         
         # Convert this to a box2d vector.
         p = b2Vec2( test_position_2d_m.tuple())

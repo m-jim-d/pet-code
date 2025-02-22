@@ -2,459 +2,28 @@
 
 # Filename: A15c_2D_perfect_kiss_serverN.py
 
-import sys
-import pygame
-import math
-from typing import Optional, Union, Tuple
 import socket
 import random
 import platform, subprocess
 
-# PyGame Constants
-from pygame.locals import (
-    K_ESCAPE,
-    K_KP1, K_KP2, K_KP3,
-    K_a, K_s, K_d, K_w,
-    K_i, K_j, K_k, K_l, K_SPACE,
-    K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_0,
-    K_f, K_g, K_r, K_x, K_e, K_q,
-    K_n, K_h, K_LCTRL, K_z,
-    K_p
-)
+import pygame
 from pygame.color import THECOLORS
 
 from A09_vec2d import Vec2D
-from A08_network import GameServer, RunningAvg, setClientColors
+from A08_network import GameServer, RunningAvg
 from A15_air_table import PerfectKissAirTable
 from A15_air_table_objects import Puck, Spring
-import A15_globals
+from A15_environment import Client, GameWindow, Environment, signInOut_function, custom_update
 
-#=====================================================================
-# Classes
-#=====================================================================
-
-class Client:
-    def __init__(self, cursor_color):
-        self.cursor_location_px: tuple[int, int] = (0,0)   # x_px, y_px
-        self.mouse_button = 1 # 1, 2, or 3
-        self.buttonIsStillDown = False
-        
-        self.active = False
-        self.drone = False
-        
-        # Jet
-        self.key_a = "U"
-        self.key_s = "U"
-        self.key_s_onoff = "ON"
-        self.key_d = "U"
-        self.key_w = "U"
-        
-        # Gun
-        self.key_j = "U"
-        self.key_k = "U"
-        self.key_k_onoff = "ON"
-        self.key_l = "U"
-        self.key_i = "U"
-        self.key_space = "U"
-        
-        # Zoom
-        self.key_n = "U"
-        self.key_h = "U"
-        self.key_lctrl = "U"
-        
-        self.selected_puck = None
-        self.cursor_color = cursor_color
-        
-        # Define the nature of the cursor strings, one for each mouse button.
-        self.mouse_strings = {'string1':{'c_drag':   2.0, 'k_Npm':   60.0},
-                              'string2':{'c_drag':   0.2, 'k_Npm':    2.0},
-                              'string3':{'c_drag':  20.0, 'k_Npm': 1000.0}}
-                                        
-    def calc_string_forces_on_pucks(self):
-        # Calculated the string forces on the selected puck and add to the aggregate
-        # that is stored in the puck object.
-        
-        # Only check for a selected puck if one isn't already selected. This keeps
-        # the puck from unselecting if cursor is dragged off the puck!
-        if (self.selected_puck == None):
-            if self.buttonIsStillDown:
-                self.selected_puck = air_table.checkForPuckAtThisPosition(self.cursor_location_px)        
-        
-        else:
-            if not self.buttonIsStillDown:
-                # Unselect the puck and bomb out of here.
-                self.selected_puck.selected = False
-                self.selected_puck = None
-                return None
-            
-            # Use dx difference to calculate the hooks law force being applied by the tether line. 
-            # If you release the mouse button after a drag it will fling the puck.
-            # This tether force will diminish as the puck gets closer to the mouse point.
-            dx_2d_m = env.ConvertScreenToWorld(Vec2D(self.cursor_location_px)) - self.selected_puck.pos_2d_m
-            
-            stringName = "string" + str(self.mouse_button)
-            self.selected_puck.cursorString_spring_force_2d_N   += dx_2d_m * self.mouse_strings[stringName]['k_Npm']
-            self.selected_puck.cursorString_puckDrag_force_2d_N += (self.selected_puck.vel_2d_mps * 
-                                                                    -1 * self.mouse_strings[stringName]['c_drag'])
-            
-    def draw_cursor_string(self):
-        if (self.selected_puck != None):
-            line_points = [env.ConvertWorldToScreen(self.selected_puck.pos_2d_m), self.cursor_location_px]
-            pygame.draw.line(game_window.surface, self.cursor_color, line_points[0], line_points[1], 1)
-                    
-    def draw_fancy_server_cursor(self):
-        self.draw_server_cursor( self.cursor_color, 0)
-        self.draw_server_cursor( THECOLORS["black"], 1)
-
-    def draw_server_cursor(self, color, edge_px):
-        cursor_outline_vertices = []
-        cursor_outline_vertices.append(  self.cursor_location_px )
-        cursor_outline_vertices.append( (self.cursor_location_px[0] + 10,  self.cursor_location_px[1] + 10) )
-        cursor_outline_vertices.append( (self.cursor_location_px[0] +  0,  self.cursor_location_px[1] + 15) )
-        
-        pygame.draw.polygon(game_window.surface, color, cursor_outline_vertices, edge_px)
-
-
-class Environment:
-    def __init__(self, screenSize_px, length_x_m):
-        self.screenSize_px = Vec2D(screenSize_px)
-        
-        self.viewOffset_2d_px = Vec2D(0,0)
-        self.viewZoom = 1
-        self.viewZoom_rate = 0.01
-        
-        self.px_to_m = length_x_m/float(self.screenSize_px.x)
-        self.m_to_px = (float(self.screenSize_px.x)/length_x_m)
-        
-        self.client_colors = setClientColors()
-                              
-        # Initialize the client dictionary with a local (non-network) client.
-        self.clients = {'local':Client(THECOLORS["green"])}
-        self.clients['local'].active = True
-
-        # For displaying a smoothed framerate.
-        self.fr_avg = RunningAvg(300, pygame, colorScheme='light')
-        
-        self.tickCount = 0
-        self.inhibit_screen_clears = False
-        self.always_render = False
-        
-        self.dt_render_limit_s = 1.0/120.0
-        self.render_timer_s = 0.0
-        
-    def remove_healthless_pucks(self):
-        for puck in air_table.pucks[:]:  # [:] indicates a copy 
-            if (puck.bullet_hit_count > puck.bullet_hit_limit):
-                puck.delete()
-                
-    # Convert from meters to pixels 
-    def px_from_m(self, dx_m):
-        return dx_m * self.m_to_px * self.viewZoom
-    
-    # Convert from pixels to meters
-    # Note: still floating values here
-    def m_from_px(self, dx_px):
-        return float(dx_px) * self.px_to_m / self.viewZoom
-    
-    def control_zoom_and_view(self):
-        local_user = self.clients['local']
-        if local_user.key_h == "D" or local_user.key_n == "D":
-            local_user.cursor_location_px = (mouseX, mouseY) = pygame.mouse.get_pos()
-
-            # Cursor world position before changing the zoom. 
-            cursor_pos_before_2d_m = self.ConvertScreenToWorld(Vec2D(local_user.cursor_location_px))
-
-            if local_user.key_h == "D":
-                self.viewZoom += self.viewZoom_rate * self.viewZoom
-            elif local_user.key_n == "D":
-                self.viewZoom -= self.viewZoom_rate * self.viewZoom
-
-            # Cursor world position after changing the zoom. 
-            cursor_pos_after_2d_m = self.ConvertScreenToWorld(Vec2D(local_user.cursor_location_px))
-
-            # Adjust the view offset to compensate for any change in the cursor's world position.
-            # This effectively zooms in and out at the cursor's position.
-            change_2d_m = cursor_pos_after_2d_m - cursor_pos_before_2d_m
-            change_2d_px = Vec2D(self.px_from_m(change_2d_m.x), self.px_from_m(change_2d_m.y))
-            self.viewOffset_2d_px = self.viewOffset_2d_px - change_2d_px
-    
-    def zoomLineThickness(self, lineThickness_px, noFill=False):
-        if (lineThickness_px == 0) and (not noFill):
-            # A thickness of zero will fill the shape.
-            return 0
-        else:
-            thickness_px = round( lineThickness_px * self.viewZoom)
-            if thickness_px < 1: thickness_px = 1
-            return thickness_px
-
-    def ConvertScreenToWorld(self, point_2d_px):
-        x_m = (                       point_2d_px.x + self.viewOffset_2d_px.x) / (self.m_to_px * self.viewZoom)
-        y_m = (self.screenSize_px.y - point_2d_px.y + self.viewOffset_2d_px.y) / (self.m_to_px * self.viewZoom)
-        return Vec2D( x_m, y_m)
-
-    def ConvertWorldToScreen(self, point_2d_m):
-        x_px = (point_2d_m.x * self.m_to_px * self.viewZoom) - self.viewOffset_2d_px.x
-        y_px = (point_2d_m.y * self.m_to_px * self.viewZoom) - self.viewOffset_2d_px.y
-        y_px = self.screenSize_px.y - y_px
-
-        # Return a tuple of integers.
-        return Vec2D(x_px, y_px, "int").tuple()
-        
-    def set_allPucks_elastic(self):
-        print("CRs for all pucks have been set for elastic collisions (CR=1)")
-        for eachpuck in air_table.pucks:
-            eachpuck.coef_rest = 1.0
-
-    # The next two functions give an alternate approach to using a modification key. This could also
-    # be done by setting up a user key state for shift and controls keys, and use that to see if
-    # the modifier key has been pressed.
-    
-    def ctrl_key_down(self):
-        keys = pygame.key.get_pressed()
-        return (keys[pygame.K_LCTRL] or keys[pygame.K_RCTRL])
-    
-    def shift_key_down(self):
-        keys = pygame.key.get_pressed()
-        return (keys[pygame.K_LSHIFT] or keys[pygame.K_RSHIFT])
-        
-    def get_local_user_input(self):
-        local_user = self.clients['local']
-        
-        # Get all the events since the last call to get().
-        for event in pygame.event.get():
-            if (event.type == pygame.QUIT): 
-                sys.exit()
-            elif (event.type == pygame.KEYDOWN):
-                if (event.key == K_ESCAPE):
-                    sys.exit()
-                elif (event.key==K_KP1):            
-                    return "1p"
-                elif (event.key==K_KP2):            
-                    return "2p"
-                elif (event.key==K_KP3):            
-                    return "3p"
-                elif (event.key==K_1): 
-                    if self.shift_key_down():
-                        return "1p"
-                    else:
-                        return 1           
-                elif (event.key==K_2):  
-                    if self.shift_key_down():
-                        return "2p"
-                    else:
-                        return 2
-                elif (event.key==K_3):
-                    if self.shift_key_down():
-                        return "3p"
-                    else:
-                        return 3
-                elif (event.key==K_4):
-                    return 4
-                elif (event.key==K_5):
-                    return 5
-                elif (event.key==K_6):
-                    return 6
-                elif (event.key==K_7):
-                    return 7
-                elif (event.key==K_8):
-                    return 8
-                elif (event.key==K_9):
-                    return 9
-                elif (event.key==K_0):
-                    return 0
-                
-                elif (event.key==K_f):
-                    for puck in air_table.pucks:
-                        puck.vel_2d_mps = Vec2D(0,0)
-                    print("all puck speeds set to zero")
-                
-                elif (event.key==K_r):
-                    air_table.count_direction *= -1
-                    print("")
-                    if self.shift_key_down():
-                        air_table.timeDirection *= -1
-                        print("time direction has been reversed")
-                    else:
-                        # Reverse the velocity of all the pucks...
-                        for puck in air_table.pucks:
-                            puck.vel_2d_mps = puck.vel_2d_mps * (-1)
-                        print("puck velocities have been reversed")
-                    print("timeDirection =", air_table.timeDirection, "count direction =", air_table.count_direction)
-                    
-                elif (event.key==K_g):
-                    air_table.g_ON = not air_table.g_ON
-                    print("g", air_table.g_ON)
-                    if air_table.g_ON:
-                        air_table.g_2d_mps2 = air_table.gON_2d_mps2
-                        air_table.coef_rest = 1.00
-                        print("setting puck CRs = 0.85, if not fixed")
-                        for eachpuck in air_table.pucks:
-                            if not eachpuck.CR_fixed:
-                                eachpuck.coef_rest = 0.85
-                    else:
-                        air_table.g_2d_mps2 = air_table.gOFF_2d_mps2
-                        air_table.coef_rest =  1.00
-                        print("setting puck CRs = 1.00, if not fixed")
-                        for eachpuck in air_table.pucks:
-                            if not eachpuck.CR_fixed:
-                                eachpuck.coef_rest = 1.00
-                
-                elif(event.key==K_x):
-                    print("Deleting all client pucks.")
-                    for puck in air_table.pucks[:]:
-                        if (puck.client_name):
-                            puck.delete()
-                
-                elif (event.key==K_z):
-                    print("")
-                    air_table.perfect_kiss = not air_table.perfect_kiss
-                    if (air_table.perfect_kiss):
-                        self.set_allPucks_elastic()
-                    print("perfect kiss =", air_table.perfect_kiss)
-                    
-                # Jet keys
-                elif (event.key==K_a):
-                    local_user.key_a = 'D'
-                elif (event.key==K_s):
-                    local_user.key_s = 'D'
-                elif (event.key==K_d):
-                    local_user.key_d = 'D'
-                elif (event.key==K_w):
-                    local_user.key_w = 'D'
-                
-                # Gun keys
-                elif (event.key==K_j):
-                    local_user.key_j = 'D'
-                elif (event.key==K_k):
-                    local_user.key_k = 'D'
-                elif (event.key==K_l):
-                    local_user.key_l = 'D'
-                elif (event.key==K_i):
-                    local_user.key_i = 'D'
-                elif (event.key==K_SPACE):
-                    local_user.key_space = 'D'
-                    
-                # Zoom keys
-                elif (event.key==K_n):
-                    local_user.key_n = 'D'
-                elif (event.key==K_h):
-                    local_user.key_h = 'D'
-                elif (event.key==K_LCTRL):
-                    local_user.key_lctrl = 'D'
-                elif event.key==K_q:
-                    print("Zooming to 1 and resetting offset.")
-                    env.viewOffset_2d_px = Vec2D(0,0)
-                    env.viewZoom = 1
-
-                elif (event.key==K_p):
-                    air_table.stop_physics = not air_table.stop_physics
-                    if (not air_table.stop_physics):
-                        air_table.game_time_s = 0
-                        print("game loop is active again")
-                    else:
-                        print("game loop is paused")
-                        
-                elif ((event.key==K_e) and (self.shift_key_down())):
-                    env.inhibit_screen_clears = not env.inhibit_screen_clears
-                    print("inhibit_screen_clears =", env.inhibit_screen_clears)
-                
-                else:
-                    return "nothing set up for this key"
-            
-            elif (event.type == pygame.KEYUP):
-                # Jet keys
-                if   (event.key==K_a):
-                    local_user.key_a = 'U'
-                elif (event.key==K_s):
-                    local_user.key_s = 'U'
-                elif (event.key==K_d):
-                    local_user.key_d = 'U'
-                elif (event.key==K_w):
-                    local_user.key_w = 'U'
-                
-                # Gun keys
-                elif (event.key==K_j):
-                    local_user.key_j = 'U'
-                elif (event.key==K_k):
-                    local_user.key_k = 'U'
-                elif (event.key==K_l):
-                    local_user.key_l = 'U'
-                elif (event.key==K_i):
-                    local_user.key_i = 'U'
-                elif (event.key==K_SPACE):
-                    local_user.key_space = 'U'
-                    
-                # Zoom keys
-                elif (event.key==K_n):
-                    local_user.key_n = 'U'
-                elif (event.key==K_h):
-                    local_user.key_h = 'U'
-                elif (event.key==K_LCTRL):
-                    local_user.key_lctrl = 'U'
-            
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                local_user.buttonIsStillDown = True
-            
-                (button1, button2, button3) = pygame.mouse.get_pressed()
-                if button1:
-                    local_user.mouse_button = 1
-                elif button2:
-                    local_user.mouse_button = 2
-                elif button3:
-                    local_user.mouse_button = 3
-                else:
-                    local_user.mouse_button = 0
-            
-            elif event.type == pygame.MOUSEBUTTONUP:
-                local_user.buttonIsStillDown = False
-                local_user.mouse_button = 0
-                
-            elif ((event.type == pygame.MOUSEMOTION) and (local_user.key_lctrl == 'D')):
-                self.viewOffset_2d_px -= Vec2D(event.rel[0], -event.rel[1])
-                
-        if local_user.buttonIsStillDown:
-            # This will select a puck when the puck runs into the cursor of the mouse with it's button still down.
-            local_user.cursor_location_px = (mouseX, mouseY) = pygame.mouse.get_pos()
-
-
-class GameWindow:
-    def __init__(self, screen_tuple_px, title):
-        self.width_px = screen_tuple_px[0]
-        self.height_px = screen_tuple_px[1]
-        
-        # The initial World position vector of the Upper Right corner of the screen.
-        # Yes, that's right, y_px = 0 for UR.
-        self.UR_2d_m = env.ConvertScreenToWorld(Vec2D(self.width_px, 0))
-        
-        print(f"Screen dimensions in meters: {self.UR_2d_m.x}, {self.UR_2d_m.y}")
-        
-        # Create a reference to the display surface object. This is a pygame "surface".
-        # Screen dimensions in pixels (tuple)
-        self.surface = pygame.display.set_mode(screen_tuple_px)
-
-        self.update_caption(title)
-        
-        self.surface.fill(THECOLORS["black"])
-        pygame.display.update()
-        
-    def update_caption(self, title):
-        pygame.display.set_caption(title)
-        self.caption = title
-    
-    def update(self):
-        pygame.display.update()
-        
-    def clear(self):
-        # Useful for shifting between the various demos.
-        self.surface.fill(THECOLORS["black"])
-        pygame.display.update()
+import A15_globals as A_g
 
 #===========================================================
 # Functions
 #===========================================================
+
 def setup_pool_shot():
-    env.always_render = True
-    air_table.constant_dt_s = 1/20.0
+    env.timestep_fixed = True
+    env.constant_dt_s = 1/20.0
     
     air_table.inhibit_wall_collisions = True
     env.inhibit_screen_clears = True
@@ -464,7 +33,9 @@ def setup_pool_shot():
     Puck(Vec2D(4.0,                 4.30), 0.45, 0.3,                            coef_rest=1.0, CR_fixed=True, vel_2d_mps=Vec2D(   0.0, 0.0))
        
 def make_some_pucks(demo):
-    game_window.update_caption("Air-Table Server A15c     Demo #" + str(demo))
+    game_window.update_caption("Perfect Kiss Air-Table Server A15c     Demo #" + str(demo))
+    env.timestep_fixed = False
+
     env.fr_avg.reset()
     air_table.coef_rest = 1.00
     env.tickCount = 0
@@ -478,8 +49,6 @@ def make_some_pucks(demo):
     air_table.collision_count = 0
     air_table.count_direction = 1
 
-    env.always_render = False
-    air_table.constant_dt_s = None
     air_table.perfect_kiss = False
     
     if demo == 1:
@@ -596,9 +165,7 @@ def make_some_pucks(demo):
         Puck( Vec2D(9.0, 4.5), 0.7, density, color=THECOLORS["cyan"], hit_limit=20, c_drag=0.7, show_health=True)
                     
     elif demo == 8:
-        air_table.game_time_s = 0
-        air_table.coef_rest = 1.00
-        air_table.buildJelloGrid( angle=(-10,90), speed=(10,40), pos_initial_2d_m=Vec2D(3.0, 1.0))
+        air_table.makeJello_variations()
 
     elif demo == 9:
         air_table.coef_rest = 1.00
@@ -634,64 +201,6 @@ def make_some_pucks(demo):
 
     else:
         print("Nothing set up for this key.")
-        
-def display_number(numeric_value, font_object,  mode='textOnBackground'):
-    if mode=='textOnBackground':
-        # Small background rectangle for the text
-        pygame.draw.rect( game_window.surface, THECOLORS["white"], pygame.Rect(10, 10, 35, 20))
-        # The text
-        txt_string = "%.0f" % numeric_value
-        txt_surface = font_object.render( txt_string, True, THECOLORS["black"])
-        game_window.surface.blit( txt_surface, [18, 11])
-    elif mode=='gameTimer':
-        fill = 6
-        time_string = f"{numeric_value:{fill}.2f}"
-        txt_surface = font_object.render( time_string, True, THECOLORS["white"])
-        game_window.surface.blit( txt_surface, [605, 11])
-    elif mode=='generalTimer':
-        fill = 5
-        time_string = f"{numeric_value:{fill}.1f}"
-        txt_surface = font_object.render( time_string, True, THECOLORS["white"])
-        game_window.surface.blit( txt_surface, [710, 5])
-        
-def custom_update(self, client_name, state_dict):    
-    self.CS_data[ client_name].cursor_location_px = state_dict['mXY']  # mouse x,y
-    self.CS_data[ client_name].buttonIsStillDown = state_dict['mBd']   # mouse button down (true/false)
-    self.CS_data[ client_name].mouse_button = state_dict['mB']         # mouse button number (1,2,3,0)
-    
-    self.CS_data[ client_name].key_a = state_dict['a']
-    self.CS_data[ client_name].key_d = state_dict['d']
-    self.CS_data[ client_name].key_w = state_dict['w']
-    
-    # Make the s key execute only once per down event.
-    # If key is up, make it ready to accept the down ('D') event.
-    if (state_dict['s'] == 'U'):
-        self.CS_data[ client_name].key_s_onoff = 'ON'
-        self.CS_data[ client_name].key_s = state_dict['s']
-    # If getting 'D' from network client and the key is enabled.
-    elif (state_dict['s'] == 'D') and (self.CS_data[ client_name].key_s_onoff == 'ON'):
-        self.CS_data[ client_name].key_s = state_dict['s']
-    
-    self.CS_data[ client_name].key_j = state_dict['j']
-    self.CS_data[ client_name].key_l = state_dict['l']
-    self.CS_data[ client_name].key_i = state_dict['i']
-    self.CS_data[ client_name].key_space = state_dict[' ']
-
-    # Make the k key execute only once per down event.
-    # If key is up, make it ready to accept the down ('D') event.
-    if (state_dict['k'] == 'U'):
-        self.CS_data[ client_name].key_k_onoff = 'ON'
-        self.CS_data[ client_name].key_k = state_dict['k']
-    # If getting 'D' from network client and the key is enabled.
-    elif (state_dict['k'] == 'D') and (self.CS_data[ client_name].key_k_onoff == 'ON'):
-        self.CS_data[ client_name].key_k = state_dict['k']
-
-def signInOut_function(self, client_name, activate=True):
-    if activate:
-        self.CS_data[client_name].active = True
-    else:
-        self.CS_data[client_name].active = False
-        self.CS_data[client_name].historyXY = []
 
 #============================================================
 # Main procedural script.
@@ -706,19 +215,19 @@ def main():
 
     myclock = pygame.time.Clock()
 
-    window_dimensions_px = (800, 700)  # window_width_px, window_height_px
+    window_dimensions_px = (800, 700)   # window_width_px, window_height_px
 
     # Create the first user/client and the methods for moving between the screen and the world.
     env = Environment(window_dimensions_px, 10.0) # 10m in along the x axis.
-    A15_globals.env = env
+    A_g.env = env
 
     game_window = GameWindow(window_dimensions_px, 'Air Table Server')
-    A15_globals.game_window = game_window
+    A_g.game_window = game_window
 
     # Define the Left, Right, Bottom, and Top boundaries of the game window.
     air_table = PerfectKissAirTable({"L_m":0.0, "R_m":game_window.UR_2d_m.x, "B_m":0.0, "T_m":game_window.UR_2d_m.y})
-    A15_globals.air_table = air_table
-    A15_globals.engine_type = "circular"
+    A_g.air_table = air_table
+    A_g.engine_type = "circular-perfectKiss"
 
     # Extend the clients dictionary to accommodate up to 10 network clients.
     for m in range(1,11):
@@ -747,21 +256,21 @@ def main():
     
     while True:
         # Limit the framerate, but let it float below this limit.
-        if (air_table.constant_dt_s != None):
-            gameLoop_FR_limit = int(1.0/air_table.constant_dt_s)
+        if (env.timestep_fixed):
+            gameLoop_FR_limit = int(1.0/env.constant_dt_s)
         else:
             gameLoop_FR_limit = 480 # default
-
-        env.tickCount += 1    
-        dt_gameLoop_s = float( myclock.tick( gameLoop_FR_limit) * 1e-3)
         
-        if (air_table.constant_dt_s != None):
-            dt_physics_s = air_table.constant_dt_s
+        env.tickCount += 1 # tickCount is reset to zero when demos start in make_some_pucks
+        dt_gameLoop_s = myclock.tick( gameLoop_FR_limit) * 1e-3
+        
+        if (env.timestep_fixed):
+            dt_physics_s = env.constant_dt_s
         else:
             dt_physics_s = dt_gameLoop_s
         
         # Get input from local user.
-        resetmode = env.get_local_user_input()
+        resetmode = env.get_local_user_input(demo_index)
         
         # Get input from network clients.
         
@@ -832,8 +341,8 @@ def main():
             # Check for puck-wall and puck-puck collisions and make penetration corrections.
             air_table.check_for_collisions(dt_physics_s * air_table.timeDirection)
             
-            if env.tickCount > 10:
-                env.fr_avg.update( myclock.get_fps())
+            if air_table.FPS_display and env.tickCount > 10:
+                env.fr_avg.update(1.0/dt_physics_s)
 
             pk_collision_cnt.update( air_table.collision_count)
 
@@ -858,7 +367,8 @@ def main():
                         air_table.pucks.remove( thisPuck)
                 
                 # Display the physics cycle rate.
-                env.fr_avg.draw( game_window.surface, 10, 10)
+                if air_table.FPS_display:
+                    env.fr_avg.draw( game_window.surface, 10, 10, caution=env.timestep_fixed)
                 
                 # Display the collision count for the demos where reversibility is well demonstrated. Generally
                 # counts up to 100 reverse well.
@@ -867,9 +377,9 @@ def main():
                 
                 # Display timers.
                 if (demo_index == 8):
-                    display_number(air_table.game_time_s, fnt_gameTimer, mode='gameTimer')
+                    game_window.display_number(air_table.game_time_s, fnt_gameTimer, mode='gameTimer')
                 elif (air_table.perfect_kiss and demo_index in [1,2,3,4]):
-                    display_number(air_table.time_s, fnt_generalTimer, mode='generalTimer')
+                    game_window.display_number(air_table.time_s, fnt_generalTimer, mode='generalTimer')
                 
                 # Now draw pucks, springs, mouse tethers, and jets.
                 # Draw boundaries of table.
@@ -893,12 +403,13 @@ def main():
                     client.draw_cursor_string()
                     
                     # Draw cursors for network clients.
-                    if ((client_name != 'local') and client.active and not client.drone):
+                    if (client.active and not client.drone):
                         client.draw_fancy_server_cursor()
                     
-                pygame.display.flip()
                 env.render_timer_s = 0
             
+            pygame.display.flip()
+
             # Limit the rendering framerate to be below that of the physics calculations.
             env.render_timer_s += dt_physics_s
             
@@ -910,7 +421,7 @@ def main():
                 air_table.game_time_s += dt_physics_s
                 
 #============================================================
-# Run the main program.  
+# Run main().  
 #============================================================
         
 main()

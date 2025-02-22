@@ -328,10 +328,12 @@ class RunningAvg:
         self.font = self.pygame.font.SysFont("Courier", 16) # Courier 16, Arial 19, Consolas ??
         
         if colorScheme == 'dark':
-            self.backGroundColor = THECOLORS["black"]
+            self.backGroundColor = THECOLORS["grey14"]
+            self.backGroundColor_caution = THECOLORS["mediumblue"]
             self.textColor = THECOLORS["white"]
         elif colorScheme == 'light':
             self.backGroundColor = THECOLORS["white"]
+            self.backGroundColor_caution = THECOLORS["yellow2"]
             self.textColor = THECOLORS["black"]
     
     def update(self, new_value):
@@ -365,7 +367,7 @@ class RunningAvg:
         self.values = []
         self.total = 0.0
     
-    def draw(self, pygame_display, pos_x, pos_y, width_px=35, fill=3):
+    def draw(self, pygame_display, pos_x, pos_y, width_px=35, fill=3, caution=False):
         """
         Display current average on pygame surface.
         
@@ -375,8 +377,12 @@ class RunningAvg:
         """
             
         # Draw background for text
-        self.pygame.draw.rect(pygame_display, self.backGroundColor,
-                            self.pygame.Rect(pos_x, pos_y, width_px, 20))
+        if (caution):
+            bg_color = self.backGroundColor_caution
+        else:
+            bg_color = self.backGroundColor
+        self.pygame.draw.rect(pygame_display, bg_color, self.pygame.Rect(pos_x, pos_y, width_px, 20))
+        
         # Draw the value
         fps_string = f"{self.result:{fill}.0f}"  # right justified, "fill" spaces, 0 decimals
         txt_surface = self.font.render(fps_string, True, self.textColor)

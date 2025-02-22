@@ -327,6 +327,14 @@ class Environment:
         # Return a tuple of integers.
         return Vec2D(x_px, y_px, "int").tuple()
 
+    def print_control_state(self):
+        print()
+        print(f"Components    (c key) = {v_sb.enable_components}")
+        print(f"Stop Rotation (f key) = {env.freeze}")
+        print(f"Total vector  (a key) = {v_sb.display_total}")
+        print(f"  Tails       (t key) = {v_sb.enable_tails}")
+        print(f"  Lines       (l key) = {v_sb.lines_not_points}")
+
     def get_user_input(self):
         # Get all the events since the last call to get().
         for event in pygame.event.get():
@@ -365,14 +373,19 @@ class Environment:
                 # Sandbox control toggles.
                 elif (event.key==K_c):
                     v_sb.enable_components = not v_sb.enable_components
+                    self.print_control_state()
                 elif (event.key==K_t):
                     v_sb.enable_tails = not v_sb.enable_tails
+                    self.print_control_state()
                 elif (event.key==K_f):
                     env.freeze = not env.freeze
+                    self.print_control_state()
                 elif (event.key==K_a):
                     v_sb.display_total = not v_sb.display_total
+                    self.print_control_state()
                 elif (event.key==K_l):
                     v_sb.lines_not_points = not v_sb.lines_not_points
+                    self.print_control_state()
                 
                 # Zoom keys.
                 elif (event.key==K_b):
@@ -458,8 +471,6 @@ class GameWindow:
 def make_some_vectors(resetmode):
     game_window.update_caption("Vector Sandbox V.1: Demo #" + str(resetmode)) 
     env.inhibit_screen_clears = False
-    
-    env.always_render = False
     
     if resetmode == 1:
         v_1 = Visual_Vec2D( 0.0,  4.0, THECOLORS["white"],  rotation_rate_dps=-20)

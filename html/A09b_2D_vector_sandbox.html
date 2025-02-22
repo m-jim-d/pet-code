@@ -435,6 +435,14 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="c1"># Return a tuple of integers.</span>
         <span class="k">return</span> <span class="n">Vec2D</span><span class="p">(</span><span class="n">x_px</span><span class="p">,</span> <span class="n">y_px</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tuple</span><span class="p">()</span>
 
+    <span class="k">def</span> <span class="nf">print_control_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Components    (c key) = </span><span class="si">{</span><span class="n">v_sb</span><span class="o">.</span><span class="n">enable_components</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stop Rotation (f key) = </span><span class="si">{</span><span class="n">env</span><span class="o">.</span><span class="n">freeze</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total vector  (a key) = </span><span class="si">{</span><span class="n">v_sb</span><span class="o">.</span><span class="n">display_total</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Tails       (t key) = </span><span class="si">{</span><span class="n">v_sb</span><span class="o">.</span><span class="n">enable_tails</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Lines       (l key) = </span><span class="si">{</span><span class="n">v_sb</span><span class="o">.</span><span class="n">lines_not_points</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">get_user_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Get all the events since the last call to get().</span>
         <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">pygame</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
@@ -473,14 +481,19 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="c1"># Sandbox control toggles.</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_c</span><span class="p">):</span>
                     <span class="n">v_sb</span><span class="o">.</span><span class="n">enable_components</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">v_sb</span><span class="o">.</span><span class="n">enable_components</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_control_state</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_t</span><span class="p">):</span>
                     <span class="n">v_sb</span><span class="o">.</span><span class="n">enable_tails</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">v_sb</span><span class="o">.</span><span class="n">enable_tails</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_control_state</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_f</span><span class="p">):</span>
                     <span class="n">env</span><span class="o">.</span><span class="n">freeze</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">env</span><span class="o">.</span><span class="n">freeze</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_control_state</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_a</span><span class="p">):</span>
                     <span class="n">v_sb</span><span class="o">.</span><span class="n">display_total</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">v_sb</span><span class="o">.</span><span class="n">display_total</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_control_state</span><span class="p">()</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_l</span><span class="p">):</span>
                     <span class="n">v_sb</span><span class="o">.</span><span class="n">lines_not_points</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">v_sb</span><span class="o">.</span><span class="n">lines_not_points</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">print_control_state</span><span class="p">()</span>
                 
                 <span class="c1"># Zoom keys.</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_b</span><span class="p">):</span>
@@ -566,8 +579,6 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="k">def</span> <span class="nf">make_some_vectors</span><span class="p">(</span><span class="n">resetmode</span><span class="p">):</span>
     <span class="n">game_window</span><span class="o">.</span><span class="n">update_caption</span><span class="p">(</span><span class="s2">&quot;Vector Sandbox V.1: Demo #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">resetmode</span><span class="p">))</span> 
     <span class="n">env</span><span class="o">.</span><span class="n">inhibit_screen_clears</span> <span class="o">=</span> <span class="kc">False</span>
-    
-    <span class="n">env</span><span class="o">.</span><span class="n">always_render</span> <span class="o">=</span> <span class="kc">False</span>
     
     <span class="k">if</span> <span class="n">resetmode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">v_1</span> <span class="o">=</span> <span class="n">Visual_Vec2D</span><span class="p">(</span> <span class="mf">0.0</span><span class="p">,</span>  <span class="mf">4.0</span><span class="p">,</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">],</span>  <span class="n">rotation_rate_dps</span><span class="o">=-</span><span class="mi">20</span><span class="p">)</span>

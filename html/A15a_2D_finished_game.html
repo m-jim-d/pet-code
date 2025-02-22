@@ -110,392 +110,19 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
 <span class="c1"># Filename: A15a_2D_finished_game.py</span>
 
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">import</span> <span class="nn">socket</span>
-<span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">platform</span><span class="o">,</span> <span class="nn">subprocess</span>
 
 <span class="kn">import</span> <span class="nn">pygame</span>
-<span class="c1"># key constants</span>
-<span class="kn">from</span> <span class="nn">pygame.locals</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">K_ESCAPE</span><span class="p">,</span>
-    <span class="n">K_a</span><span class="p">,</span> <span class="n">K_s</span><span class="p">,</span> <span class="n">K_d</span><span class="p">,</span> <span class="n">K_w</span><span class="p">,</span>
-    <span class="n">K_i</span><span class="p">,</span> <span class="n">K_j</span><span class="p">,</span> <span class="n">K_k</span><span class="p">,</span> <span class="n">K_l</span><span class="p">,</span> <span class="n">K_SPACE</span><span class="p">,</span>
-    <span class="n">K_1</span><span class="p">,</span> <span class="n">K_2</span><span class="p">,</span> <span class="n">K_3</span><span class="p">,</span> <span class="n">K_4</span><span class="p">,</span> <span class="n">K_5</span><span class="p">,</span> <span class="n">K_6</span><span class="p">,</span> <span class="n">K_7</span><span class="p">,</span> <span class="n">K_8</span><span class="p">,</span> <span class="n">K_9</span><span class="p">,</span> <span class="n">K_0</span><span class="p">,</span>
-    <span class="n">K_f</span><span class="p">,</span> <span class="n">K_g</span><span class="p">,</span> <span class="n">K_x</span><span class="p">,</span> <span class="n">K_q</span><span class="p">,</span>
-    <span class="n">K_n</span><span class="p">,</span> <span class="n">K_h</span><span class="p">,</span> <span class="n">K_LCTRL</span><span class="p">,</span> <span class="n">K_z</span><span class="p">,</span>
-    <span class="n">K_p</span>
-<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pygame.color</span> <span class="kn">import</span> <span class="n">THECOLORS</span>
 
 <span class="kn">from</span> <span class="nn">A09_vec2d</span> <span class="kn">import</span> <span class="n">Vec2D</span>
-<span class="kn">from</span> <span class="nn">A08_network</span> <span class="kn">import</span> <span class="n">GameServer</span><span class="p">,</span> <span class="n">RunningAvg</span><span class="p">,</span> <span class="n">setClientColors</span>
-<span class="kn">from</span> <span class="nn">A15_air_table</span> <span class="kn">import</span> <span class="n">SimpleAirTable</span>
+<span class="kn">from</span> <span class="nn">A08_network</span> <span class="kn">import</span> <span class="n">GameServer</span>
+<span class="kn">from</span> <span class="nn">A15_air_table</span> <span class="kn">import</span> <span class="n">CircularAirTable</span>
 <span class="kn">from</span> <span class="nn">A15_air_table_objects</span> <span class="kn">import</span> <span class="n">Puck</span><span class="p">,</span> <span class="n">Spring</span>
-<span class="kn">import</span> <span class="nn">A15_globals</span>
+<span class="kn">from</span> <span class="nn">A15_environment</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">GameWindow</span><span class="p">,</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">signInOut_function</span><span class="p">,</span> <span class="n">custom_update</span>
 
-<span class="c1">#=====================================================================</span>
-<span class="c1"># Classes</span>
-<span class="c1">#=====================================================================</span>
-
-<span class="k">class</span> <span class="nc">Client</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cursor_color</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>   <span class="c1"># x_px, y_px</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mouse_button</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># 1, 2, or 3</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buttonIsStillDown</span> <span class="o">=</span> <span class="kc">False</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">drone</span> <span class="o">=</span> <span class="kc">False</span>
-        
-        <span class="c1"># Jet</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_a</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_s</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_s_onoff</span> <span class="o">=</span> <span class="s2">&quot;ON&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_d</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_w</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        
-        <span class="c1"># Gun</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_j</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_k</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_k_onoff</span> <span class="o">=</span> <span class="s2">&quot;ON&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_l</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_i</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_space</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        
-        <span class="c1"># Zoom</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_n</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_h</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key_lctrl</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cursor_color</span> <span class="o">=</span> <span class="n">cursor_color</span>
-        
-        <span class="c1"># Define the nature of the cursor strings, one for each mouse button.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">mouse_strings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;string1&#39;</span><span class="p">:{</span><span class="s1">&#39;c_drag&#39;</span><span class="p">:</span>   <span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;k_Npm&#39;</span><span class="p">:</span>   <span class="mf">60.0</span><span class="p">},</span>
-                              <span class="s1">&#39;string2&#39;</span><span class="p">:{</span><span class="s1">&#39;c_drag&#39;</span><span class="p">:</span>   <span class="mf">0.2</span><span class="p">,</span> <span class="s1">&#39;k_Npm&#39;</span><span class="p">:</span>    <span class="mf">2.0</span><span class="p">},</span>
-                              <span class="s1">&#39;string3&#39;</span><span class="p">:{</span><span class="s1">&#39;c_drag&#39;</span><span class="p">:</span>  <span class="mf">20.0</span><span class="p">,</span> <span class="s1">&#39;k_Npm&#39;</span><span class="p">:</span> <span class="mf">1000.0</span><span class="p">}}</span>
-                                        
-    <span class="k">def</span> <span class="nf">calc_string_forces_on_pucks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Calculated the string forces on the selected puck and add to the aggregate</span>
-        <span class="c1"># that is stored in the puck object.</span>
-        
-        <span class="c1"># Only check for a selected puck if one isn&#39;t already selected. This keeps</span>
-        <span class="c1"># the puck from unselecting if cursor is dragged off the puck!</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span> <span class="o">==</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonIsStillDown</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span> <span class="o">=</span> <span class="n">air_table</span><span class="o">.</span><span class="n">checkForPuckAtThisPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">)</span>        
-        
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttonIsStillDown</span><span class="p">:</span>
-                <span class="c1"># Unselect the puck and bomb out of here.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">selected</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="k">return</span> <span class="kc">None</span>
-            
-            <span class="c1"># Use dx difference to calculate the hooks law force being applied by the tether line. </span>
-            <span class="c1"># If you release the mouse button after a drag it will fling the puck.</span>
-            <span class="c1"># This tether force will diminish as the puck gets closer to the mouse point.</span>
-            <span class="n">dx_2d_m</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">ConvertScreenToWorld</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">))</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">pos_2d_m</span>
-            
-            <span class="n">stringName</span> <span class="o">=</span> <span class="s2">&quot;string&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mouse_button</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">cursorString_spring_force_2d_N</span>   <span class="o">+=</span> <span class="n">dx_2d_m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouse_strings</span><span class="p">[</span><span class="n">stringName</span><span class="p">][</span><span class="s1">&#39;k_Npm&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">cursorString_puckDrag_force_2d_N</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">vel_2d_mps</span> <span class="o">*</span> 
-                                                                    <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mouse_strings</span><span class="p">[</span><span class="n">stringName</span><span class="p">][</span><span class="s1">&#39;c_drag&#39;</span><span class="p">])</span>
-            
-    <span class="k">def</span> <span class="nf">draw_cursor_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="n">line_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">env</span><span class="o">.</span><span class="n">ConvertWorldToScreen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">pos_2d_m</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">]</span>
-            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor_color</span><span class="p">,</span> <span class="n">line_points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">line_points</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
-                    
-    <span class="k">def</span> <span class="nf">draw_fancy_server_cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">draw_server_cursor</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">cursor_color</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">draw_server_cursor</span><span class="p">(</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">draw_server_cursor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">edge_px</span><span class="p">):</span>
-        <span class="n">cursor_outline_vertices</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">cursor_outline_vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>  <span class="bp">self</span><span class="o">.</span><span class="n">cursor_location_px</span> <span class="p">)</span>
-        <span class="n">cursor_outline_vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">10</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">10</span><span class="p">)</span> <span class="p">)</span>
-        <span class="n">cursor_outline_vertices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span>  <span class="mi">0</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">15</span><span class="p">)</span> <span class="p">)</span>
-        
-        <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">color</span><span class="p">,</span> <span class="n">cursor_outline_vertices</span><span class="p">,</span> <span class="n">edge_px</span><span class="p">)</span>
-
-
-<span class="k">class</span> <span class="nc">Environment</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screenSize_px</span><span class="p">,</span> <span class="n">length_x_m</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">screenSize_px</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="n">screenSize_px</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">viewOffset_2d_px</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom_rate</span> <span class="o">=</span> <span class="mf">0.01</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">px_to_m</span> <span class="o">=</span> <span class="n">length_x_m</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">screenSize_px</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">m_to_px</span> <span class="o">=</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">screenSize_px</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">length_x_m</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">client_colors</span> <span class="o">=</span> <span class="n">setClientColors</span><span class="p">()</span>
-                              
-        <span class="c1"># Initialize the client dictionary with a local (non-network) client.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clients</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;local&#39;</span><span class="p">:</span><span class="n">Client</span><span class="p">(</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;green&quot;</span><span class="p">])}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="c1"># For displaying a smoothed framerate.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fr_avg</span> <span class="o">=</span> <span class="n">RunningAvg</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="n">pygame</span><span class="p">,</span> <span class="n">colorScheme</span><span class="o">=</span><span class="s1">&#39;light&#39;</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">tickCount</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dt_render_limit_s</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">120.0</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">render_timer_s</span> <span class="o">=</span> <span class="mf">0.0</span>
-        
-    <span class="k">def</span> <span class="nf">remove_healthless_pucks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">puck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[:]:</span>  <span class="c1"># [:] indicates a copy </span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">puck</span><span class="o">.</span><span class="n">bullet_hit_count</span> <span class="o">&gt;</span> <span class="n">puck</span><span class="o">.</span><span class="n">bullet_hit_limit</span><span class="p">):</span>
-                <span class="n">puck</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-                
-    <span class="c1"># Convert from meters to pixels </span>
-    <span class="k">def</span> <span class="nf">px_from_m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx_m</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">dx_m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_to_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span>
-    
-    <span class="c1"># Convert from pixels to meters</span>
-    <span class="c1"># Note: still floating values here</span>
-    <span class="k">def</span> <span class="nf">m_from_px</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx_px</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">dx_px</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">px_to_m</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span>
-    
-    <span class="k">def</span> <span class="nf">control_zoom_and_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">local_user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">local_user</span><span class="o">.</span><span class="n">key_h</span> <span class="o">==</span> <span class="s2">&quot;D&quot;</span> <span class="ow">or</span> <span class="n">local_user</span><span class="o">.</span><span class="n">key_n</span> <span class="o">==</span> <span class="s2">&quot;D&quot;</span><span class="p">:</span>
-            <span class="n">local_user</span><span class="o">.</span><span class="n">cursor_location_px</span> <span class="o">=</span> <span class="p">(</span><span class="n">mouseX</span><span class="p">,</span> <span class="n">mouseY</span><span class="p">)</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">get_pos</span><span class="p">()</span>
-
-            <span class="c1"># Cursor world position before changing the zoom. </span>
-            <span class="n">cursor_pos_before_2d_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ConvertScreenToWorld</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="n">local_user</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">))</span>
-
-            <span class="k">if</span> <span class="n">local_user</span><span class="o">.</span><span class="n">key_h</span> <span class="o">==</span> <span class="s2">&quot;D&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom_rate</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span>
-            <span class="k">elif</span> <span class="n">local_user</span><span class="o">.</span><span class="n">key_n</span> <span class="o">==</span> <span class="s2">&quot;D&quot;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom_rate</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span>
-
-            <span class="c1"># Cursor world position after changing the zoom. </span>
-            <span class="n">cursor_pos_after_2d_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ConvertScreenToWorld</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="n">local_user</span><span class="o">.</span><span class="n">cursor_location_px</span><span class="p">))</span>
-
-            <span class="c1"># Adjust the view offset to compensate for any change in the cursor&#39;s world position.</span>
-            <span class="c1"># This effectively zooms in and out at the cursor&#39;s position.</span>
-            <span class="n">change_2d_m</span> <span class="o">=</span> <span class="n">cursor_pos_after_2d_m</span> <span class="o">-</span> <span class="n">cursor_pos_before_2d_m</span>
-            <span class="n">change_2d_px</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">px_from_m</span><span class="p">(</span><span class="n">change_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">px_from_m</span><span class="p">(</span><span class="n">change_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">viewOffset_2d_px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewOffset_2d_px</span> <span class="o">-</span> <span class="n">change_2d_px</span>
-    
-    <span class="k">def</span> <span class="nf">zoomLineThickness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lineThickness_px</span><span class="p">,</span> <span class="n">noFill</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">lineThickness_px</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">noFill</span><span class="p">):</span>
-            <span class="c1"># A thickness of zero will fill the shape.</span>
-            <span class="k">return</span> <span class="mi">0</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">thickness_px</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span> <span class="n">lineThickness_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">thickness_px</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span> <span class="n">thickness_px</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">return</span> <span class="n">thickness_px</span>
-
-    <span class="k">def</span> <span class="nf">ConvertScreenToWorld</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point_2d_px</span><span class="p">):</span>
-        <span class="n">x_m</span> <span class="o">=</span> <span class="p">(</span>                       <span class="n">point_2d_px</span><span class="o">.</span><span class="n">x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewOffset_2d_px</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_to_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span><span class="p">)</span>
-        <span class="n">y_m</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">screenSize_px</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">point_2d_px</span><span class="o">.</span><span class="n">y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewOffset_2d_px</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">m_to_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Vec2D</span><span class="p">(</span> <span class="n">x_m</span><span class="p">,</span> <span class="n">y_m</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">ConvertWorldToScreen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">point_2d_m</span><span class="p">):</span>
-        <span class="n">x_px</span> <span class="o">=</span> <span class="p">(</span><span class="n">point_2d_m</span><span class="o">.</span><span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_to_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewOffset_2d_px</span><span class="o">.</span><span class="n">x</span>
-        <span class="n">y_px</span> <span class="o">=</span> <span class="p">(</span><span class="n">point_2d_m</span><span class="o">.</span><span class="n">y</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_to_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewOffset_2d_px</span><span class="o">.</span><span class="n">y</span>
-        <span class="n">y_px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">screenSize_px</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">y_px</span>
-
-        <span class="c1"># Return a tuple of integers.</span>
-        <span class="k">return</span> <span class="n">Vec2D</span><span class="p">(</span><span class="n">x_px</span><span class="p">,</span> <span class="n">y_px</span><span class="p">,</span> <span class="s2">&quot;int&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">tuple</span><span class="p">()</span>
-
-    <span class="k">def</span> <span class="nf">get_local_user_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">local_user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="s1">&#39;local&#39;</span><span class="p">]</span>
-        
-        <span class="c1"># Get all the events since the last call to get().</span>
-        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">pygame</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">QUIT</span><span class="p">):</span> 
-                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">KEYDOWN</span><span class="p">):</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span> <span class="o">==</span> <span class="n">K_ESCAPE</span><span class="p">):</span>
-                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_1</span><span class="p">):</span>            
-                    <span class="k">return</span> <span class="mi">1</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_2</span><span class="p">):</span>                          
-                    <span class="k">return</span> <span class="mi">2</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_3</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="mi">3</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_4</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="mi">4</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_5</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="mi">5</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_6</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="mi">6</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_7</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="mi">7</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_8</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="mi">8</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_9</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="mi">9</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_0</span><span class="p">):</span>
-                    <span class="k">return</span> <span class="mi">0</span>
-                
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_f</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">puck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                        <span class="n">puck</span><span class="o">.</span><span class="n">vel_2d_mps</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;all puck speeds set to zero&quot;</span><span class="p">)</span>
-                
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_g</span><span class="p">):</span>
-                    <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">,</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span><span class="p">:</span>
-                        <span class="n">air_table</span><span class="o">.</span><span class="n">g_2d_mps2</span> <span class="o">=</span> <span class="n">air_table</span><span class="o">.</span><span class="n">gON_2d_mps2</span>
-                        <span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span> <span class="mf">1.00</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;setting puck CRs = 0.85, if not fixed&quot;</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">CR_fixed</span><span class="p">:</span>
-                                <span class="n">eachpuck</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span> <span class="mf">0.85</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">air_table</span><span class="o">.</span><span class="n">g_2d_mps2</span> <span class="o">=</span> <span class="n">air_table</span><span class="o">.</span><span class="n">gOFF_2d_mps2</span>
-                        <span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span>  <span class="mf">1.00</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;setting puck CRs = 1.00, if not fixed&quot;</span><span class="p">)</span>
-                        <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">CR_fixed</span><span class="p">:</span>
-                                <span class="n">eachpuck</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span> <span class="mf">1.00</span>
-                
-                <span class="k">elif</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_x</span><span class="p">):</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Deleting all client pucks.&quot;</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">puck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[:]:</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="n">puck</span><span class="o">.</span><span class="n">client_name</span><span class="p">):</span>
-                            <span class="n">puck</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
-                
-                <span class="c1"># Jet keys</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_a</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_a</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_s</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_s</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_d</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_d</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_w</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_w</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                
-                <span class="c1"># Gun keys</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_j</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_j</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_k</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_k</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_l</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_l</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_i</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_i</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_SPACE</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_space</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                    
-                <span class="c1"># Zoom keys</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_n</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_n</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_h</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_h</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_LCTRL</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_lctrl</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
-                <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_q</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Zooming to 1 and resetting offset.&quot;</span><span class="p">)</span>
-                    <span class="n">env</span><span class="o">.</span><span class="n">viewOffset_2d_px</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
-                    <span class="n">env</span><span class="o">.</span><span class="n">viewZoom</span> <span class="o">=</span> <span class="mi">1</span>
-
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_p</span><span class="p">):</span>
-                    <span class="n">air_table</span><span class="o">.</span><span class="n">stop_physics</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">air_table</span><span class="o">.</span><span class="n">stop_physics</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">air_table</span><span class="o">.</span><span class="n">stop_physics</span><span class="p">):</span>
-                        <span class="n">air_table</span><span class="o">.</span><span class="n">game_time_s</span> <span class="o">=</span> <span class="mi">0</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;game loop is active again&quot;</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;game loop is paused&quot;</span><span class="p">)</span>
-                        
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="s2">&quot;nothing set up for this key&quot;</span>
-            
-            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">KEYUP</span><span class="p">):</span>
-                <span class="c1"># Jet keys</span>
-                <span class="k">if</span>   <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_a</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_a</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_s</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_s</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_d</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_d</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_w</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_w</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                
-                <span class="c1"># Gun keys</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_j</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_j</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_k</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_k</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_l</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_l</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_i</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_i</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_SPACE</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_space</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                    
-                <span class="c1"># Zoom keys</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_n</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_n</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_h</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_h</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-                <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_LCTRL</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_lctrl</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
-            
-            <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONDOWN</span><span class="p">:</span>
-                <span class="n">local_user</span><span class="o">.</span><span class="n">buttonIsStillDown</span> <span class="o">=</span> <span class="kc">True</span>
-            
-                <span class="p">(</span><span class="n">button1</span><span class="p">,</span> <span class="n">button2</span><span class="p">,</span> <span class="n">button3</span><span class="p">)</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">get_pressed</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">button1</span><span class="p">:</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">mouse_button</span> <span class="o">=</span> <span class="mi">1</span>
-                <span class="k">elif</span> <span class="n">button2</span><span class="p">:</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">mouse_button</span> <span class="o">=</span> <span class="mi">2</span>
-                <span class="k">elif</span> <span class="n">button3</span><span class="p">:</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">mouse_button</span> <span class="o">=</span> <span class="mi">3</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">mouse_button</span> <span class="o">=</span> <span class="mi">0</span>
-            
-            <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEBUTTONUP</span><span class="p">:</span>
-                <span class="n">local_user</span><span class="o">.</span><span class="n">buttonIsStillDown</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="n">local_user</span><span class="o">.</span><span class="n">mouse_button</span> <span class="o">=</span> <span class="mi">0</span>
-                
-            <span class="k">elif</span> <span class="p">((</span><span class="n">event</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">pygame</span><span class="o">.</span><span class="n">MOUSEMOTION</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">local_user</span><span class="o">.</span><span class="n">key_lctrl</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">)):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">viewOffset_2d_px</span> <span class="o">-=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">rel</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">event</span><span class="o">.</span><span class="n">rel</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-                
-        <span class="k">if</span> <span class="n">local_user</span><span class="o">.</span><span class="n">buttonIsStillDown</span><span class="p">:</span>
-            <span class="c1"># This will select a puck when the puck runs into the cursor of the mouse with it&#39;s button still down.</span>
-            <span class="n">local_user</span><span class="o">.</span><span class="n">cursor_location_px</span> <span class="o">=</span> <span class="p">(</span><span class="n">mouseX</span><span class="p">,</span> <span class="n">mouseY</span><span class="p">)</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">get_pos</span><span class="p">()</span>
-
-
-<span class="k">class</span> <span class="nc">GameWindow</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screen_tuple_px</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">width_px</span> <span class="o">=</span> <span class="n">screen_tuple_px</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">height_px</span> <span class="o">=</span> <span class="n">screen_tuple_px</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        
-        <span class="c1"># The initial World position vector of the Upper Right corner of the screen.</span>
-        <span class="c1"># Yes, that&#39;s right, y_px = 0 for UR.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">UR_2d_m</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">ConvertScreenToWorld</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">width_px</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-        
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Screen dimensions in meters: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">y</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        
-        <span class="c1"># Create a reference to the display surface object. This is a pygame &quot;surface&quot;.</span>
-        <span class="c1"># Screen dimensions in pixels (tuple)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">screen_tuple_px</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_caption</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">])</span>
-        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-        
-    <span class="k">def</span> <span class="nf">update_caption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
-        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">caption</span> <span class="o">=</span> <span class="n">title</span>
-    
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
-        
-    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="c1"># Useful for shifting between the various demos.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">])</span>
-        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+<span class="kn">import</span> <span class="nn">A15_globals</span> <span class="k">as</span> <span class="nn">A_g</span>
 
 <span class="c1">#===========================================================</span>
 <span class="c1"># Functions</span>
@@ -620,9 +247,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="n">Puck</span><span class="p">(</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mf">9.0</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">),</span> <span class="mf">0.7</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">],</span> <span class="n">hit_limit</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">c_drag</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">show_health</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
-        <span class="n">air_table</span><span class="o">.</span><span class="n">game_time_s</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span> <span class="mf">1.00</span>
-        <span class="n">air_table</span><span class="o">.</span><span class="n">buildJelloGrid</span><span class="p">(</span> <span class="n">angle</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">90</span><span class="p">),</span> <span class="n">speed</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">40</span><span class="p">),</span> <span class="n">pos_initial_2d_m</span><span class="o">=</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">3.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">))</span>
+        <span class="n">air_table</span><span class="o">.</span><span class="n">makeJello_variations</span><span class="p">()</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
         <span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span> <span class="mf">1.00</span>
@@ -643,59 +268,6 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing set up for this key.&quot;</span><span class="p">)</span>
-        
-<span class="k">def</span> <span class="nf">display_number</span><span class="p">(</span><span class="n">numeric_value</span><span class="p">,</span> <span class="n">font_object</span><span class="p">,</span>  <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;textOnBackground&#39;</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">mode</span><span class="o">==</span><span class="s1">&#39;textOnBackground&#39;</span><span class="p">:</span>
-        <span class="c1"># Small background rectangle for the text</span>
-        <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">rect</span><span class="p">(</span> <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">],</span> <span class="n">pygame</span><span class="o">.</span><span class="n">Rect</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">35</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
-        <span class="c1"># The text</span>
-        <span class="n">txt_string</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%.0f</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">numeric_value</span>
-        <span class="n">txt_surface</span> <span class="o">=</span> <span class="n">font_object</span><span class="o">.</span><span class="n">render</span><span class="p">(</span> <span class="n">txt_string</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">])</span>
-        <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span> <span class="n">txt_surface</span><span class="p">,</span> <span class="p">[</span><span class="mi">18</span><span class="p">,</span> <span class="mi">11</span><span class="p">])</span>
-    <span class="k">elif</span> <span class="n">mode</span><span class="o">==</span><span class="s1">&#39;gameTimer&#39;</span><span class="p">:</span>
-        <span class="n">fill</span> <span class="o">=</span> <span class="mi">6</span>
-        <span class="n">time_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">numeric_value</span><span class="si">:{</span><span class="n">fill</span><span class="si">}</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="n">txt_surface</span> <span class="o">=</span> <span class="n">font_object</span><span class="o">.</span><span class="n">render</span><span class="p">(</span> <span class="n">time_string</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">])</span>
-        <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">blit</span><span class="p">(</span> <span class="n">txt_surface</span><span class="p">,</span> <span class="p">[</span><span class="mi">605</span><span class="p">,</span> <span class="mi">11</span><span class="p">])</span>
-
-<span class="k">def</span> <span class="nf">custom_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_name</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>    
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">cursor_location_px</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;mXY&#39;</span><span class="p">]</span>  <span class="c1"># mouse x,y</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">buttonIsStillDown</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;mBd&#39;</span><span class="p">]</span>   <span class="c1"># mouse button down (true/false)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">mouse_button</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;mB&#39;</span><span class="p">]</span>         <span class="c1"># mouse button number (1,2,3,0)</span>
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_a</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_d</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;d&#39;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_w</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;w&#39;</span><span class="p">]</span>
-    
-    <span class="c1"># Make the s key execute only once per down event.</span>
-    <span class="c1"># If key is up, make it ready to accept the down (&#39;D&#39;) event.</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;U&#39;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_s_onoff</span> <span class="o">=</span> <span class="s1">&#39;ON&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_s</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span>
-    <span class="c1"># If getting &#39;D&#39; from network client and the key is enabled.</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_s_onoff</span> <span class="o">==</span> <span class="s1">&#39;ON&#39;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_s</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;s&#39;</span><span class="p">]</span>
-    
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_j</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_l</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;l&#39;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_i</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;i&#39;</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_space</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39; &#39;</span><span class="p">]</span>
-
-    <span class="c1"># Make the k key execute only once per down event.</span>
-    <span class="c1"># If key is up, make it ready to accept the down (&#39;D&#39;) event.</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;U&#39;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_k_onoff</span> <span class="o">=</span> <span class="s1">&#39;ON&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_k</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span>
-    <span class="c1"># If getting &#39;D&#39; from network client and the key is enabled.</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_k_onoff</span> <span class="o">==</span> <span class="s1">&#39;ON&#39;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span> <span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_k</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span>
-
-<span class="k">def</span> <span class="nf">signInOut_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_name</span><span class="p">,</span> <span class="n">activate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">activate</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">historyXY</span> <span class="o">=</span> <span class="p">[]</span>
 
 <span class="c1">#============================================================</span>
 <span class="c1"># Main procedural script.</span>
@@ -710,19 +282,19 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="n">myclock</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Clock</span><span class="p">()</span>
 
-    <span class="n">window_dimensions_px</span> <span class="o">=</span> <span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">700</span><span class="p">)</span>   <span class="c1">#window_width_px, window_height_px</span>
+    <span class="n">window_dimensions_px</span> <span class="o">=</span> <span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">700</span><span class="p">)</span>   <span class="c1"># window_width_px, window_height_px</span>
 
     <span class="c1"># Create the first user/client and the methods for moving between the screen and the world.</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">window_dimensions_px</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span> <span class="c1"># 10m in along the x axis.</span>
-    <span class="n">A15_globals</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+    <span class="n">A_g</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
 
     <span class="n">game_window</span> <span class="o">=</span> <span class="n">GameWindow</span><span class="p">(</span><span class="n">window_dimensions_px</span><span class="p">,</span> <span class="s1">&#39;Air Table Server&#39;</span><span class="p">)</span>
-    <span class="n">A15_globals</span><span class="o">.</span><span class="n">game_window</span> <span class="o">=</span> <span class="n">game_window</span>
+    <span class="n">A_g</span><span class="o">.</span><span class="n">game_window</span> <span class="o">=</span> <span class="n">game_window</span>
 
     <span class="c1"># Define the Left, Right, Bottom, and Top boundaries of the game window.</span>
-    <span class="n">air_table</span> <span class="o">=</span> <span class="n">SimpleAirTable</span><span class="p">({</span><span class="s2">&quot;L_m&quot;</span><span class="p">:</span><span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;R_m&quot;</span><span class="p">:</span><span class="n">game_window</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;B_m&quot;</span><span class="p">:</span><span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;T_m&quot;</span><span class="p">:</span><span class="n">game_window</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">})</span>
-    <span class="n">A15_globals</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="n">air_table</span>
-    <span class="n">A15_globals</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">=</span> <span class="s2">&quot;circular&quot;</span>
+    <span class="n">air_table</span> <span class="o">=</span> <span class="n">CircularAirTable</span><span class="p">({</span><span class="s2">&quot;L_m&quot;</span><span class="p">:</span><span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;R_m&quot;</span><span class="p">:</span><span class="n">game_window</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;B_m&quot;</span><span class="p">:</span><span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;T_m&quot;</span><span class="p">:</span><span class="n">game_window</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">})</span>
+    <span class="n">A_g</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="n">air_table</span>
+    <span class="n">A_g</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">=</span> <span class="s2">&quot;circular&quot;</span>
 
     <span class="c1"># Extend the clients dictionary to accommodate up to 10 network clients.</span>
     <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">11</span><span class="p">):</span>
@@ -747,20 +319,28 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                         <span class="n">update_function</span><span class="o">=</span><span class="n">custom_update</span><span class="p">,</span> <span class="n">clientStates</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">,</span> 
                         <span class="n">signInOut_function</span><span class="o">=</span><span class="n">signInOut_function</span><span class="p">)</span>
     
-    <span class="c1"># Limit the framerate, but let it float below this limit.</span>
-    <span class="n">framerate_limit</span> <span class="o">=</span> <span class="mi">480</span>
-
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">tickCount</span> <span class="o">+=</span> <span class="mi">1</span>    
-        <span class="n">dt_physics_s</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">myclock</span><span class="o">.</span><span class="n">tick</span><span class="p">(</span> <span class="n">framerate_limit</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span><span class="p">)</span>
+        <span class="c1"># Limit the framerate, but let it float below this limit.</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">timestep_fixed</span><span class="p">):</span>
+            <span class="n">gameLoop_FR_limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">env</span><span class="o">.</span><span class="n">constant_dt_s</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">gameLoop_FR_limit</span> <span class="o">=</span> <span class="mi">480</span> <span class="c1"># default</span>
+        
+        <span class="n">env</span><span class="o">.</span><span class="n">tickCount</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c1"># tickCount is reset to zero when demos start in make_some_pucks</span>
+        <span class="n">dt_gameLoop_s</span> <span class="o">=</span> <span class="n">myclock</span><span class="o">.</span><span class="n">tick</span><span class="p">(</span> <span class="n">gameLoop_FR_limit</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1e-3</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">timestep_fixed</span><span class="p">):</span>
+            <span class="n">dt_physics_s</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">constant_dt_s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dt_physics_s</span> <span class="o">=</span> <span class="n">dt_gameLoop_s</span>
         
         <span class="c1"># Get input from local user.</span>
-        <span class="n">resetmode</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_local_user_input</span><span class="p">()</span>
+        <span class="n">resetmode</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_local_user_input</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
         
         <span class="c1"># Get input from network clients.</span>
         
         <span class="c1"># This dt check avoids problem when dragging the game window.</span>
-        <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="n">dt_physics_s</span> <span class="o">&lt;</span> <span class="mf">0.10</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">air_table</span><span class="o">.</span><span class="n">stop_physics</span><span class="p">)</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="p">((</span><span class="n">dt_physics_s</span> <span class="o">&lt;</span> <span class="mf">0.10</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">air_table</span><span class="o">.</span><span class="n">stop_physics</span><span class="p">)):</span>
             
             <span class="c1"># Reset the game based on local user control.</span>
             <span class="k">if</span> <span class="n">resetmode</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">]:</span>
@@ -826,8 +406,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="c1"># Check for puck-wall and puck-puck collisions and make penetration corrections.</span>
             <span class="n">air_table</span><span class="o">.</span><span class="n">check_for_collisions</span><span class="p">()</span>
             
-            <span class="k">if</span> <span class="n">env</span><span class="o">.</span><span class="n">tickCount</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
-                <span class="n">env</span><span class="o">.</span><span class="n">fr_avg</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">myclock</span><span class="o">.</span><span class="n">get_fps</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">air_table</span><span class="o">.</span><span class="n">FPS_display</span> <span class="ow">and</span> <span class="n">env</span><span class="o">.</span><span class="n">tickCount</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="n">env</span><span class="o">.</span><span class="n">fr_avg</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="n">dt_physics_s</span><span class="p">)</span>
             
             <span class="k">if</span> <span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">render_timer_s</span> <span class="o">&gt;</span> <span class="n">env</span><span class="o">.</span><span class="n">dt_render_limit_s</span><span class="p">):</span>
                 
@@ -845,11 +425,12 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                         <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span> <span class="n">thisPuck</span><span class="p">)</span>
                 
                 <span class="c1"># Display the physics cycle rate.</span>
-                <span class="n">env</span><span class="o">.</span><span class="n">fr_avg</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span> <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">air_table</span><span class="o">.</span><span class="n">FPS_display</span><span class="p">:</span>
+                    <span class="n">env</span><span class="o">.</span><span class="n">fr_avg</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span> <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">caution</span><span class="o">=</span><span class="n">env</span><span class="o">.</span><span class="n">timestep_fixed</span><span class="p">)</span>
                 
-                <span class="c1"># Display game timer text.</span>
+                <span class="c1"># Display timers.</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">demo_index</span> <span class="o">==</span> <span class="mi">8</span><span class="p">):</span>
-                    <span class="n">display_number</span><span class="p">(</span><span class="n">air_table</span><span class="o">.</span><span class="n">game_time_s</span><span class="p">,</span> <span class="n">fnt_gameTimer</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;gameTimer&#39;</span><span class="p">)</span>
+                    <span class="n">game_window</span><span class="o">.</span><span class="n">display_number</span><span class="p">(</span><span class="n">air_table</span><span class="o">.</span><span class="n">game_time_s</span><span class="p">,</span> <span class="n">fnt_gameTimer</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;gameTimer&#39;</span><span class="p">)</span>
                 
                 <span class="c1"># Now draw pucks, springs, mouse tethers, and jets.</span>
                 <span class="c1"># Draw boundaries of table.</span>
@@ -873,12 +454,13 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                     <span class="n">client</span><span class="o">.</span><span class="n">draw_cursor_string</span><span class="p">()</span>
                     
                     <span class="c1"># Draw cursors for network clients.</span>
-                    <span class="k">if</span> <span class="p">((</span><span class="n">client_name</span> <span class="o">!=</span> <span class="s1">&#39;local&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">client</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">client</span><span class="o">.</span><span class="n">drone</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">client</span><span class="o">.</span><span class="n">drone</span><span class="p">):</span>
                         <span class="n">client</span><span class="o">.</span><span class="n">draw_fancy_server_cursor</span><span class="p">()</span>
                     
-                <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
                 <span class="n">env</span><span class="o">.</span><span class="n">render_timer_s</span> <span class="o">=</span> <span class="mi">0</span>
             
+            <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">flip</span><span class="p">()</span>
+
             <span class="c1"># Limit the rendering framerate to be below that of the physics calculations.</span>
             <span class="n">env</span><span class="o">.</span><span class="n">render_timer_s</span> <span class="o">+=</span> <span class="n">dt_physics_s</span>
             
@@ -890,7 +472,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="n">air_table</span><span class="o">.</span><span class="n">game_time_s</span> <span class="o">+=</span> <span class="n">dt_physics_s</span>
                 
 <span class="c1">#============================================================</span>
-<span class="c1"># Run the main program.  </span>
+<span class="c1"># Run main().  </span>
 <span class="c1">#============================================================</span>
         
 <span class="n">main</span><span class="p">()</span>
