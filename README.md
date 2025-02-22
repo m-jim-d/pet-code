@@ -1,15 +1,15 @@
-## Python Files for the Physics Engine Tutorial (PET) Walkthrough:
+## Physics Engine Tutorial (PET):
 
 Please refer to the installation instructions provided on the website:
 
 https://m-jim-d.github.io/pet/
-or
+
+    or
+
 https://pet.triquence.org/
 
 
-## Script Organization
-
-The codebase consists of both executable scripts and supporting module files.
+The codebase consists of both executable Python scripts and supporting module files.
 
 This progression, originally a series of assignments, shows how the codebase evolves from simple PyGame demonstrations and 1D physics (air track) to 2D physics (air table) and multiplayer games. The A15 modules form a reusable framework that supports multiple physics implementations, from basic circular collisions to Box2D integration.
 
