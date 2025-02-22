@@ -2,7 +2,6 @@
 
 Please refer to the installation instructions provided on the PET website:
 
-https://m-jim-d.github.io/pet/ 
 https://pet.triquence.org/
 
 The codebase consists of both executable Python scripts and supporting module files.
