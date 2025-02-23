@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Filename: A02.1_string_rendering_v1.py
+# Filename: A02a_string_rendering.py
 
 import time
 

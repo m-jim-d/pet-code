@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Filename: A02.1_string_rendering_v2.py
+# Filename: A02b_string_rendering.py
 
 """
 When running this script, include a demo number as an argument. 
