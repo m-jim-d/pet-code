@@ -11,7 +11,7 @@ This progression, originally a series of assignments, shows how the codebase evo
 ### Basic Framework and Concepts (A01-A07)
 - `A01_game_loop_and_events.py`: Introduces basic PyGame game loop and event handling
 - `A02a_string_rendering.py`: The one-page physics engine.
-- `A02c_string_rendering_long.py`: A longer version of the one-pager.
+- `A02b_string_rendering_long.py`: A longer version of the one-pager.
 - `A02c_air_track_framework.py`: Basic framework for air track (1D) physics simulation
 - `A03_air_track_g_wallCollisions.py`: Adds gravity and wall collision detection
 - `A04_air_track_carCollisions.py`: Implements collision detection between cars/objects
