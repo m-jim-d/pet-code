@@ -7,7 +7,7 @@ When running this script, include a demo number as an argument.
 Optionally include 'd' for data details.
 
 For example:    
-python A02.1_string_rendering_v2.py 2 d
+python A02b_string_rendering_long.py 2 d
 
 This script includes the pygame (keyboard) event handlers and 
 requires a little pygame window be displayed. This window is only 
