@@ -104,15 +104,12 @@ class AirTable:
 
         pos_2d_m = pos_initial_2d_m
 
-        spacing_factor = 1.2 # same as spring length
-
         # Create a grid of pucks. Starting at the initial position, populate a column of pucks, increasing the y position.
         # Then reset the y position and increase the x position, adding additional columns. k ranges over each puck in a column.
         # j ranges over the columns.
 
         for j in range(grid_x_n):
             for k in range(grid_y_n):
-                #print(f"j,k=({j},{k}) pos_2d_m=({pos_2d_m.x:.2f},{pos_2d_m.y:.2f})")
                 # corners
                 if ((j,k)==(0,0) or (j,k)==(grid_x_n-1,0) or (j,k)==(0,grid_y_n-1) or (j,k)==(grid_x_n-1,grid_y_n-1)):
                     color=THECOLORS["red"]
@@ -145,7 +142,6 @@ class AirTable:
         for m in range(grid_x_n):
             for n in range(grid_y_n-1):
                 o_index = n + (m * (grid_y_n))
-                #print(f"m:{m}, n:{n}, o_index:{o_index},{o_index+1}")
                 Spring( self.pucks[o_index], self.pucks[o_index+1], spring_length_m, spring_strength_Npm2, 
                         color=THECOLORS["blue"], c_damp=spring_damping)
         
@@ -155,7 +151,6 @@ class AirTable:
         for m in range(0,grid_x_n-1):
             for n in range(1,grid_y_n):
                 o_index = n + (m * (grid_y_n))
-                #print(f"m:{m}, n:{n}, o_index:{o_index},{o_index+(grid_y_n-1)}")
                 # Connect to a nearby puck: down one, right one.
                 Spring( self.pucks[o_index], self.pucks[o_index+(grid_y_n-1)], spring_length_m, spring_strength_Npm2, 
                         color=THECOLORS["lightblue"], c_damp=spring_damping)
@@ -242,7 +237,6 @@ class AirTable:
                 puck.selected = True
                 return puck
         return None
-
 
     """
     Note that update_PuckSpeedAndPosition has a corresponding update_TotalForceVectorOnPuck method 
@@ -449,12 +443,6 @@ class PerfectKissAirTable(AirTable):
         # Position vector 2-prime of PuckA
         puckA_2p_pos_2d_m = puckA_1_pos_2d_m + puckA_relvel_2d_mps * self.dt_s
         
-        # A check to see if the collision angle is the same in the new frame of reference (as seen from B).
-        #final_collision_angle = (puckA_2p_pos_2d_m - puckB_1_pos_2d_m).get_angle_between(Vec2D(1.0,0.0))
-        #print "collision_angle", initial_collision_angle, final_collision_angle
-        
-        #print "check =", (puckA_2p_pos_2d_m - puckB_1_pos_2d_m).length()/(puckA.radius_m + puckB.radius_m)
-        
         # Prime path vectors
         prime_path_puckA_2d_m = puckA_2p_pos_2d_m - puckA_1_pos_2d_m
         prime_normalized_2d_m = prime_path_puckA_2d_m.normal()
@@ -475,19 +463,15 @@ class PerfectKissAirTable(AirTable):
         
         # Kiss point vector
         puckA_2_kiss_2d_m = puckA_1_pos_2d_m + A1_B1_projection_2d_m - x_2d_m
-        #print "A1_B1_projection_2d_m, x_2d_m =", A1_B1_projection_2d_m, x_2d_m
         
         # Vector between detection and kiss.
         d_2d_m = puckA_2p_pos_2d_m - puckA_2_kiss_2d_m
-        #print "puckA_2p_pos_2d_m, puckA_2_kiss_2d_m =", puckA_2p_pos_2d_m, puckA_2_kiss_2d_m
         
         # Time between detection and kiss. Avoid zero in the denominator.
         if puckA_relvel_2d_mps.x > 0:
             time_between_kiss_and_detection_s = d_2d_m.x / puckA_relvel_2d_mps.x
-            #print "d_2d_m.x, puckA_relvel_2d_mps.x =", d_2d_m.x, puckA_relvel_2d_mps.x
         else:
             time_between_kiss_and_detection_s = d_2d_m.y / puckA_relvel_2d_mps.y
-            #print "d_2d_m.y, puckA_relvel_2d_mps.y =", d_2d_m.y, puckA_relvel_2d_mps.y
             
         return time_between_kiss_and_detection_s
 

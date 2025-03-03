@@ -50,6 +50,7 @@ Puck Popper Features:
 Core Modules:
 - `A15_air_table.py`: Core air table physics implementation with multiple collision engines
 - `A15_air_table_objects.py`: Object definitions (pucks, walls, springs, jets, guns)
+- `A15_game_loop.py`: manage the game loop and updates to the state of the air table
 - `A15_environment.py`: Environment management, coordinate systems, and user interaction
 - `A15_globals.py`: Global variables and shared state management
 
