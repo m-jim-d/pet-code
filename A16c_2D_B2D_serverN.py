@@ -3,46 +3,42 @@
 # Filename: A16c_2D_B2D_serverN.py
 
 import math
-import socket
-import platform, subprocess
 
-import pygame
 from pygame.color import THECOLORS
 
 from A09_vec2d import Vec2D
-from A08_network import GameServer
-from A15_air_table import Box2DAirTable
 from A15_air_table_objects import Wall, Puck, Spring
-from A15_environment import Client, GameWindow, Environment, signInOut_function, custom_update
+from A15_game_loop import GameLoop
 
-import A15_globals as A_g
+import A15_globals as g
 
 #===========================================================
 # Functions
 #===========================================================
         
 def make_some_pucks(demo):
-    game_window.update_caption("PyBox2D Air-Table Server A16c     Demo #" + str(demo))
-    env.timestep_fixed = False
+    g.game_window.update_caption("PyBox2D Air-Table Server A16c     Demo #" + str(demo))
+    g.env.timestep_fixed = False
 
     # This removes all references to pucks and walls and effectively deletes them. 
-    for eachpuck in air_table.pucks[:]:
+    for eachpuck in g.air_table.pucks[:]:
         eachpuck.delete()
-    for eachWall in air_table.walls[:]:
-        if not eachWall.fence:
-            eachWall.delete()
+    if g.air_table.engine == "box2d":
+        for eachWall in g.air_table.walls[:]:
+            if not eachWall.fence:
+                eachWall.delete()
 
     # Most of the demos don't need the tangle checker.
-    air_table.jello_tangle_checking_enabled = False
+    g.air_table.jello_tangle_checking_enabled = False
     
     # Now just black out the screen.
-    game_window.clear()
+    g.game_window.clear()
 
-    env.fr_avg.reset()
-    env.tickCount = 0
+    g.env.fr_avg.reset()
+    g.env.tickCount = 0
 
-    for client_name in env.clients:
-        client = env.clients[client_name]
+    for client_name in g.env.clients:
+        client = g.env.clients[client_name]
         if client.drone:
             client.active = False
             client.drone = False
@@ -78,10 +74,10 @@ def make_some_pucks(demo):
             {"p1": {"rps":  0.0, "color": THECOLORS["tan"]},
              "p2": {"rps":  0.0, "color": THECOLORS["tan"]}}
         ]
-        env.d2_state_cnt = len(initial_states)
+        g.env.d2_state_cnt = len(initial_states)
 
-        state = initial_states[env.demo2_variation_index]
-        print("Variation", env.demo2_variation_index + 1, 
+        state = initial_states[g.env.demo2_variation_index]
+        print("Variation", g.env.demo2_variation_index + 1, 
               "   p1_rps =", state["p1"]["rps"], 
               "   p2_rps =", state["p2"]["rps"])
 
@@ -95,8 +91,8 @@ def make_some_pucks(demo):
         spring_length_m = 1.0
         Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=0.15, c_damp=50.0, color=THECOLORS["yellow"])
     
-        game_window.update_caption( game_window.caption + 
-            f"     Variation {env.demo2_variation_index + 1}" +
+        g.game_window.update_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo2_variation_index + 1}" +
             f"     rps = ({state['p1']['rps']:.1f}, {state['p2']['rps']:.1f})"
         )
 
@@ -122,10 +118,10 @@ def make_some_pucks(demo):
              "p2": {"rps":   4.0, "color": THECOLORS["darkred"]},
              "p3": {"rps":   4.0, "color": THECOLORS["darkred"]}}
         ]
-        env.d3_state_cnt = len(initial_states)
+        g.env.d3_state_cnt = len(initial_states)
 
-        state = initial_states[env.demo3_variation_index]
-        print("Variation", env.demo3_variation_index + 1, 
+        state = initial_states[g.env.demo3_variation_index]
+        print("Variation", g.env.demo3_variation_index + 1, 
               "   p1_rps =", state["p1"]["rps"], 
               "   p2_rps =", state["p2"]["rps"],
               "   p3_rps =", state["p3"]["rps"])
@@ -139,6 +135,7 @@ def make_some_pucks(demo):
         p3.b2d_body.angularVelocity = state["p3"]["rps"]
         p3.b2d_body.fixtures[0].friction = 2.0
 
+        # Some equilateral triangle math:  h = (1/2) * √3 * a
         y_m = p1.pos_2d_m.y + (p3.pos_2d_m.x - p1.pos_2d_m.x) * 3**0.5 / 2.0
         x_m = p1.pos_2d_m.x + (p3.pos_2d_m.x - p1.pos_2d_m.x)/2.0
         p2 = Puck(Vec2D(x_m, y_m), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p2"]["color"])
@@ -152,8 +149,8 @@ def make_some_pucks(demo):
         Spring(p1, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
         Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
 
-        game_window.update_caption( game_window.caption + 
-            f"     Variation {env.demo3_variation_index + 1}" +
+        g.game_window.update_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo3_variation_index + 1}" +
             f"     rps = ({state['p1']['rps']:.1f}, {state['p2']['rps']:.1f}, {state['p3']['rps']:.1f})"
         )
 
@@ -179,50 +176,45 @@ def make_some_pucks(demo):
         Wall(Vec2D(7.0, 2.5), half_width_m=3.0, half_height_m=0.04, angle_radians=+2*(math.pi/180), border_px=0)
     
     elif demo == 5:
-        Puck(Vec2D(2.00, 3.00),  0.4, 0.3)
-        Puck(Vec2D(3.50, 4.50),  0.4, 0.3)
+        p1 = Puck(Vec2D(2.00, 3.00),  0.4, 0.3)
+        p2 = Puck(Vec2D(3.50, 4.50),  0.4, 0.3)
         
         spring_strength_Npm2 = 20.0 #18.0
         spring_length_m = 1.5
-        Spring(air_table.pucks[0], air_table.pucks[1], spring_length_m, spring_strength_Npm2, width_m=0.2)
+        Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=0.2)
     
     elif demo == 6:
         density = 1.5
         radius = 0.7
-        
         coef_rest_puck = 0.3
+
+        p1 = Puck(Vec2D(2.00, 3.00), radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
+        p2 = Puck(Vec2D(3.50, 4.50), radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
+        p3 = Puck(Vec2D(5.00, 3.00), radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
         
+        # No springs on this one.
+        Puck(Vec2D(3.50, 7.00), 0.95, density, coef_rest=coef_rest_puck, CR_fixed=True)
+
         spring_strength_Npm2 = 400.0
         spring_length_m = 2.5
         spring_width_m = 0.07
         spring_drag = 0.0
         spring_damper = 5.0
 
-        Puck(Vec2D(2.00, 3.00),  radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
-        Puck(Vec2D(3.50, 4.50),  radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
-        Puck(Vec2D(5.00, 3.00),  radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
-        
-        # No springs on this one.
-        Puck(Vec2D(3.50, 7.00),  0.95, density, coef_rest=coef_rest_puck, CR_fixed=True)
-        
-        Spring(air_table.pucks[0], air_table.pucks[1],
-               spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_drag=spring_drag)
-        Spring(air_table.pucks[1], air_table.pucks[2],
-               spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_drag=spring_drag)
-        Spring(air_table.pucks[2], air_table.pucks[0],
-               spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_drag=spring_drag)
-        
-        # Increase the shock-absorber strength for each spring.
-        for spring in air_table.springs:                                 
-            spring.damper_Ns2pm2 = spring_damper
-                
+        Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
+            c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["red"])
+        Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
+            c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["tan"])
+        Spring(p3, p1, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
+            c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["gold"])
+
     elif demo == 7:        
         density = 0.8
         #                              , r_m , density
         tempPuck = Puck(Vec2D(4.0, 1.0), 0.55, density, color=THECOLORS["orange"], show_health=True, hit_limit=10)
         Spring(tempPuck, Vec2D(4.0, 1.0), strength_Npm=300.0, width_m=0.02, c_drag = 1.5)
         
-        puck_position = Vec2D(0.0, game_window.UR_2d_m.y) + Vec2D(2.0, -2.0) # starting from upper left
+        puck_position = Vec2D(0.0, g.game_window.UR_2d_m.y) + Vec2D(2.0, -2.0) # starting from upper left
         tempPuck = Puck(puck_position, 1.4, density, rect_fixture=True, aspect_ratio=0.1, show_health=True)
         tempPuck.b2d_body.angularVelocity = 0.5
         Spring(tempPuck, puck_position, strength_Npm=300.0, width_m=0.02, c_drag = 1.5 + 10.0)
@@ -241,43 +233,44 @@ def make_some_pucks(demo):
         # Make user/client controllable pucks
         # for all the clients.
         y_puck_position_m = 1.0
-        for client_name in env.clients:
-            client = env.clients[client_name]
+        for client_name in g.env.clients:
+            client = g.env.clients[client_name]
             if client.active and not client.drone:
-                air_table.buildControlledPuck( x_m=6.4, y_m=y_puck_position_m, r_m=0.45, client_name=client_name, sf_abs=False)
+                # Box2D drag modeling is slightly different than that in the circular engines. So, c_drag set higher than the default value, 0.7.
+                g.air_table.buildControlledPuck( x_m=6.4, y_m=y_puck_position_m, r_m=0.45, client_name=client_name, sf_abs=False, c_drag=1.5)
                 y_puck_position_m += 1.2
                         
         # drone pucks
         client_name = "C5"
-        env.clients[client_name].active = True
-        env.clients[client_name].drone = True
-        air_table.buildControlledPuck( x_m=1.0, y_m=1.0, r_m=0.55, client_name=client_name, sf_abs=False)
+        g.env.clients[client_name].active = True
+        g.env.clients[client_name].drone = True
+        g.air_table.buildControlledPuck( x_m=1.0, y_m=1.0, r_m=0.55, client_name=client_name, sf_abs=False)
         client_name = "C6"
-        env.clients[client_name].active = True
-        env.clients[client_name].drone = True
-        air_table.buildControlledPuck( x_m=8.5, y_m=7.0, r_m=0.55, client_name=client_name, sf_abs=False)
+        g.env.clients[client_name].active = True
+        g.env.clients[client_name].drone = True
+        g.air_table.buildControlledPuck( x_m=8.5, y_m=7.0, r_m=0.55, client_name=client_name, sf_abs=False)
 
-        env.set_gravity("off")
+        g.env.set_gravity("off")
             
     elif demo == 8:
-        air_table.makeJello_variations()
+        g.air_table.makeJello_variations()
 
     elif demo == 9:
-        air_table.buildJelloGrid( angle=45, speed=0, pos_initial_2d_m=Vec2D(4.0, 2.5), puck_drag=1.5, show_health=True, coef_rest=0.85)
+        g.air_table.buildJelloGrid( angle=45, speed=0, pos_initial_2d_m=Vec2D(4.0, 2.5), puck_drag=1.5, show_health=True, coef_rest=0.85)
 
-        env.clients["C5"].active = True
-        env.clients["C5"].drone = True
-        air_table.buildControlledPuck( x_m=2.0, y_m=8.0, r_m=0.45, client_name="C5")
+        g.env.clients["C5"].active = True
+        g.env.clients["C5"].drone = True
+        g.air_table.buildControlledPuck( x_m=2.0, y_m=8.0, r_m=0.45, client_name="C5")
 
-        env.clients["C6"].active = True
-        env.clients["C6"].drone = True
-        air_table.buildControlledPuck( x_m=8.5, y_m=1.5, r_m=0.45, client_name="C6")
+        g.env.clients["C6"].active = True
+        g.env.clients["C6"].drone = True
+        g.air_table.buildControlledPuck( x_m=8.5, y_m=1.5, r_m=0.45, client_name="C6")
 
         # Pin two corners of the jello grid.
-        Spring(air_table.pucks[ 1], Vec2D(0.3, 0.3), length_m=0.0, strength_Npm=800.0, width_m=0.02)
-        Spring(air_table.pucks[10], Vec2D(9.7, 8.4), length_m=0.0, strength_Npm=800.0, width_m=0.02)
+        Spring(g.air_table.pucks[ 1], Vec2D(0.3, 0.3), length_m=0.0, strength_Npm=800.0, width_m=0.02)
+        Spring(g.air_table.pucks[10], Vec2D(9.7, 8.4), length_m=0.0, strength_Npm=800.0, width_m=0.02)
 
-        env.set_gravity("off")
+        g.env.set_gravity("off")
     
     elif demo == 0:
         density = 0.7
@@ -293,7 +286,7 @@ def make_some_pucks(demo):
         # Drop a circular instigator with some spin, to get the chain reaction started.
         Puck(Vec2D(0.1, 0.2), 0.06, density, rect_fixture=False, angularVelocity_rps=-10)
         
-        env.set_gravity("on")
+        g.env.set_gravity("on")
 
     else:
         print("Nothing set up for this key.")
@@ -303,207 +296,13 @@ def make_some_pucks(demo):
 #============================================================
 
 def main():
+    g.make_some_pucks = make_some_pucks
+    game_loop = GameLoop(engine_type="box2d")
+    game_loop.start(demo_index=7)
 
-    # A few globals.
-    global env, game_window, air_table
-    
-    pygame.init()
-
-    myclock = pygame.time.Clock()
-
-    window_dimensions_px = (800, 700)  # window_width_px, window_height_px
-    
-    # Create the first user/client and the methods for moving between the screen and the world.
-    env = Environment(window_dimensions_px, 10.0) # 10m in along the x axis.
-    A_g.env = env
-
-    game_window = GameWindow(window_dimensions_px, 'Air Table Server')
-    A_g.game_window = game_window
-
-    # Define the Left, Right, Bottom, and Top boundaries of the game window.
-    air_table = Box2DAirTable({"L_m":0.0, "R_m":game_window.UR_2d_m.x, "B_m":0.0, "T_m":game_window.UR_2d_m.y})
-    A_g.air_table = air_table
-    A_g.engine_type = "box2d"
-
-    air_table.buildFence() # walls at the window boundaries.
-
-    # Extend the clients dictionary to accommodate up to 10 network clients.
-    for m in range(1,11):
-        c_name = 'C' + str(m)
-        env.clients[ c_name] = Client( env.client_colors[ c_name])
-    
-    # Font object for rendering text onto display surface.
-    fnt_gameTimer = pygame.font.SysFont("Courier", 50)
-
-    # Add some pucks to the table.
-    demo_index = 7
-    make_some_pucks( demo_index)
-
-    # Setup network server.
-    if platform.system() == 'Linux':
-        local_ip = subprocess.check_output(["hostname", "-I"]).decode().strip()
-    else:
-        local_ip = socket.gethostbyname(socket.gethostname())
-    print("Server IP address:", local_ip)
-
-    server = GameServer(host='0.0.0.0', port=8888, 
-                        update_function=custom_update, clientStates=env.clients, 
-                        signInOut_function=signInOut_function)
-
-    while True:
-        # Limit the framerate, but let it float below this limit.
-        if (env.timestep_fixed):
-            gameLoop_FR_limit = int(1.0/env.constant_dt_s)
-        else:
-            gameLoop_FR_limit = 480 # default
-        
-        env.tickCount += 1 # tickCount is reset to zero when demos start in make_some_pucks
-        dt_gameLoop_s = myclock.tick( gameLoop_FR_limit) * 1e-3
-        
-        if (env.timestep_fixed):
-            dt_physics_s = env.constant_dt_s
-        else:
-            dt_physics_s = dt_gameLoop_s
-        
-        # Get input from local user.
-        resetmode = env.get_local_user_input(demo_index)
-        
-        # This check avoids problem when dragging the game window.
-        if ((dt_gameLoop_s < 0.10) and (not air_table.stop_physics)):
-            
-            # Reset the game based on local user control.
-            if resetmode in [0,1,2,3,4,5,6,7,8,9]:
-                demo_index = resetmode
-                print(demo_index)
-                                
-                # Start, or restart a demo.
-                make_some_pucks( demo_index)               
-                        
-            if (env.render_timer_s > env.dt_render_limit_s):
-                # Get input from network clients.
-                if server.running:
-                    server.accept_clients()
-                
-            for client_name in env.clients:
-                # Calculate client related forces.
-                env.clients[client_name].calc_string_forces_on_pucks()
-                
-            if (env.render_timer_s > env.dt_render_limit_s):
-                # Control the zoom
-                env.control_zoom_and_view()
-                
-                for controlled_puck in air_table.controlled_pucks:
-                    # Rotate based on keyboard of the controlling client.
-                    controlled_puck.jet.client_rotation_control()
-                    
-                    if env.clients[ controlled_puck.client_name].drone:
-                        controlled_puck.gun.drone_rotation_control()
-                    else:
-                        controlled_puck.gun.client_rotation_control()
-                    
-                    # Turn gun on/off
-                    controlled_puck.gun.control_firing()
-                    
-                    # Turn shield on/off
-                    controlled_puck.gun.control_shield()
-            
-            # Calculate jet forces on pucks...
-            for controlled_puck in air_table.controlled_pucks:
-                controlled_puck.jet.turn_jet_forces_onoff()
-            
-            # Calculate the forces the springs apply on the pucks...
-            for eachspring in air_table.springs:
-                eachspring.calc_spring_forces_on_pucks()
-                
-            # Apply forces to the pucks and calculate movements.
-            for eachpuck in air_table.pucks:
-                eachpuck.calc_regularDragForce()
-                air_table.update_TotalForceVectorOnPuck( eachpuck, dt_physics_s)
-            
-            # Run Box2d    
-            air_table.b2d_world.Step( dt_physics_s, 10, 10)
-            
-            # Get new positions, translational velocities, and rotational speeds, from box2d
-            for eachpuck in air_table.pucks:
-                eachpuck.get_Box2d_XandV()
-            
-            # Check for puck-puck contact.
-            if air_table.jello_tangle_checking_enabled:
-                air_table.check_for_jello_tangle()
-
-            if air_table.FPS_display and env.tickCount > 10:
-                env.fr_avg.update(1.0/dt_physics_s) # 1.0/dt_physics_s myclock.get_fps()
-            
-            if (env.render_timer_s > env.dt_render_limit_s):
-                
-                # Erase the blackboard.
-                if not env.inhibit_screen_clears:
-                    if not air_table.g_ON:
-                        game_window.surface.fill((0,0,0))  # black
-                    else:
-                        game_window.surface.fill((20,20,70))  # dark blue
-
-                #print(f"{len(air_table.target_pucks)}, {len(air_table.controlled_pucks)}, {len(air_table.pucks)}, s:{len(air_table.springs)}")
-
-                # Display the physics cycle rate.
-                if air_table.FPS_display:
-                    env.fr_avg.draw( game_window.surface, 10, 10, caution=env.timestep_fixed)
-                    
-                if (demo_index == 8):
-                    game_window.display_number(air_table.game_time_s, fnt_gameTimer, mode='gameTimer')
-                
-                # Clean out old bullets.
-                for thisPuck in air_table.pucks[:]:  # [:] indicates a copy 
-                    if (thisPuck.bullet) and ((air_table.time_s - thisPuck.birth_time_s) > thisPuck.age_limit_s):
-                        thisPuck.delete()
-
-                # Draw pucks, springs, mouse tethers, and jets.
-                
-                for eachWall in air_table.walls:
-                    eachWall.draw()
-
-                for eachpuck in air_table.pucks: 
-                    eachpuck.draw()
-                    if (eachpuck.jet != None):
-                        if eachpuck.jet.client.active:
-                            eachpuck.gun.draw_shield()
-                            eachpuck.jet.draw()
-                            eachpuck.gun.draw()
-                            
-                for eachspring in air_table.springs: 
-                    eachspring.draw()
-                
-                env.remove_healthless_pucks()
-                
-                for client_name in env.clients:
-                    client = env.clients[client_name]
-                    client.draw_cursor_string()
-                    
-                    # Draw cursors for network clients.
-                    if (client.active and not client.drone):
-                        client.draw_fancy_server_cursor()
-                    
-                env.render_timer_s = 0
-            
-            # Renders noticeably smoother (on my Windows computer) if flip is called at the 
-            # rate of the main loop (more frequently than the render_timer block above).
-            pygame.display.flip()
-
-            # Limit the rendering framerate to be below that of the physics calculations.
-            env.render_timer_s += dt_gameLoop_s
-            
-            # Keep track of time for use in timestamping operations
-            # (determine the age of old bullets to be deleted)
-            air_table.time_s += dt_gameLoop_s
-            
-            # Jello madness game timer
-            if air_table.jello_tangle_checking_enabled:
-                air_table.tangle_checker_time_s += dt_gameLoop_s
-                if air_table.tangled:
-                    air_table.game_time_s += dt_gameLoop_s
-                
 #============================================================
-# Run main().  
+# start everything...
 #============================================================
 
-main()
+if __name__ == '__main__':
+    main()

@@ -30,7 +30,7 @@ from pygame.color import THECOLORS
 from A09_vec2d import Vec2D
 
 # Global variables shared across scripts
-import A15_globals as A_g
+import A15_globals as g
 from A15_air_table_objects import Wall, Puck, Spring, Gun, Jet
 
 from Box2D import (b2World, b2Vec2, b2_dynamicBody, b2AABB, b2QueryCallback, b2ContactListener)
@@ -49,7 +49,7 @@ class AirTable:
         
         self.springs = []
         
-        self.walls = walls_dic
+        self.walls_dic = walls_dic
         self.collision_count = 0
         self.coef_rest = 1.0
 
@@ -60,12 +60,15 @@ class AirTable:
         self.correct_for_wall_penetration = True
         self.correct_for_puck_penetration = True
         
+        # Time step (established in game loop)
+        self.dt_s = None
         # General clock time for determining bullet age.
         self.time_s = 0.0
         # Timer for the Jello Madness game.
         self.game_time_s = 0.0
 
         self.FPS_display = True
+        self.engine = "not yet established"
 
     def buildControlledPuck(self, x_m=1.0, y_m=1.0, r_m=0.45, density=0.7, c_drag=0.7, client_name=None, sf_abs=True):
         tempPuck = Puck( Vec2D( x_m, y_m), r_m, density, c_drag=c_drag, c_angularDrag=0.5,
@@ -173,7 +176,7 @@ class AirTable:
 
         for puck in self.pucks:
             puck.vel_2d_mps = velocity_2d_mps
-            if (A_g.engine_type == 'box2d'): puck.b2d_body.linearVelocity = velocity_2d_mps.tuple()
+            if (self.engine == 'box2d'): puck.b2d_body.linearVelocity = velocity_2d_mps.tuple()
 
         return {'angle':angleOfGrid, 'speed_mps':speed_mps}
 
@@ -189,8 +192,8 @@ class AirTable:
             {'x_n':3, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
             {'x_n':2, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min': 0,'spd_max':200}
         ]
-        A_g.env.d8_state_cnt = len(initial_states)
-        state = initial_states[A_g.env.demo8_variation_index]
+        g.env.d8_state_cnt = len(initial_states)
+        state = initial_states[g.env.demo8_variation_index]
 
         self.game_time_s = 0
         self.jello_tangle_checking_enabled = True
@@ -201,26 +204,26 @@ class AirTable:
             grid_x_n=state['x_n'], grid_y_n=state['y_n']
         )
 
-        A_g.game_window.update_caption( A_g.game_window.caption + 
-            f"     Variation {A_g.env.demo8_variation_index + 1}" +
+        g.game_window.update_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo8_variation_index + 1}" +
             f"     grid = ({state['x_n']}, {state['y_n']})" +
             f"  angle = {throw['angle']:.1f}  speed = {throw['speed_mps']:.1f}"
         )
 
     """
-    The following methods are used (only) by the circular versions of the air table (Simple and PerfectKiss).
+    The following methods are used (only) by the circular versions of the air table (Circular and PerfectKiss).
     """
     def draw(self):
         #{"L_m":0.0, "R_m":10.0, "B_m":0.0, "T_m":10.0}
-        topLeft_2d_px =   A_g.env.ConvertWorldToScreen( Vec2D( self.walls['L_m'],        self.walls['T_m']))
-        topRight_2d_px =  A_g.env.ConvertWorldToScreen( Vec2D( self.walls['R_m']-0.01,   self.walls['T_m']))
-        botLeft_2d_px =   A_g.env.ConvertWorldToScreen( Vec2D( self.walls['L_m'],        self.walls['B_m']+0.01))
-        botRight_2d_px =  A_g.env.ConvertWorldToScreen( Vec2D( self.walls['R_m']-0.01,   self.walls['B_m']+0.01))
+        topLeft_2d_px =   g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['L_m'],        self.walls_dic['T_m']))
+        topRight_2d_px =  g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['R_m']-0.01,   self.walls_dic['T_m']))
+        botLeft_2d_px =   g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['L_m'],        self.walls_dic['B_m']+0.01))
+        botRight_2d_px =  g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['R_m']-0.01,   self.walls_dic['B_m']+0.01))
         
-        pygame.draw.line(A_g.game_window.surface, THECOLORS["orangered1"], topLeft_2d_px,  topRight_2d_px, 1)
-        pygame.draw.line(A_g.game_window.surface, THECOLORS["orangered1"], topRight_2d_px, botRight_2d_px, 1)
-        pygame.draw.line(A_g.game_window.surface, THECOLORS["orangered1"], botRight_2d_px, botLeft_2d_px,  1)
-        pygame.draw.line(A_g.game_window.surface, THECOLORS["orangered1"], botLeft_2d_px,  topLeft_2d_px,  1)
+        pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], topLeft_2d_px,  topRight_2d_px, 1)
+        pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], topRight_2d_px, botRight_2d_px, 1)
+        pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], botRight_2d_px, botLeft_2d_px,  1)
+        pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], botLeft_2d_px,  topLeft_2d_px,  1)
     
     def checkForPuckAtThisPosition(self, x_px_or_tuple, y_px = None):
         if y_px == None:
@@ -230,7 +233,7 @@ class AirTable:
             self.x_px = x_px_or_tuple
             self.y_px = y_px
         
-        test_position_m = A_g.env.ConvertScreenToWorld(Vec2D(self.x_px, self.y_px))
+        test_position_m = g.env.ConvertScreenToWorld(Vec2D(self.x_px, self.y_px))
         for puck in self.pucks:
             vector_difference_m = test_position_m - puck.pos_2d_m
             # Use squared lengths for speed (avoid square root)
@@ -245,14 +248,14 @@ class AirTable:
     Note that update_PuckSpeedAndPosition has a corresponding update_TotalForceVectorOnPuck method 
     in the Box2DAirTable class (speed and position calculated by Box2D). 
     """
-    def update_PuckSpeedAndPosition(self, puck, dt_s):
+    def update_PuckSpeedAndPosition(self, puck):
         # Net resulting force on the puck.
         puck_forces_2d_N = (self.g_2d_mps2 * puck.mass_kg) + (puck.SprDamp_force_2d_N + 
                                                               puck.jet_force_2d_N +
                                                               puck.cursorString_spring_force_2d_N +
                                                               puck.cursorString_puckDrag_force_2d_N +
                                                               puck.puckDrag_force_2d_N +
-                                                              puck.impulse_2d_Ns/dt_s)
+                                                              puck.impulse_2d_Ns/self.dt_s)
         
         # Acceleration from Newton's law.
         acc_2d_mps2 = puck_forces_2d_N / puck.mass_kg
@@ -264,11 +267,11 @@ class AirTable:
         
         # Acceleration changes the velocity:  dv = a * dt
         # Velocity at the end of the timestep.
-        puck.vel_2d_mps = puck.vel_2d_mps + (acc_2d_mps2 * dt_s)
+        puck.vel_2d_mps = puck.vel_2d_mps + (acc_2d_mps2 * self.dt_s)
         
         # Calculate the new physical puck position using the average velocity.
         # Velocity changes the position:  dx = v * dt
-        puck.pos_2d_m = puck.pos_2d_m + (puck.vel_2d_mps * dt_s)
+        puck.pos_2d_m = puck.pos_2d_m + (puck.vel_2d_mps * self.dt_s)
         
         # Now reset the aggregate forces.
         puck.SprDamp_force_2d_N = Vec2D(0.0,0.0)
@@ -290,44 +293,51 @@ class AirTable:
         B = self.normal_AFTER_2d_mps(B_normal_BEFORE_2d_mps, B_mass_kg, A_normal_BEFORE_2d_mps, A_mass_kg, CR_puck)
         return A, B
 
+    def checkForFenceCollisions(self, puck):
+        if not self.inhibit_wall_collisions:
+            if (((puck.pos_2d_m.y - puck.radius_m) < self.walls_dic["B_m"]) or ((puck.pos_2d_m.y + puck.radius_m) > self.walls_dic["T_m"])):
+                
+                if self.correct_for_wall_penetration:
+                    if (puck.pos_2d_m.y - puck.radius_m) < self.walls_dic["B_m"]:
+                        penetration_y_m = self.walls_dic["B_m"] - (puck.pos_2d_m.y - puck.radius_m)
+                        puck.pos_2d_m.y += 2 * penetration_y_m
+                
+                    if (puck.pos_2d_m.y + puck.radius_m) > self.walls_dic["T_m"]:
+                        penetration_y_m = (puck.pos_2d_m.y + puck.radius_m) - self.walls_dic["T_m"]
+                        puck.pos_2d_m.y -= 2 * penetration_y_m
+                
+                puck.vel_2d_mps.y *= -1 * min(self.coef_rest, puck.coef_rest)
+                if (self.engine == "circular-perfectKiss") and self.perfect_kiss: self.collision_count += 1 * self.count_direction
+            
+            if (((puck.pos_2d_m.x - puck.radius_m) < self.walls_dic["L_m"]) or ((puck.pos_2d_m.x + puck.radius_m) > self.walls_dic["R_m"])):
+                
+                if self.correct_for_wall_penetration:
+                    if (puck.pos_2d_m.x - puck.radius_m) < self.walls_dic["L_m"]:
+                        penetration_x_m = self.walls_dic["L_m"] - (puck.pos_2d_m.x - puck.radius_m)
+                        puck.pos_2d_m.x += 2 * penetration_x_m
+                
+                    if (puck.pos_2d_m.x + puck.radius_m) > self.walls_dic["R_m"]:
+                        penetration_x_m = (puck.pos_2d_m.x + puck.radius_m) - self.walls_dic["R_m"]
+                        puck.pos_2d_m.x -= 2 * penetration_x_m
+                        
+                #print("CR x wall, puck:", self.coef_rest, puck.coef_rest)                    
+                puck.vel_2d_mps.x *= -1 * min(self.coef_rest, puck.coef_rest)
+                if (self.engine == "circular-perfectKiss") and self.perfect_kiss: self.collision_count += 1 * self.count_direction
+
 
 class CircularAirTable(AirTable):
     def __init__(self, walls_dic):
         super().__init__(walls_dic)
 
+        self.engine = "circular"
+
     def check_for_collisions(self):
         self.tangled = False
 
         for i, puck in enumerate(self.pucks):
-            # Wall collisions
-            if not self.inhibit_wall_collisions:
-                if (((puck.pos_2d_m.y - puck.radius_m) < self.walls["B_m"]) or ((puck.pos_2d_m.y + puck.radius_m) > self.walls["T_m"])):
-                    
-                    if self.correct_for_wall_penetration:
-                        if (puck.pos_2d_m.y - puck.radius_m) < self.walls["B_m"]:
-                            penetration_y_m = self.walls["B_m"] - (puck.pos_2d_m.y - puck.radius_m)
-                            puck.pos_2d_m.y += 2 * penetration_y_m
-                    
-                        if (puck.pos_2d_m.y + puck.radius_m) > self.walls["T_m"]:
-                            penetration_y_m = (puck.pos_2d_m.y + puck.radius_m) - self.walls["T_m"]
-                            puck.pos_2d_m.y -= 2 * penetration_y_m
-                    
-                    puck.vel_2d_mps.y *= -1 * min(self.coef_rest, puck.coef_rest)
-                
-                if (((puck.pos_2d_m.x - puck.radius_m) < self.walls["L_m"]) or ((puck.pos_2d_m.x + puck.radius_m) > self.walls["R_m"])):
-                    
-                    if self.correct_for_wall_penetration:
-                        if (puck.pos_2d_m.x - puck.radius_m) < self.walls["L_m"]:
-                            penetration_x_m = self.walls["L_m"] - (puck.pos_2d_m.x - puck.radius_m)
-                            puck.pos_2d_m.x += 2 * penetration_x_m
-                    
-                        if (puck.pos_2d_m.x + puck.radius_m) > self.walls["R_m"]:
-                            penetration_x_m = (puck.pos_2d_m.x + puck.radius_m) - self.walls["R_m"]
-                            puck.pos_2d_m.x -= 2 * penetration_x_m
-                            
-                    #print("CR x wall, puck:", self.coef_rest, puck.coef_rest)                    
-                    puck.vel_2d_mps.x *= -1 * min(self.coef_rest, puck.coef_rest)
-                
+            # Check for collisions in the perimeter fence (walls)
+            self.checkForFenceCollisions(puck)
+
             # Collisions with other pucks. 
             for otherpuck in self.pucks[i+1:]:
                 # Check if the two puck circles are overlapping.
@@ -417,12 +427,14 @@ class PerfectKissAirTable(AirTable):
     def __init__(self, walls_dic):
         super().__init__(walls_dic)
 
+        self.engine = "circular-perfectKiss"
+
         # For perfect kiss
         self.perfect_kiss = False
         self.count_direction = 1
         self.timeDirection = 1
 
-    def time_past_kiss(self, dt_s, puckA, puckB):
+    def time_past_kiss(self, puckA, puckB):
         # Determine the time between the kiss point and collision detection event (penetration time).
         
         initial_collision_angle = (puckA.pos_2d_m - puckB.pos_2d_m).get_angle_between(Vec2D(1.0,0.0))
@@ -431,11 +443,11 @@ class PerfectKissAirTable(AirTable):
         puckA_relvel_2d_mps = puckA.vel_2d_mps - puckB.vel_2d_mps
         
         # Previous position vectors (position 1) of the two pucks
-        puckA_1_pos_2d_m = puckA.pos_2d_m - puckA.vel_2d_mps * dt_s
-        puckB_1_pos_2d_m = puckB.pos_2d_m - puckB.vel_2d_mps * dt_s
+        puckA_1_pos_2d_m = puckA.pos_2d_m - puckA.vel_2d_mps * self.dt_s
+        puckB_1_pos_2d_m = puckB.pos_2d_m - puckB.vel_2d_mps * self.dt_s
         
         # Position vector 2-prime of PuckA
-        puckA_2p_pos_2d_m = puckA_1_pos_2d_m + puckA_relvel_2d_mps * dt_s
+        puckA_2p_pos_2d_m = puckA_1_pos_2d_m + puckA_relvel_2d_mps * self.dt_s
         
         # A check to see if the collision angle is the same in the new frame of reference (as seen from B).
         #final_collision_angle = (puckA_2p_pos_2d_m - puckB_1_pos_2d_m).get_angle_between(Vec2D(1.0,0.0))
@@ -479,41 +491,13 @@ class PerfectKissAirTable(AirTable):
             
         return time_between_kiss_and_detection_s
 
-    def check_for_collisions(self, dt_s):
+    def check_for_collisions(self):
         self.tangled = False
 
         for i, puck in enumerate(self.pucks):
-            # Wall collisions
-            if not self.inhibit_wall_collisions:
-                if (((puck.pos_2d_m.y - puck.radius_m) < self.walls["B_m"]) or ((puck.pos_2d_m.y + puck.radius_m) > self.walls["T_m"])):
-                    
-                    if self.correct_for_wall_penetration:
-                        if (puck.pos_2d_m.y - puck.radius_m) < self.walls["B_m"]:
-                            penetration_y_m = self.walls["B_m"] - (puck.pos_2d_m.y - puck.radius_m)
-                            puck.pos_2d_m.y += 2 * penetration_y_m
-                    
-                        if (puck.pos_2d_m.y + puck.radius_m) > self.walls["T_m"]:
-                            penetration_y_m = (puck.pos_2d_m.y + puck.radius_m) - self.walls["T_m"]
-                            puck.pos_2d_m.y -= 2 * penetration_y_m
-                    
-                    puck.vel_2d_mps.y *= -1 * min(self.coef_rest, puck.coef_rest)
-                    if self.perfect_kiss: self.collision_count += 1 * self.count_direction
-                
-                if (((puck.pos_2d_m.x - puck.radius_m) < self.walls["L_m"]) or ((puck.pos_2d_m.x + puck.radius_m) > self.walls["R_m"])):
-                    
-                    if self.correct_for_wall_penetration:
-                        if (puck.pos_2d_m.x - puck.radius_m) < self.walls["L_m"]:
-                            penetration_x_m = self.walls["L_m"] - (puck.pos_2d_m.x - puck.radius_m)
-                            puck.pos_2d_m.x += 2 * penetration_x_m
-                    
-                        if (puck.pos_2d_m.x + puck.radius_m) > self.walls["R_m"]:
-                            penetration_x_m = (puck.pos_2d_m.x + puck.radius_m) - self.walls["R_m"]
-                            puck.pos_2d_m.x -= 2 * penetration_x_m
-                            
-                    #print("CR x wall, puck:", self.coef_rest, puck.coef_rest)                    
-                    puck.vel_2d_mps.x *= -1 * min(self.coef_rest, puck.coef_rest)
-                    if self.perfect_kiss: self.collision_count += 1 * self.count_direction
-                
+            # Check for collisions in the perimeter fence (walls)
+            self.checkForFenceCollisions(puck)
+
             # Collisions with other pucks. 
             for otherpuck in self.pucks[i+1:]:
                 # Check if the two puck circles are overlapping.
@@ -574,7 +558,7 @@ class PerfectKissAirTable(AirTable):
                         penetration_m = (puck.radius_m + otherpuck.radius_m) - p_to_p_m2**0.5
                         if self.perfect_kiss:
                             # Use a special perfect-kiss method to determine the time.
-                            penetration_time_s = self.time_past_kiss( dt_s, puck, otherpuck)
+                            penetration_time_s = self.time_past_kiss(puck, otherpuck)
                         else:    
                             penetration_time_s = penetration_m / relative_normal_spd_mps
                                                     
@@ -586,7 +570,7 @@ class PerfectKissAirTable(AirTable):
                             otherpuck.pos_2d_m = otherpuck.pos_2d_m - (otherpuck.vel_2d_mps * (penetration_time_scaler * penetration_time_s))
                             
                             # Draw the perfect-kissing pucks (you'll only be able to see this in the example run that is started by pressing
-                            # the 3 key on the number pad. This is one of the pool-shot examples that inhibits screen clears.
+                            # the 3 key on the number pad (or shift-3). This is one of the pool-shot examples that inhibits screen clears.
                             puck.draw(tempColor=THECOLORS["cyan"])
                             otherpuck.draw(tempColor=THECOLORS["cyan"])
                         
@@ -698,8 +682,9 @@ class Box2DAirTable(AirTable):
     def __init__(self, walls_dic):
         super().__init__(walls_dic)
 
+        self.engine = "box2d"
+
         self.puck_dictionary = {}
-        self.walls_dic = walls_dic
         self.walls = []
 
         self.jello_tangle_checking_enabled = False
@@ -712,7 +697,7 @@ class Box2DAirTable(AirTable):
         width_m = 0.05 # 0.05
         fenceColor = THECOLORS['orangered1']
         border_px = 2
-        nudge_m = A_g.env.px_to_m * 1 # nudge of 1 pixel
+        nudge_m = g.env.px_to_m * 1 # nudge of 1 pixel
         # Left and right walls
         Wall( Vec2D( self.walls_dic["L_m"] - (width_m + nudge_m), self.walls_dic["T_m"]/2.0), width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
         Wall( Vec2D( self.walls_dic["R_m"] + width_m, self.walls_dic["T_m"]/2.0), width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
@@ -734,7 +719,7 @@ class Box2DAirTable(AirTable):
             self.y_px = y_px
         
         # Convert to a world point.
-        test_position_2d_m = A_g.env.ConvertScreenToWorld(Vec2D(self.x_px, self.y_px))
+        test_position_2d_m = g.env.ConvertScreenToWorld(Vec2D(self.x_px, self.y_px))
         
         # Convert this to a box2d vector.
         p = b2Vec2( test_position_2d_m.tuple())
@@ -766,14 +751,14 @@ class Box2DAirTable(AirTable):
         else:
             return {'puck': None, 'b2d_xy_m': b2Vec2(0,0)}
     
-    def update_TotalForceVectorOnPuck(self, puck, dt_s):
+    def update_TotalForceVectorOnPuck(self, puck):
         # Net resulting force on the puck.
         puck_forces_2d_N = (self.g_2d_mps2 * puck.mass_kg) + (puck.SprDamp_force_2d_N + 
                                                               puck.jet_force_2d_N +
                                                               puck.puckDrag_force_2d_N +
                                                               puck.cursorString_spring_force_2d_N +
                                                               puck.cursorString_puckDrag_force_2d_N +
-                                                              puck.impulse_2d_Ns/dt_s)
+                                                              puck.impulse_2d_Ns/self.dt_s)
         
         # Apply this force to the puck's center of mass (COM) in the Box2d world.
         force_point_b2d_m = puck.b2d_body.GetWorldPoint( b2Vec2(0,0))

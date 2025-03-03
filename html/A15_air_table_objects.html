@@ -260,7 +260,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
         <span class="c1"># Add puck to the lists of pucks, controlled pucks, and target pucks.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">pin</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">A_g</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">==</span> <span class="s1">&#39;box2d&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">A_g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;box2d&#39;</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_Box2d_Puck</span><span class="p">()</span>
                 <span class="n">A_g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">puck_dictionary</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
 
@@ -303,8 +303,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">mass_kg</span> <span class="o">=</span> <span class="n">dynamic_body</span><span class="o">.</span><span class="n">mass</span>
         
         <span class="c1"># fluid drag inside Box2D</span>
-        <span class="c1"># Note that linear damping is accounted for external to box2d using the c_drag attribute.</span>
-        <span class="n">dynamic_body</span><span class="o">.</span><span class="n">linearDamping</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="c1"># This must stay 0.0 to avoid double-counting the damping.</span>
+        <span class="n">dynamic_body</span><span class="o">.</span><span class="n">linearDamping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_drag</span>
         <span class="n">dynamic_body</span><span class="o">.</span><span class="n">angularDamping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c_angularDrag</span>
         <span class="n">dynamic_body</span><span class="o">.</span><span class="n">bullet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bullet</span>
 
@@ -324,7 +323,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">rotation_speed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">angularVelocity</span>
     
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">A_g</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">==</span> <span class="s1">&#39;box2d&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">A_g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;box2d&#39;</span><span class="p">):</span>
             <span class="c1"># Remove the puck from the dictionary.</span>
             <span class="k">del</span> <span class="n">A_g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">puck_dictionary</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span><span class="p">]</span>
             <span class="c1"># Remove the puck from the world in box2d.</span>
@@ -391,7 +390,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="c1"># Draw main puck body.</span>
             <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span> <span class="n">A_g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">puck_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_2d_px</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span><span class="p">,</span> <span class="n">A_g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">zoomLineThickness</span><span class="p">(</span><span class="n">puck_border_thickness</span><span class="p">))</span>
             
-            <span class="k">if</span> <span class="p">(</span><span class="n">A_g</span><span class="o">.</span><span class="n">engine_type</span> <span class="o">==</span> <span class="s1">&#39;box2d&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">A_g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;box2d&#39;</span><span class="p">):</span>
                 <span class="c1"># If it&#39;s not a bullet and not a rectangle, draw a spoke to indicate rotational orientation.</span>
                 <span class="k">if</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">bullet</span> <span class="o">==</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rect_fixture</span><span class="o">==</span><span class="kc">False</span><span class="p">)):</span>
                     <span class="c1"># Shorten the spoke by a fraction of the thickness so that its end (and the blocky rendering) is hidden in the border.</span>
@@ -752,7 +751,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         
         <span class="bp">self</span><span class="o">.</span><span class="n">length_m</span> <span class="o">=</span> <span class="n">length_m</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strength_Npm</span> <span class="o">=</span> <span class="n">strength_Npm</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">damper_Ns2pm2</span> <span class="o">=</span> <span class="n">c_damp</span> <span class="c1"># 5.0 0.05 0.15</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">damper_Ns2pm2</span> <span class="o">=</span> <span class="n">c_damp</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unstretched_width_m</span> <span class="o">=</span> <span class="n">width_m</span> <span class="c1"># 0.05</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">c_drag</span> <span class="o">=</span> <span class="n">c_drag</span>

@@ -45,7 +45,7 @@ from pygame.color import THECOLORS
 
 from A08_network import RunningAvg, setClientColors
 from A09_vec2d import Vec2D
-import A15_globals as A_g
+import A15_globals as g
 
 from Box2D import b2Vec2
 
@@ -154,7 +154,7 @@ class Client:
         # the puck from unselecting if cursor is dragged off the puck!
         if (self.selected_puck == None):
             if self.buttonIsStillDown:
-                self.selected_puck = A_g.air_table.checkForPuckAtThisPosition(self.cursor_location_px)        
+                self.selected_puck = g.air_table.checkForPuckAtThisPosition(self.cursor_location_px)        
         
         else:
             if not self.buttonIsStillDown:
@@ -166,12 +166,18 @@ class Client:
             # Use dx difference to calculate the hooks law force being applied by the tether line. 
             # If you release the mouse button after a drag it will fling the puck.
             # This tether force will diminish as the puck gets closer to the mouse point.
-            dx_2d_m = A_g.env.ConvertScreenToWorld(Vec2D(self.cursor_location_px)) - self.selected_puck.pos_2d_m
+            dx_2d_m = g.env.ConvertScreenToWorld(Vec2D(self.cursor_location_px)) - self.selected_puck.pos_2d_m
             
             stringName = "string" + str(self.mouse_button)
             self.selected_puck.cursorString_spring_force_2d_N   += dx_2d_m * self.mouse_strings[stringName]['k_Npm']
-            self.selected_puck.cursorString_puckDrag_force_2d_N += (self.selected_puck.vel_2d_mps * 
-                                                                    -1 * self.mouse_strings[stringName]['c_drag'])
+            
+            # The drag force is generally in the opposite direction from the puck velocity. So the sign term is -1
+            # unless the timeDirection has been reversed in testing the reversibility of perfect-kiss collisions. 
+            if (g.air_table.engine == 'circular-perfectKiss'):
+                sign = -1 * g.air_table.timeDirection 
+            else:
+                sign = -1
+            self.selected_puck.cursorString_puckDrag_force_2d_N += self.selected_puck.vel_2d_mps * sign * self.mouse_strings[stringName]['c_drag']
     
     def calc_string_forces_on_pucks_b2d(self):
         # Calculated the string forces on the selected puck and add to the aggregate
@@ -184,7 +190,7 @@ class Client:
             if self.buttonIsStillDown:
                 # Depending on whether the shift key is down or not, do a COM based selection.
                 # Use box2d to look for pucks at the cursor location.
-                result = A_g.air_table.checkForPuckAtThisPosition_b2d(self.cursor_location_px)
+                result = g.air_table.checkForPuckAtThisPosition_b2d(self.cursor_location_px)
                 self.selected_puck = result['puck']
                 if (self.key_shift == 'D'):
                     # non-COM selection, specific local point on object.
@@ -234,7 +240,7 @@ class Client:
             # Calculation and aggregation of the cursor forces.
             if self.COM_selection:
                 # Spring force
-                dx_2d_m = A_g.env.ConvertScreenToWorld(Vec2D(self.cursor_location_px)) - self.selected_puck.pos_2d_m
+                dx_2d_m = g.env.ConvertScreenToWorld(Vec2D(self.cursor_location_px)) - self.selected_puck.pos_2d_m
                 spring_force_2d_N = dx_2d_m * self.mouse_strings[stringName]['k_Npm'] * force_choke
                 self.selected_puck.cursorString_spring_force_2d_N += spring_force_2d_N
                 
@@ -245,7 +251,7 @@ class Client:
             else:
                 # NonCOM selection:
                 # Spring
-                dx_2d_m = A_g.env.ConvertScreenToWorld(Vec2D(self.cursor_location_px)) - self.selection_2d_m
+                dx_2d_m = g.env.ConvertScreenToWorld(Vec2D(self.cursor_location_px)) - self.selection_2d_m
                 
                 # Spring force
                 spring_force_2d_N = dx_2d_m * self.mouse_strings_nonCOM[stringName]['k_Npm'] * force_choke
@@ -276,7 +282,7 @@ class Client:
                     self.selected_puck.cursorString_torque_force_Nm = 10.0 * self.selected_puck.mass_kg * spin_direction
 
     def calc_string_forces_on_pucks(self):
-        if (A_g.engine_type == "box2d"):
+        if (g.air_table.engine == "box2d"):
             self.calc_string_forces_on_pucks_b2d()
         else:
             self.calc_string_forces_on_pucks_circular()
@@ -288,13 +294,13 @@ class Client:
             else:
                 selection_location_2d_m = self.selection_2d_m
 
-            line_points = [A_g.env.ConvertWorldToScreen(selection_location_2d_m), self.cursor_location_px]
+            line_points = [g.env.ConvertWorldToScreen(selection_location_2d_m), self.cursor_location_px]
 
             # small circle at selection point.
-            radius_px = 4  # * A_g.env.viewZoom
-            pygame.draw.circle(A_g.game_window.surface, THECOLORS['red'], line_points[0], radius_px, 2)
+            radius_px = 4  # * g.env.viewZoom
+            pygame.draw.circle(g.game_window.surface, THECOLORS['red'], line_points[0], radius_px, 2)
 
-            pygame.draw.line(A_g.game_window.surface, self.cursor_color, line_points[0], line_points[1], 1)  # A_g.env.zoomLineThickness(1)
+            pygame.draw.line(g.game_window.surface, self.cursor_color, line_points[0], line_points[1], 1)  # g.env.zoomLineThickness(1)
                     
     def draw_fancy_server_cursor(self):
         self.draw_server_cursor( self.cursor_color, 0)
@@ -306,10 +312,10 @@ class Client:
         cursor_outline_vertices.append( (self.cursor_location_px[0] + 12,  self.cursor_location_px[1] + 12) )
         cursor_outline_vertices.append( (self.cursor_location_px[0] +  0,  self.cursor_location_px[1] + 17) )
         
-        pygame.draw.polygon(A_g.game_window.surface, color, cursor_outline_vertices, edge_px)
+        pygame.draw.polygon(g.game_window.surface, color, cursor_outline_vertices, edge_px)
 
         if self.buttonIsStillDown:
-            pygame.draw.circle(A_g.game_window.surface, THECOLORS['red'], self.cursor_location_px, 4, 2)
+            pygame.draw.circle(g.game_window.surface, THECOLORS['red'], self.cursor_location_px, 4, 2)
 
 
 class GameWindow:
@@ -319,10 +325,10 @@ class GameWindow:
         
         # The initial World position vector of the Upper Right corner of the screen.
         # Yes, that's right, y_px = 0 for UR.
-        self.UR_2d_m = A_g.env.ConvertScreenToWorld(Vec2D(self.width_px, 0))
+        self.UR_2d_m = g.env.ConvertScreenToWorld(Vec2D(self.width_px, 0))
         
         print(f"Screen dimensions in meters: {self.UR_2d_m.x}, {self.UR_2d_m.y}")
-        print(f"One pixel = {A_g.env.px_to_m * 1} meters")
+        print(f"One pixel = {g.env.px_to_m * 1} meters")
         
         # Create a reference to the display surface object. This is a pygame "surface".
         # Screen dimensions in pixels (tuple)
@@ -400,7 +406,7 @@ class Environment:
         self.demo8_variation_index = 0
                         
     def remove_healthless_pucks(self):
-        for puck in A_g.air_table.pucks[:]:  # [:] indicates a copy 
+        for puck in g.air_table.pucks[:]:  # [:] indicates a copy 
             if (puck.bullet_hit_count > puck.bullet_hit_limit):
                 puck.delete()
 
@@ -458,20 +464,20 @@ class Environment:
 
     def set_allPucks_elastic(self):
         print("CRs for all pucks have been set for elastic collisions (CR=1)")
-        for eachpuck in A_g.air_table.pucks:
+        for eachpuck in g.air_table.pucks:
             eachpuck.coef_rest = 1.0
     
     def set_gravity(self, onOff):
         if (onOff == "on"):
-            A_g.air_table.g_ON = True
+            g.air_table.g_ON = True
         else:
-            A_g.air_table.g_ON = False
+            g.air_table.g_ON = False
         self.adjust_restitution_for_gravity()
 
     def adjust_restitution_for_gravity(self):
-        if A_g.air_table.g_ON:
-            A_g.air_table.g_2d_mps2 = A_g.air_table.gON_2d_mps2
-            for each_puck in A_g.air_table.pucks:
+        if g.air_table.g_ON:
+            g.air_table.g_2d_mps2 = g.air_table.gON_2d_mps2
+            for each_puck in g.air_table.pucks:
                 if not each_puck.CR_fixed:
                     each_puck.coef_rest = each_puck.coef_rest_atBirth
                     if each_puck.b2d_body:
@@ -483,8 +489,8 @@ class Environment:
                     if each_puck.b2d_body:
                         each_puck.b2d_body.fixtures[0].friction = each_puck.friction_atBirth
         else:
-            A_g.air_table.g_2d_mps2 = A_g.air_table.gOFF_2d_mps2
-            for each_puck in A_g.air_table.pucks:
+            g.air_table.g_2d_mps2 = g.air_table.gOFF_2d_mps2
+            for each_puck in g.air_table.pucks:
                 if not each_puck.CR_fixed:
                     each_puck.coef_rest = 1.0
                     if each_puck.b2d_body:
@@ -546,67 +552,71 @@ class Environment:
                 elif (event.key==K_f):
                     if local_user.key_shift == 'D':
                         # Stop rotational movement.
-                        for puck in A_g.air_table.pucks:
+                        for puck in g.air_table.pucks:
                             puck.angularVelocity_rps = 0
                             if puck.b2d_body:
                                 puck.b2d_body.angularVelocity = 0.0
                         print("all rotational speeds set to zero")
                     else:
                         # Stop translational movement.
-                        for puck in A_g.air_table.pucks:
+                        for puck in g.air_table.pucks:
                             puck.vel_2d_mps = Vec2D(0,0)
                             if puck.b2d_body:
                                 puck.b2d_body.linearVelocity = b2Vec2(0,0)
                         print("all translational speeds set to zero")
                 
                 elif (event.key==K_r):
-                    if A_g.engine_type == 'circular-perfectKiss':
-                        A_g.air_table.count_direction *= -1
+                    if g.air_table.engine == 'circular-perfectKiss':
                         print("")
                         if local_user.key_shift == 'D':
-                            A_g.air_table.timeDirection *= -1
-                            print("time direction has been reversed")
+                            if demo_index in [1,2,3,4]:
+                                g.air_table.timeDirection *= -1
+                                g.air_table.count_direction = g.air_table.timeDirection
+                                print("Time direction has been reversed.")
+                            else:
+                                print("Time reversals not supported in this demo.")
                         else:
                             # Reverse the velocity of all the pucks...
-                            for puck in A_g.air_table.pucks:
+                            g.air_table.count_direction *= -1
+                            for puck in g.air_table.pucks:
                                 puck.vel_2d_mps = puck.vel_2d_mps * (-1)
                             print("puck velocities have been reversed")
 
-                        print("timeDirection =", A_g.air_table.timeDirection, "count direction =", A_g.air_table.count_direction)
+                        print("timeDirection =", g.air_table.timeDirection, "count direction =", g.air_table.count_direction)
                     else:
                         print("Feature is not available. For use with PerfectKissAirTable only.")
 
                 elif (event.key==K_g):
                     # Toggle the logical flag for g.
-                    A_g.air_table.g_ON = not A_g.air_table.g_ON
-                    print("g", A_g.air_table.g_ON)
+                    g.air_table.g_ON = not g.air_table.g_ON
+                    print("g", g.air_table.g_ON)
                     self.adjust_restitution_for_gravity()
                 
                 elif(event.key==K_x):
                     if local_user.key_shift == 'D':
                         print("Deleting all client pucks.")
-                        for puck in A_g.air_table.pucks[:]:
+                        for puck in g.air_table.pucks[:]:
                             if (puck.client_name):
                                 puck.delete()
                     else:
                         print("Deleting the selected puck.")
-                        for puck in A_g.air_table.pucks[:]:
+                        for puck in g.air_table.pucks[:]:
                             if (puck.selected):
                                 puck.delete()
 
                 elif (event.key==K_z):
-                    if hasattr(A_g.air_table, 'perfect_kiss'):
+                    if hasattr(g.air_table, 'perfect_kiss'):
                         print("")
-                        A_g.air_table.perfect_kiss = not A_g.air_table.perfect_kiss
-                        if (A_g.air_table.perfect_kiss):
+                        g.air_table.perfect_kiss = not g.air_table.perfect_kiss
+                        if (g.air_table.perfect_kiss):
                             self.set_allPucks_elastic()
-                        print("perfect kiss =", A_g.air_table.perfect_kiss)
+                        print("perfect kiss =", g.air_table.perfect_kiss)
                     else:
                         print("Perfect Kiss not available in this script.")
 
                 elif (event.key==K_F1):
                     # Toggle FPS display on/off
-                    A_g.air_table.FPS_display = not A_g.air_table.FPS_display
+                    g.air_table.FPS_display = not g.air_table.FPS_display
                 
                 # Jet keys
                 elif (event.key==K_a):
@@ -644,15 +654,15 @@ class Environment:
                     
                 # Pause the game loop
                 elif ((event.key==K_p) and not (local_user.key_shift == 'D')):
-                    A_g.air_table.stop_physics = not A_g.air_table.stop_physics
-                    if (not A_g.air_table.stop_physics):
-                        A_g.air_table.game_time_s = 0
+                    g.air_table.stop_physics = not g.air_table.stop_physics
+                    if (not g.air_table.stop_physics):
+                        g.air_table.game_time_s = 0
                         print("game loop is active again")
                     else:
                         print("game loop is paused")
                 
                 # Set equal-interval physics (more stability for Jello Madness)
-                elif ((event.key==K_p) and (local_user.key_shift == 'D') and (not A_g.air_table.stop_physics)):
+                elif ((event.key==K_p) and (local_user.key_shift == 'D') and (not g.air_table.stop_physics)):
                     self.timestep_fixed = not self.timestep_fixed
                     if self.timestep_fixed:
                         self.constant_dt_s = 1.0/self.fr_avg.result
@@ -671,17 +681,17 @@ class Environment:
                 # Increment the variation indices for demos 2 and 3, but keep the main
                 # demo index as it is.
                 elif (event.key==K_RIGHT):
-                    if demo_index == 2 and A_g.engine_type == 'box2d':
+                    if demo_index == 2 and g.air_table.engine == 'box2d':
                         self.demo2_variation_index = (self.demo2_variation_index + 1) % self.d2_state_cnt
-                    elif demo_index == 3 and A_g.engine_type == 'box2d':
+                    elif demo_index == 3 and g.air_table.engine == 'box2d':
                         self.demo3_variation_index = (self.demo3_variation_index + 1) % self.d3_state_cnt
                     elif demo_index == 8:
                         self.demo8_variation_index = (self.demo8_variation_index + 1) % self.d8_state_cnt
                     return demo_index
                 elif (event.key==K_LEFT):
-                    if demo_index == 2 and A_g.engine_type == 'box2d':
+                    if demo_index == 2 and g.air_table.engine == 'box2d':
                         self.demo2_variation_index = (self.demo2_variation_index - 1) % self.d2_state_cnt
-                    elif demo_index == 3 and A_g.engine_type == 'box2d':
+                    elif demo_index == 3 and g.air_table.engine == 'box2d':
                         self.demo3_variation_index = (self.demo3_variation_index - 1) % self.d3_state_cnt
                     elif demo_index == 8:
                         self.demo8_variation_index = (self.demo8_variation_index - 1) % self.d8_state_cnt

@@ -12,11 +12,10 @@ Global Variables:
     env: The simulation environment instance
     game_window: The main game display window
     air_table: The simulation table/arena
-    engine_type: The type of physics engine being used
 """
 
 # Global variables shared across scripts
 env = None
 game_window = None
 air_table = None
-engine_type = None
+make_some_pucks = None
