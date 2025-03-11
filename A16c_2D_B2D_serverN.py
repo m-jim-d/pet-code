@@ -405,21 +405,24 @@ def make_some_pucks(demo):
         g.env.set_gravity("off")
             
     elif demo == 8:
-        g.air_table.makeJello_variations()
+        g.air_table.throwJello_variations()
 
     elif demo == 9:
         initial_states = [
-            {'n_x':4,'n_y':3,'pa_i':1,'pb_i':10,'spr':True},
-            {'n_x':4,'n_y':3,'pa_i':1,'pb_i':10,'spr':False},
+            {'n_x':4,'n_y':3,'spr':True,'pa_i':1,'pb_i':10},
+            {'n_x':4,'n_y':3,'spr':False},
 
-            {'n_x':4,'n_y':2,'pa_i':0,'pb_i': 7,'spr':True},
-            {'n_x':4,'n_y':2,'pa_i':0,'pb_i': 7,'spr':False},
+            {'n_x':5,'n_y':3,'spr':True,'pa_i':1,'pb_i':13},
+            {'n_x':5,'n_y':3,'spr':False},
 
-            {'n_x':4,'n_y':4,'pa_i':0,'pb_i':15,'spr':True, 'angle':0},
-            {'n_x':4,'n_y':4,'pa_i':0,'pb_i':15,'spr':False,'angle':0},
+            {'n_x':4,'n_y':2,'spr':True,'pa_i':3,'pb_i': 4},
+            {'n_x':4,'n_y':2,'spr':False},
 
-            {'n_x':5,'n_y':5,'pa_i':2,'pb_i':22,'spr':True},
-            {'n_x':5,'n_y':5,'pa_i':2,'pb_i':22,'spr':False}
+            {'n_x':4,'n_y':4,'spr':True,'pa_i':0,'pb_i':15,'angle':0},
+            {'n_x':4,'n_y':4,'spr':False,'angle':0},
+
+            {'n_x':5,'n_y':5,'spr':True,'pa_i':7,'pb_i':17},
+            {'n_x':5,'n_y':5,'spr':False}
         ]
         g.env.demo_variations[9]['count'] = len(initial_states)
         state = initial_states[g.env.demo_variations[9]['index']]
@@ -445,8 +448,10 @@ def make_some_pucks(demo):
 
         # Pin two pucks of the jello grid.
         if state['spr']:
-            Spring(g.air_table.pucks[state['pa_i']], Vec2D(0.3, 0.3), length_m=0.0, strength_Npm=800.0, width_m=0.02)
-            Spring(g.air_table.pucks[state['pb_i']], Vec2D(9.7, 8.4), length_m=0.0, strength_Npm=800.0, width_m=0.02)
+            Spring(g.air_table.pucks[state['pa_i']], Vec2D(0.3, 0.3), color=THECOLORS['yellow'],
+                length_m=0.0, strength_Npm=800.0, width_m=0.02)
+            Spring(g.air_table.pucks[state['pb_i']], Vec2D(9.7, 8.4), color=THECOLORS['yellow'],
+                length_m=0.0, strength_Npm=800.0, width_m=0.02)
 
         g.env.clients["C5"].active = True
         g.env.clients["C5"].drone = True

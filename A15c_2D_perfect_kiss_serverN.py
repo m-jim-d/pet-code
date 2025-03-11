@@ -182,7 +182,7 @@ def make_some_pucks(demo):
         Puck( Vec2D(9.0, 4.5), 0.7, density, color=THECOLORS["cyan"], hit_limit=20, c_drag=0.7, show_health=True)
                     
     elif demo == 8:
-        g.air_table.makeJello_variations()  # Variations handled within method
+        g.air_table.throwJello_variations()  # Variations handled within method
 
     elif demo == 9:
         g.air_table.coef_rest = 1.00
@@ -424,7 +424,7 @@ def make_some_pucks(demo):
         Puck( Vec2D(9.0, 4.5), 0.7, density, color=THECOLORS["cyan"], hit_limit=20, c_drag=0.7, show_health=True)
                     
     elif demo == 8:
-        g.air_table.makeJello_variations()
+        g.air_table.throwJello_variations()
 
     elif demo == 9:
         g.air_table.coef_rest = 1.00

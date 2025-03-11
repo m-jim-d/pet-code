@@ -176,7 +176,7 @@ class AirTable:
 
         return {'angle':angleOfGrid, 'speed_mps':speed_mps}
 
-    def makeJello_variations(self):
+    def throwJello_variations(self):
         initial_states = [
             {'x_n':4, 'y_n':3, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
             {'x_n':4, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
