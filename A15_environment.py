@@ -309,7 +309,7 @@ class Client:
             radius_px = 4  # * g.env.viewZoom
             pygame.draw.circle(g.game_window.surface, THECOLORS['red'], line_points[0], radius_px, 2)
 
-            # Draw green/red indicator circles (half radius) for torque.
+            # Draw green/red indicator circles (half radius) when applying torque.
             if (g.air_table.engine == "box2d"):
                 if (self.key_t == "D" and self.key_shift == "U"):
                     pygame.draw.circle(g.game_window.surface, THECOLORS['green'], line_points[0], self.selected_puck.radius_px/2, 2)
