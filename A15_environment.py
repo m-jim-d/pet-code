@@ -38,7 +38,7 @@ from pygame.locals import (
     K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_0,
     K_f, K_g, K_r, K_x, K_e, K_q,
     K_n, K_h, K_LCTRL, K_RCTRL, K_z, K_p,
-    K_t, K_LSHIFT, K_RSHIFT, K_F1,
+    K_t, K_LSHIFT, K_RSHIFT, K_F1, K_TAB,
     K_RIGHT, K_LEFT
 )
 from pygame.color import THECOLORS
@@ -51,36 +51,43 @@ from Box2D import b2Vec2
 
 
 def custom_update(self, client_name, state_dict):    
-    self.CS_data[ client_name].cursor_location_px = state_dict['mXY']  # mouse x,y
-    self.CS_data[ client_name].buttonIsStillDown = state_dict['mBd']   # mouse button down (true/false)
-    self.CS_data[ client_name].mouse_button = state_dict['mB']         # mouse button number (1,2,3,0)
+    self.CS_data[client_name].cursor_location_px = state_dict['mXY']  # mouse x,y
+    self.CS_data[client_name].buttonIsStillDown = state_dict['mBd']   # mouse button down (true/false)
+    self.CS_data[client_name].mouse_button = state_dict['mB']         # mouse button number (1,2,3,0)
     
-    self.CS_data[ client_name].key_a = state_dict['a']
-    self.CS_data[ client_name].key_d = state_dict['d']
-    self.CS_data[ client_name].key_w = state_dict['w']
+    self.CS_data[client_name].key_a = state_dict['a']
+    self.CS_data[client_name].key_d = state_dict['d']
+    self.CS_data[client_name].key_w = state_dict['w']
     
     # Make the s key execute only once per down event.
     # If key is up, make it ready to accept the down ('D') event.
     if (state_dict['s'] == 'U'):
-        self.CS_data[ client_name].key_s_onoff = 'ON'
-        self.CS_data[ client_name].key_s = state_dict['s']
+        self.CS_data[client_name].key_s_onoff = 'ON'
+        self.CS_data[client_name].key_s = state_dict['s']
     # If getting 'D' from network client and the key is enabled.
-    elif (state_dict['s'] == 'D') and (self.CS_data[ client_name].key_s_onoff == 'ON'):
-        self.CS_data[ client_name].key_s = state_dict['s']
+    elif (state_dict['s'] == 'D') and (self.CS_data[client_name].key_s_onoff == 'ON'):
+        self.CS_data[client_name].key_s = state_dict['s']
     
-    self.CS_data[ client_name].key_j = state_dict['j']
-    self.CS_data[ client_name].key_l = state_dict['l']
-    self.CS_data[ client_name].key_i = state_dict['i']
-    self.CS_data[ client_name].key_space = state_dict[' ']
+    self.CS_data[client_name].key_j = state_dict['j']
+    self.CS_data[client_name].key_l = state_dict['l']
+    self.CS_data[client_name].key_i = state_dict['i']
+    self.CS_data[client_name].key_space = state_dict[' ']
 
     # Make the k key execute only once per down event.
     # If key is up, make it ready to accept the down ('D') event.
     if (state_dict['k'] == 'U'):
-        self.CS_data[ client_name].key_k_onoff = 'ON'
-        self.CS_data[ client_name].key_k = state_dict['k']
+        self.CS_data[client_name].key_k_onoff = 'ON'
+        self.CS_data[client_name].key_k = state_dict['k']
     # If getting 'D' from network client and the key is enabled.
-    elif (state_dict['k'] == 'D') and (self.CS_data[ client_name].key_k_onoff == 'ON'):
-        self.CS_data[ client_name].key_k = state_dict['k']
+    elif (state_dict['k'] == 'D') and (self.CS_data[client_name].key_k_onoff == 'ON'):
+        self.CS_data[client_name].key_k = state_dict['k']
+
+    self.CS_data[client_name].key_shift = state_dict['lrs']
+
+    if (state_dict['socl'] == 'T'):
+        self.CS_data[client_name].select_offCenter_lock = True
+    else:
+        self.CS_data[client_name].select_offCenter_lock = False
 
 def signInOut_function(self, client_name, activate=True):
     if activate:
@@ -124,6 +131,8 @@ class Client:
         
         # Cursor selection modification      #b2d
         self.key_shift = "U"
+        self.select_offCenter_lock = False
+
         self.key_t = "U"
         
         self.selected_puck = None
@@ -192,7 +201,7 @@ class Client:
                 # Use box2d to look for pucks at the cursor location.
                 result = g.air_table.checkForPuckAtThisPosition_b2d(self.cursor_location_px)
                 self.selected_puck = result['puck']
-                if (self.key_shift == 'D'):
+                if (self.key_shift == 'D' or self.select_offCenter_lock):
                     # non-COM selection, specific local point on object.
                     self.COM_selection = False
                     self.selection_pointOnPuck_b2d_m = result['b2d_xy_m']
@@ -326,6 +335,8 @@ class GameWindow:
         # The initial World position vector of the Upper Right corner of the screen.
         # Yes, that's right, y_px = 0 for UR.
         self.UR_2d_m = g.env.ConvertScreenToWorld(Vec2D(self.width_px, 0))
+
+        self.center_2d_m = Vec2D(self.UR_2d_m.x / 2.0, self.UR_2d_m.y / 2.0)
         
         print(f"Screen dimensions in meters: {self.UR_2d_m.x}, {self.UR_2d_m.y}")
         print(f"One pixel = {g.env.px_to_m * 1} meters")
@@ -401,9 +412,23 @@ class Environment:
         self.dt_render_limit_s = 1.0/120.0
         self.render_timer_s = 0.0
 
-        self.demo2_variation_index = 0
-        self.demo3_variation_index = 0
-        self.demo8_variation_index = 0
+        self.demo_variations = {
+            # Regular numeric demos
+            0:{'index':0,'count':0},
+            1:{'index':0,'count':0},
+            2:{'index':0,'count':0},
+            3:{'index':0,'count':0},
+            4:{'index':0,'count':0},
+            5:{'index':0,'count':0},
+            6:{'index':0,'count':0},
+            7:{'index':0,'count':0},
+            8:{'index':0,'count':0},
+            9:{'index':0,'count':0},
+            # Special perfect kiss demos
+            '1p':{'index':0,'count':0},
+            '2p':{'index':0,'count':0},
+            '3p':{'index':0,'count':0},
+        }
                         
     def remove_healthless_pucks(self):
         for puck in g.air_table.pucks[:]:  # [:] indicates a copy 
@@ -674,27 +699,30 @@ class Environment:
                 # Shift modifier
                 elif (event.key==K_LSHIFT or event.key==K_RSHIFT):
                     local_user.key_shift = 'D'
-                
+                elif (event.key==K_TAB and (local_user.key_shift == 'D')):
+                    local_user.select_offCenter_lock = not local_user.select_offCenter_lock
+                    print("select-off-center lock =", local_user.select_offCenter_lock)
+
                 elif (event.key==K_t):
                     local_user.key_t = 'D'
                 
-                # Increment the variation indices for demos 2 and 3, but keep the main
-                # demo index as it is.
-                elif (event.key==K_RIGHT):
-                    if demo_index == 2 and g.air_table.engine == 'box2d':
-                        self.demo2_variation_index = (self.demo2_variation_index + 1) % self.d2_state_cnt
-                    elif demo_index == 3 and g.air_table.engine == 'box2d':
-                        self.demo3_variation_index = (self.demo3_variation_index + 1) % self.d3_state_cnt
-                    elif demo_index == 8:
-                        self.demo8_variation_index = (self.demo8_variation_index + 1) % self.d8_state_cnt
-                    return demo_index
-                elif (event.key==K_LEFT):
-                    if demo_index == 2 and g.air_table.engine == 'box2d':
-                        self.demo2_variation_index = (self.demo2_variation_index - 1) % self.d2_state_cnt
-                    elif demo_index == 3 and g.air_table.engine == 'box2d':
-                        self.demo3_variation_index = (self.demo3_variation_index - 1) % self.d3_state_cnt
-                    elif demo_index == 8:
-                        self.demo8_variation_index = (self.demo8_variation_index - 1) % self.d8_state_cnt
+                # Handle demo variations
+                elif (event.key in [K_RIGHT, K_LEFT]):
+                    if g.air_table.engine != 'box2d' and demo_index in [2,3,4]:
+                        print("Variations only available in box2d engine mode")
+                        return demo_index
+
+                    if self.demo_variations[demo_index]['count'] <= 1:
+                        print(f"Demo {demo_index} has no additional variations")
+                        return demo_index
+                        
+                    # Increment or decrement the variation index
+                    delta = 1 if event.key == K_RIGHT else -1
+                    self.demo_variations[demo_index]['index'] = (
+                        self.demo_variations[demo_index]['index'] + delta
+                    ) % self.demo_variations[demo_index]['count']
+                    
+                    print(f"Demo {demo_index} variation {self.demo_variations[demo_index]['index'] + 1} of {self.demo_variations[demo_index]['count']}")
                     return demo_index
                     
                 elif ((event.key==K_e) and (local_user.key_shift == 'D')):

@@ -11,7 +11,7 @@ from pygame.locals import (
     K_c, K_1, K_2, K_3,
     K_a, K_s, K_d, K_w,
     K_j, K_k, K_l, K_i, K_SPACE,
-    K_LSHIFT, K_t
+    K_LSHIFT, K_RSHIFT, K_t, K_TAB
 )
 from pygame.color import THECOLORS
 
@@ -67,8 +67,15 @@ def checkforUserInput(client_state):
             elif (event.key==K_SPACE):
                 client_state[' '] = 'D'
                 
-            elif (event.key==K_LSHIFT):
-                client_state['ls'] = 'D'
+            elif (event.key==K_LSHIFT or event.key==K_RSHIFT):
+                client_state['lrs'] = 'D' # left or right shift key
+            elif (event.key==K_TAB and (client_state['lrs'] == 'D')):
+                if (client_state['socl'] == 'T'):
+                    client_state['socl'] = 'F' # select-off-center lock
+                else:
+                    client_state['socl'] = 'T'
+                print("select-off-center lock =", client_state['socl'])
+
             elif (event.key==K_t):
                 client_state['t'] = 'D'
             
@@ -93,8 +100,9 @@ def checkforUserInput(client_state):
             elif (event.key==K_SPACE):
                 client_state[' '] = 'U'
                 
-            elif (event.key==K_LSHIFT):
-                client_state['ls'] = 'U'
+            elif (event.key==K_LSHIFT or event.key==K_RSHIFT):
+                client_state['lrs'] = 'U'
+
             elif (event.key==K_t):
                 client_state['t'] = 'U'
         
@@ -154,12 +162,14 @@ def main():
 
     # Initialize client state dictionary.
     client_state = {'ID': client.id,
-                    'mXY':(0,0), 'mBd':False, 'mB':1,
-                    'a':'U', 's':'U', 'd':'U', 'w':'U', 
-                    'j':'U', 'k':'U', 'l':'U', 'i':'U', ' ':'U',
-                    'm':'U',
-                    'f':'U',
-                    't':'U', 'ls':'U'}
+        'mXY':(0,0), 'mBd':False, 'mB':1,
+        'a':'U', 's':'U', 'd':'U', 'w':'U', 
+        'j':'U', 'k':'U', 'l':'U', 'i':'U', ' ':'U',
+        'm':'U',
+        'f':'U',
+        't':'U', 
+        'lrs':'U', 'socl':'F'
+    }
         
     framerate_limit = 120
     fr_avg = RunningAvg(100, pygame, colorScheme='light')

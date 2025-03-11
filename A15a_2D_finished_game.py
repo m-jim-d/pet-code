@@ -37,6 +37,9 @@ def make_some_pucks(demo):
     g.air_table.coef_rest = 1.00
     g.air_table.time_s = 0.0
 
+    # Each demo will have a single variation unless specified below.
+    g.env.demo_variations[demo]['count'] = 1  # Single variation
+
     if demo == 1:
         #    position       , r_m , density
         Puck(Vec2D(2.5, 7.5), 0.25, 0.3, color=THECOLORS["orange"])
@@ -181,7 +184,7 @@ def make_some_pucks(demo):
         print("Nothing set up for this key.")
 
 #============================================================
-# Main procedural script.
+# main procedural script
 #============================================================
 
 def main():
@@ -190,7 +193,7 @@ def main():
     game_loop.start(demo_index=7)
 
 #============================================================
-# Run main().  
+# Start everything.
 #============================================================
         
 if __name__ == '__main__':

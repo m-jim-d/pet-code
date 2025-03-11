@@ -146,7 +146,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="kn">from</span> <span class="nn">A15_environment</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">GameWindow</span><span class="p">,</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">signInOut_function</span><span class="p">,</span> <span class="n">custom_update</span>
 
 <span class="c1"># Global variables shared across scripts</span>
-<span class="kn">import</span> <span class="nn">A15_globals</span> <span class="k">as</span> <span class="nn">A_g</span>
+<span class="kn">import</span> <span class="nn">A15_globals</span> <span class="k">as</span> <span class="nn">g</span>
 
 <span class="k">class</span> <span class="nc">GameLoop</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engine_type</span><span class="o">=</span><span class="s2">&quot;box2d&quot;</span><span class="p">):</span>
@@ -156,10 +156,10 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         
         <span class="c1"># Create the first user/client and the methods for moving between the screen and the world.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">window_dimensions_px</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span> <span class="c1"># 10m in along the x axis.</span>
-        <span class="n">A_g</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">game_window</span> <span class="o">=</span> <span class="n">GameWindow</span><span class="p">(</span><span class="n">window_dimensions_px</span><span class="p">,</span> <span class="s1">&#39;Air Table Server&#39;</span><span class="p">)</span>
-        <span class="n">A_g</span><span class="o">.</span><span class="n">game_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game_window</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">game_window</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">game_window</span>
 
         <span class="c1"># Define the Left, Right, Bottom, and Top boundaries of the game window.</span>
         <span class="n">walls_dic</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;L_m&quot;</span><span class="p">:</span><span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;R_m&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;B_m&quot;</span><span class="p">:</span><span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;T_m&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">}</span>
@@ -173,7 +173,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="n">PerfectKissAirTable</span><span class="p">(</span><span class="n">walls_dic</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown engine type: </span><span class="si">{</span><span class="n">engine_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">A_g</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">myclock</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Clock</span><span class="p">()</span>
 
@@ -195,7 +195,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildFence</span><span class="p">()</span> <span class="c1"># walls at the window boundaries.</span>
 
         <span class="c1"># Initialize demo</span>
-        <span class="n">A_g</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
         
         <span class="c1"># Setup network server</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_network_server</span><span class="p">()</span>
@@ -251,7 +251,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="nb">print</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
                 
                 <span class="c1"># Start, or restart a demo.</span>
-                <span class="n">A_g</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>               
+                <span class="n">g</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>               
                         
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">render_timer_s</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">dt_render_limit_s</span><span class="p">):</span>
                 <span class="c1"># Get input from network clients.</span>

@@ -43,13 +43,14 @@ class AirTable:
         self.g_2d_mps2 = self.gOFF_2d_mps2
         self.g_ON = False
         
+        self.pucks = []
         self.controlled_pucks = []
         self.target_pucks = []
-        self.pucks = []
         
         self.springs = []
         
         self.walls_dic = walls_dic
+        
         self.collision_count = 0
         self.coef_rest = 1.0
 
@@ -187,8 +188,8 @@ class AirTable:
             {'x_n':3, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
             {'x_n':2, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min': 0,'spd_max':200}
         ]
-        g.env.d8_state_cnt = len(initial_states)
-        state = initial_states[g.env.demo8_variation_index]
+        g.env.demo_variations[8]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[8]['index']]
 
         self.game_time_s = 0
         self.jello_tangle_checking_enabled = True
@@ -200,7 +201,7 @@ class AirTable:
         )
 
         g.game_window.update_caption( g.game_window.caption + 
-            f"     Variation {g.env.demo8_variation_index + 1}" +
+            f"     Variation {g.env.demo_variations[8]['index'] + 1}" +
             f"     grid = ({state['x_n']}, {state['y_n']})" +
             f"  angle = {throw['angle']:.1f}  speed = {throw['speed_mps']:.1f}"
         )
@@ -677,17 +678,25 @@ class Box2DAirTable(AirTable):
         # Create the Box2D world
         self.b2d_world = b2World(gravity=(-0.0, -0.0), doSleep=True, contactListener=myContactListener(self))
 
-    def buildFence(self):
+    def buildFence(self, onoff={'L':True,'R':True,'T':True,'B':True}):
+        for eachWall in self.walls[:]:
+            if eachWall.fence:
+                eachWall.delete()
+
         width_m = 0.05 # 0.05
         fenceColor = THECOLORS['orangered1']
         border_px = 2
         nudge_m = g.env.px_to_m * 1 # nudge of 1 pixel
         # Left and right walls
-        Wall( Vec2D( self.walls_dic["L_m"] - (width_m + nudge_m), self.walls_dic["T_m"]/2.0), width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
-        Wall( Vec2D( self.walls_dic["R_m"] + width_m, self.walls_dic["T_m"]/2.0), width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
+        if onoff['L']: Wall( Vec2D( self.walls_dic["L_m"] - (width_m + nudge_m), self.walls_dic["T_m"]/2.0), 
+            width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
+        if onoff['R']: Wall( Vec2D( self.walls_dic["R_m"] + width_m, self.walls_dic["T_m"]/2.0), 
+            width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
         # Top and bottom walls
-        Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["T_m"] + (width_m + nudge_m)), self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
-        Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["B_m"] - width_m), self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
+        if onoff['T']: Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["T_m"] + (width_m + nudge_m)), 
+            self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
+        if onoff['B']: Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["B_m"] - width_m), 
+            self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
 
     def checkForPuckAtThisPosition_b2d(self, x_px_or_tuple, y_px = None):
         # This is used for cursor selection at a particular point on the puck.  #b2d

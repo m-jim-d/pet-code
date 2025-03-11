@@ -23,10 +23,11 @@ def make_some_pucks(demo):
     # This removes all references to pucks and walls and effectively deletes them. 
     for eachpuck in g.air_table.pucks[:]:
         eachpuck.delete()
-    if g.air_table.engine == "box2d":
-        for eachWall in g.air_table.walls[:]:
-            if not eachWall.fence:
-                eachWall.delete()
+        
+    for eachWall in g.air_table.walls[:]:
+        if not eachWall.fence:
+            eachWall.delete()
+    g.air_table.buildFence() # a complete perimeter fence
 
     # Most of the demos don't need the tangle checker.
     g.air_table.jello_tangle_checking_enabled = False
@@ -42,6 +43,9 @@ def make_some_pucks(demo):
         if client.drone:
             client.active = False
             client.drone = False
+
+    # Each demo will have a single variation unless specified below.
+    g.env.demo_variations[demo]['count'] = 1  # Single variation
 
     if demo == 1:
         #    position       , r_m , density
@@ -74,25 +78,31 @@ def make_some_pucks(demo):
             {"p1": {"rps":  0.0, "color": THECOLORS["tan"]},
              "p2": {"rps":  0.0, "color": THECOLORS["tan"]}}
         ]
-        g.env.d2_state_cnt = len(initial_states)
-
-        state = initial_states[g.env.demo2_variation_index]
-        print("Variation", g.env.demo2_variation_index + 1, 
+        g.env.demo_variations[2]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[2]['index']]
+        print("Variation", g.env.demo_variations[2]['index'] + 1, 
               "   p1_rps =", state["p1"]["rps"], 
               "   p2_rps =", state["p2"]["rps"])
 
-        p1 = Puck(Vec2D(2.0, 2.0), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, friction=2.0, friction_fixed=True, border_px=10, color=state["p1"]["color"])
-        p1.b2d_body.angularVelocity = state["p1"]["rps"]
-        
-        p2 = Puck(Vec2D(8.0, 6.75), 1.7, 1.0, CR_fixed=True, coef_rest=0.0, friction=2.0, friction_fixed=True, border_px=10, color=state["p2"]["color"])
-        p2.b2d_body.angularVelocity = state["p2"]["rps"]
+        p1 = Puck( Vec2D(2.0, 2.0), 1.7, 1.0, 
+            border_px=10, color=state["p1"]["color"],
+            angularVelocity_rps=state["p1"]["rps"],
+            coef_rest=0.0, CR_fixed=True, 
+            friction=2.0, friction_fixed=True
+        )
+        p2 = Puck( Vec2D(8.0, 6.75), 1.7, 1.0, 
+            border_px=10, color=state["p2"]["color"],
+            angularVelocity_rps=state["p2"]["rps"],
+            coef_rest=0.0, CR_fixed=True,
+            friction=2.0, friction_fixed=True
+        )
 
         spring_strength_Npm2 = 20.0
         spring_length_m = 1.0
         Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=0.15, c_damp=50.0, color=THECOLORS["yellow"])
     
         g.game_window.update_caption( g.game_window.caption + 
-            f"     Variation {g.env.demo2_variation_index + 1}" +
+            f"     Variation {g.env.demo_variations[2]['index'] + 1}" +
             f"     rps = ({state['p1']['rps']:.1f}, {state['p2']['rps']:.1f})"
         )
 
@@ -118,29 +128,35 @@ def make_some_pucks(demo):
              "p2": {"rps":   4.0, "color": THECOLORS["darkred"]},
              "p3": {"rps":   4.0, "color": THECOLORS["darkred"]}}
         ]
-        g.env.d3_state_cnt = len(initial_states)
-
-        state = initial_states[g.env.demo3_variation_index]
-        print("Variation", g.env.demo3_variation_index + 1, 
+        g.env.demo_variations[3]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[3]['index']]
+        print("Variation", g.env.demo_variations[3]['index'] + 1, 
               "   p1_rps =", state["p1"]["rps"], 
               "   p2_rps =", state["p2"]["rps"],
               "   p3_rps =", state["p3"]["rps"])
         
         p1p3_y_m = 2.3
-        p1 = Puck(Vec2D(2.0, p1p3_y_m), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p1"]["color"])
-        p1.b2d_body.angularVelocity = state["p1"]["rps"]
-        p1.b2d_body.fixtures[0].friction = 2.0
-        
-        p3 = Puck(Vec2D(8.0, p1p3_y_m), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p3"]["color"])
-        p3.b2d_body.angularVelocity = state["p3"]["rps"]
-        p3.b2d_body.fixtures[0].friction = 2.0
-
-        # Some equilateral triangle math:  h = (1/2) * √3 * a
+        p1 = Puck( Vec2D(2.0, p1p3_y_m), 1.2, 1.0, 
+            angularVelocity_rps=state["p1"]["rps"],
+            coef_rest=0.0, CR_fixed=True, 
+            friction=2.0, friction_fixed=True,
+            border_px=10, color=state["p1"]["color"]
+        )
+        p3 = Puck( Vec2D(8.0, p1p3_y_m), 1.2, 1.0, 
+            angularVelocity_rps=state["p3"]["rps"],
+            coef_rest=0.0, CR_fixed=True, 
+            friction=2.0, friction_fixed=True,
+            border_px=10, color=state["p3"]["color"]
+        )
+        # Equilateral triangle:  h = (1/2) * √3 * a
         y_m = p1.pos_2d_m.y + (p3.pos_2d_m.x - p1.pos_2d_m.x) * 3**0.5 / 2.0
         x_m = p1.pos_2d_m.x + (p3.pos_2d_m.x - p1.pos_2d_m.x)/2.0
-        p2 = Puck(Vec2D(x_m, y_m), 1.2, 1.0, CR_fixed=True, coef_rest=0.0, border_px=10, color=state["p2"]["color"])
-        p2.b2d_body.angularVelocity = state["p2"]["rps"]
-        p2.b2d_body.fixtures[0].friction = 2.0
+        p2 = Puck( Vec2D(x_m, y_m), 1.2, 1.0, 
+            angularVelocity_rps=state["p2"]["rps"],
+            coef_rest=0.0, CR_fixed=True, 
+            friction=2.0, friction_fixed=True,
+            border_px=10, color=state["p2"]["color"]
+        )
 
         spring_strength_Npm2 = 15.0
         spring_length_m = 1.0
@@ -150,85 +166,220 @@ def make_some_pucks(demo):
         Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
 
         g.game_window.update_caption( g.game_window.caption + 
-            f"     Variation {g.env.demo3_variation_index + 1}" +
+            f"     Variation {g.env.demo_variations[3]['index'] + 1}" +
             f"     rps = ({state['p1']['rps']:.1f}, {state['p2']['rps']:.1f}, {state['p3']['rps']:.1f})"
         )
 
     elif demo == 4:
-        spacing_factor = 1.0
-        grid_size = 10,5
-        for j in range(grid_size[0]):
-            for k in range(grid_size[1]):
-                if ((j,k) == (2,2)):
-                    puck_color_value = THECOLORS["orange"]
-                else:
-                    puck_color_value = THECOLORS["grey"]
+        initial_states = [
+            {'w1':{'angle_d':-0.17},'w2':{'angle_d':+4.00}},
+            {'w1':{'angle_d':-5.00},'w2':{'angle_d':+2.00}},
+            {'w1':{'angle_d':-9.00},'w2':{'angle_d':+1.00}},
+            {'w1':{'angle_d': 0.00},'w2':{'angle_d':+9.00}},
+            {'funnel_angle_d': 5},
+            {'funnel_angle_d':15},
+            {'funnel_angle_d':25},
+            {'funnel_angle_d':35},
+            {'funnel_angle_d':45}
+        ]
+        g.env.demo_variations[4]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[4]['index']]
 
-                offset_2d_m = Vec2D(0.0, 4.5)
-                spacing_factor = 0.7
-                position_2d_m = Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)) + offset_2d_m
+        # For the first group of variations, add a grid of pucks.
+        if 'w1' in state:
+            spacing_factor = 1.0
+            grid_size = 10,5
+            for j in range(grid_size[0]):
+                for k in range(grid_size[1]):
+                    if (k >= 1 and k <= 3):
+                        puck_color_value = THECOLORS['orange']
+                    else:
+                        puck_color_value = THECOLORS['grey']
 
-                Puck(position_2d_m, radius_m=0.25, density_kgpm2=1.0, 
-                           color=puck_color_value,
-                           CR_fixed=True, coef_rest=0.8, friction=0.05, friction_fixed=True)
+                    offset_2d_m = Vec2D(0.0, 4.5)
+                    spacing_factor = 0.7
+                    position_2d_m = Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)) + offset_2d_m
 
-        Wall(Vec2D(4.0, 4.5), half_width_m=4.0, half_height_m=0.04, angle_radians=-2*(math.pi/180), border_px=0)
-        Wall(Vec2D(7.0, 2.5), half_width_m=3.0, half_height_m=0.04, angle_radians=+2*(math.pi/180), border_px=0)
-    
+                    Puck(position_2d_m, radius_m=0.25, density_kgpm2=1.0,
+                            color=puck_color_value,
+                            CR_fixed=True, coef_rest=0.8, friction=0.05, friction_fixed=True)
+
+            Wall(Vec2D(4.0, 4.5), half_width_m=4.0, half_height_m=0.04, border_px=0,
+                angle_radians=state['w1']['angle_d']*(math.pi/180)
+            )
+            Wall(Vec2D(7.0, 2.5), half_width_m=3.0, half_height_m=0.04, border_px=0,
+                angle_radians=state['w2']['angle_d']*(math.pi/180)
+            )
+            details_desc = f"w1 angle = {state['w1']['angle_d']}   w2 angle = {state['w2']['angle_d']}"
+        
+        # Two walls symmetrically angled to produce a funnel at the bottom of the window, two pucks.
+        elif 'funnel_angle_d' in state:
+            # No side walls:
+            g.air_table.buildFence(onoff={'L':False,'R':False,'T':True,'B':True})
+            
+            c_f = 1.0
+            y_m = 7.0
+            x_m = 0.0
+            Puck(Vec2D(x_m,y_m), radius_m=1.25, density_kgpm2=1.0, CR_fixed=True, coef_rest=0.7, friction=c_f, friction_fixed=True)
+            x_m = g.air_table.walls_dic['R_m']
+            Puck(Vec2D(x_m,y_m), radius_m=1.25, density_kgpm2=1.0, CR_fixed=True, coef_rest=0.7, friction=c_f, friction_fixed=True)
+
+            angle_d = state['funnel_angle_d']
+            hw_m = 100.0
+            hh_m = 0.10
+            y_m = math.sin(angle_d * (math.pi/180)) * hw_m # Position walls so their center end is at the bottom of the window.
+            cf_touch = math.cos(angle_d * (math.pi/180))   # Position walls so their center ends touch.
+            x_m = (0.5 * g.air_table.walls_dic['R_m']) - cf_touch * hw_m
+            Wall(Vec2D( x_m, y_m), half_width_m=hw_m, half_height_m=hh_m, border_px=0, angle_radians=-angle_d*(math.pi/180))
+            x_m = (0.5 * g.air_table.walls_dic['R_m']) + cf_touch * hw_m
+            Wall(Vec2D( x_m, y_m), half_width_m=hw_m, half_height_m=hh_m, border_px=0, angle_radians=+angle_d*(math.pi/180))
+
+            details_desc = f"funnel angle = {state['funnel_angle_d']}"
+
+        g.game_window.update_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo_variations[4]['index'] + 1}" +
+            f"     {details_desc}"
+        )
+
     elif demo == 5:
-        p1 = Puck(Vec2D(2.00, 3.00),  0.4, 0.3)
-        p2 = Puck(Vec2D(3.50, 4.50),  0.4, 0.3)
+        """
+        Spring-pinned pucks are placed in a regular-polygons arrangement. Pucks are placed
+        at at polygon radius, R = r_puck / sin(π/n). The spring pins are positioned closer
+        to the center providing tension to hold the pucks in contact.
+        """
+        initial_states = [
+            {'n_pucks':2},
+            {'n_pucks':3},
+            {'n_pucks':4},
+            {'n_pucks':5},
+            {'n_pucks':6},
+            {'n_pucks':7},
+            {'n_pucks':8},
+            {'n_pucks':9},
+            {'n_pucks':1}
+        ]
+        g.env.demo_variations[5]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[5]['index']]
         
-        spring_strength_Npm2 = 20.0 #18.0
-        spring_length_m = 1.5
-        Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=0.2)
-    
+        # No walls:
+        g.air_table.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
+
+        radius_m = 1.5
+        density = 1.0
+
+        def pinnedPuck(puck_position_2d_m, pin_position_2d_m=None):
+            if not pin_position_2d_m:
+                pin_position_2d_m = puck_position_2d_m
+
+            p1 = Puck(puck_position_2d_m, radius_m, density,
+                color=THECOLORS["coral"],
+                friction=1.0, friction_fixed=True,
+                coef_rest=0.0, CR_fixed=True, border_px=5, 
+                angle_r=+0.0*math.pi/180.0
+            )
+            Spring(p1, pin_position_2d_m, color=THECOLORS['dodgerblue'],
+                strength_Npm=200.0, width_m=0.03, c_drag=15.0, c_damp=15.0
+            )
+
+        n_pucks = state['n_pucks']
+
+        if n_pucks == 1:
+            pinnedPuck(g.game_window.center_2d_m)
+        else:
+            polygon_radius_m = radius_m / math.sin(math.pi/n_pucks)
+            center_to_puck_2d_m = Vec2D(0.0, polygon_radius_m)
+            pin_offset_m = 0.4
+            center_to_pin_2d_m = Vec2D(0.0, polygon_radius_m - pin_offset_m)
+            for i in range(0, n_pucks):
+                angle = (360 / n_pucks) * i
+
+                rotated_c_to_puck_2d_m = center_to_puck_2d_m.rotated(angle)
+                puck_position_2d_m = g.game_window.center_2d_m + rotated_c_to_puck_2d_m
+
+                rotated_c_to_pin_2d_m = center_to_pin_2d_m.rotated(angle)
+                pin_position_2d_m = g.game_window.center_2d_m + rotated_c_to_pin_2d_m
+
+                pinnedPuck(puck_position_2d_m, pin_position_2d_m)
+
+        g.game_window.update_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo_variations[5]['index'] + 1}" +
+            f"     pinned pucks = {n_pucks}"
+        )
+
     elif demo == 6:
-        density = 1.5
-        radius = 0.7
-        coef_rest_puck = 0.3
-
-        p1 = Puck(Vec2D(2.00, 3.00), radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
-        p2 = Puck(Vec2D(3.50, 4.50), radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
-        p3 = Puck(Vec2D(5.00, 3.00), radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
+        initial_states = [
+            {'type':'three-pucks'},
+            {'type':'two-pucks'}
+        ]
+        g.env.demo_variations[6]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[6]['index']]
         
-        # No springs on this one.
-        Puck(Vec2D(3.50, 7.00), 0.95, density, coef_rest=coef_rest_puck, CR_fixed=True)
+        if state['type'] == 'three-pucks':
+            density = 1.5
+            radius = 0.7
+            coef_rest_puck = 0.3
 
-        spring_strength_Npm2 = 400.0
-        spring_length_m = 2.5
-        spring_width_m = 0.07
-        spring_drag = 0.0
-        spring_damper = 5.0
+            p1 = Puck(Vec2D(2.00, 3.00), radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
+            p2 = Puck(Vec2D(3.50, 4.50), radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
+            p3 = Puck(Vec2D(5.00, 3.00), radius, density, coef_rest=coef_rest_puck, CR_fixed=True)
+            
+            # No springs on this one.
+            Puck(Vec2D(3.50, 7.00), 0.95, density, coef_rest=coef_rest_puck, CR_fixed=True)
 
-        Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
-            c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["red"])
-        Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
-            c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["tan"])
-        Spring(p3, p1, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
-            c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["gold"])
+            spring_strength_Npm2 = 400.0
+            spring_length_m = 2.5
+            spring_width_m = 0.07
+            spring_drag = 0.0
+            spring_damper = 5.0
 
-    elif demo == 7:        
+            Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
+                c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["red"])
+            Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
+                c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["tan"])
+            Spring(p3, p1, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
+                c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["gold"])
+
+        elif state['type'] == 'two-pucks':
+            p1 = Puck(Vec2D(2.00, 3.00),  0.4, 0.3)
+            p2 = Puck(Vec2D(3.50, 4.50),  0.4, 0.3)
+            
+            spring_strength_Npm2 = 20.0 #18.0
+            spring_length_m = 1.5
+            Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=0.2)
+
+        g.game_window.update_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo_variations[6]['index'] + 1}"
+        )
+
+    elif demo == 7:
         density = 0.8
         #                              , r_m , density
-        tempPuck = Puck(Vec2D(4.0, 1.0), 0.55, density, color=THECOLORS["orange"], show_health=True, hit_limit=10)
-        Spring(tempPuck, Vec2D(4.0, 1.0), strength_Npm=300.0, width_m=0.02, c_drag = 1.5)
+        tempPuck = Puck(Vec2D(4.0, 1.0), 0.55, density, 
+            color=THECOLORS["orange"], show_health=True, hit_limit=10
+        )
+        Spring(tempPuck, Vec2D(4.0, 1.0), strength_Npm=300.0, 
+            pin_radius_m=0.03, width_m=0.02, c_drag = 1.5)
         
         puck_position = Vec2D(0.0, g.game_window.UR_2d_m.y) + Vec2D(2.0, -2.0) # starting from upper left
-        tempPuck = Puck(puck_position, 1.4, density, rect_fixture=True, aspect_ratio=0.1, show_health=True)
-        tempPuck.b2d_body.angularVelocity = 0.5
-        Spring(tempPuck, puck_position, strength_Npm=300.0, width_m=0.02, c_drag = 1.5 + 10.0)
+        tempPuck = Puck(puck_position, 1.4, density, 
+            angularVelocity_rps=0.5, rect_fixture=True, aspect_ratio=0.1, show_health=True
+        )
+        Spring(tempPuck, puck_position, strength_Npm=300.0, 
+            pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
 
         puck_position = Vec2D(8.5, 4.0)
-        tempPuck = Puck(puck_position, 1.4, density, rect_fixture=True, aspect_ratio=0.1, show_health=True)
-        tempPuck.b2d_body.angularVelocity = 0.5
-        Spring(tempPuck, puck_position, strength_Npm=300.0, width_m=0.02, c_drag = 1.5 + 10.0)
+        tempPuck = Puck(puck_position, 1.4, density, 
+            angularVelocity_rps=0.5, rect_fixture=True, aspect_ratio=0.1, show_health=True
+        )
+        Spring(tempPuck, puck_position, strength_Npm=300.0, 
+            pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
 
         # Make some pinned-spring pucks.
         for m in range(0, 6): 
-            pinPoint_2d = Vec2D(2.0 + (m * 0.65), 4.0)
-            tempPuck = Puck(pinPoint_2d, 0.25, density, color=THECOLORS["orange"], show_health=True, hit_limit=15)
-            Spring(tempPuck, pinPoint_2d, strength_Npm=300.0, width_m=0.02, c_drag=1.5)
+            pinPoint_2d_m = Vec2D(2.0 + (m * 0.65), 4.0)
+            tempPuck = Puck(pinPoint_2d_m, 0.25, density, color=THECOLORS["orange"], show_health=True, hit_limit=15)
+            Spring(tempPuck, pinPoint_2d_m, strength_Npm=300.0, 
+                width_m=0.02, c_drag=1.5, pin_radius_m=0.03)
         
         # Make user/client controllable pucks
         # for all the clients.
@@ -236,7 +387,8 @@ def make_some_pucks(demo):
         for client_name in g.env.clients:
             client = g.env.clients[client_name]
             if client.active and not client.drone:
-                # Box2D drag modeling is slightly different than that in the circular engines. So, c_drag set higher than the default value, 0.7.
+                # Box2D drag modeling is slightly different than that in the circular
+                # engines. So, c_drag set higher than the default value, 0.7.
                 g.air_table.buildControlledPuck( x_m=6.4, y_m=y_puck_position_m, r_m=0.45, client_name=client_name, sf_abs=False, c_drag=1.5)
                 y_puck_position_m += 1.2
                         
@@ -256,7 +408,45 @@ def make_some_pucks(demo):
         g.air_table.makeJello_variations()
 
     elif demo == 9:
-        g.air_table.buildJelloGrid( angle=45, speed=0, pos_initial_2d_m=Vec2D(4.0, 2.5), puck_drag=1.5, show_health=True, coef_rest=0.85)
+        initial_states = [
+            {'n_x':4,'n_y':3,'pa_i':1,'pb_i':10,'spr':True},
+            {'n_x':4,'n_y':3,'pa_i':1,'pb_i':10,'spr':False},
+
+            {'n_x':4,'n_y':2,'pa_i':0,'pb_i': 7,'spr':True},
+            {'n_x':4,'n_y':2,'pa_i':0,'pb_i': 7,'spr':False},
+
+            {'n_x':4,'n_y':4,'pa_i':0,'pb_i':15,'spr':True, 'angle':0},
+            {'n_x':4,'n_y':4,'pa_i':0,'pb_i':15,'spr':False,'angle':0},
+
+            {'n_x':5,'n_y':5,'pa_i':2,'pb_i':22,'spr':True},
+            {'n_x':5,'n_y':5,'pa_i':2,'pb_i':22,'spr':False}
+        ]
+        g.env.demo_variations[9]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[9]['index']]
+        
+        if 'angle' in state:
+            angle = state['angle']
+        else:
+            angle = 45
+        g.air_table.buildJelloGrid( angle=angle, speed=0, 
+            grid_x_n=state['n_x'], grid_y_n=state['n_y'],
+            pos_initial_2d_m=Vec2D(4.0, 2.5), 
+            puck_drag=1.5, show_health=True, coef_rest=0.85
+        )
+
+        # Center the grid in the window.
+        com_2d_m = Vec2D(0,0)
+        for puck in g.air_table.pucks:
+            com_2d_m += puck.pos_2d_m
+        com_2d_m = com_2d_m / len(g.air_table.pucks)
+        shift_2d_m = g.game_window.center_2d_m - com_2d_m
+        for puck in g.air_table.pucks:
+            puck.set_pos_and_vel(puck.pos_2d_m + shift_2d_m)
+
+        # Pin two pucks of the jello grid.
+        if state['spr']:
+            Spring(g.air_table.pucks[state['pa_i']], Vec2D(0.3, 0.3), length_m=0.0, strength_Npm=800.0, width_m=0.02)
+            Spring(g.air_table.pucks[state['pb_i']], Vec2D(9.7, 8.4), length_m=0.0, strength_Npm=800.0, width_m=0.02)
 
         g.env.clients["C5"].active = True
         g.env.clients["C5"].drone = True
@@ -265,10 +455,6 @@ def make_some_pucks(demo):
         g.env.clients["C6"].active = True
         g.env.clients["C6"].drone = True
         g.air_table.buildControlledPuck( x_m=8.5, y_m=1.5, r_m=0.45, client_name="C6")
-
-        # Pin two corners of the jello grid.
-        Spring(g.air_table.pucks[ 1], Vec2D(0.3, 0.3), length_m=0.0, strength_Npm=800.0, width_m=0.02)
-        Spring(g.air_table.pucks[10], Vec2D(9.7, 8.4), length_m=0.0, strength_Npm=800.0, width_m=0.02)
 
         g.env.set_gravity("off")
     
@@ -292,7 +478,7 @@ def make_some_pucks(demo):
         print("Nothing set up for this key.")
 
 #============================================================
-# Main procedural script.
+# main procedural script
 #============================================================
 
 def main():
@@ -301,7 +487,7 @@ def main():
     game_loop.start(demo_index=7)
 
 #============================================================
-# start everything...
+# Start everything.
 #============================================================
 
 if __name__ == '__main__':

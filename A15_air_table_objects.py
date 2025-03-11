@@ -8,12 +8,12 @@ Core objects for the air table physics simulation.
 This module defines the physical objects that can exist in the simulation:
 
 Classes:
-    Wall: Static boundary objects with collision detection
-    Puck: Dynamic objects with physics properties (mass, velocity, etc.)
-    Spring: Elastic connections between pucks with customizable properties
-    RotatingTube: Base class for rotatable attachments (Jet/Gun)
-    Jet: Propulsion system that can be attached to pucks
-    Gun: Weapon system that can be mounted on pucks
+    Wall: Static boundary objects with collision detection  
+    Puck: Dynamic objects with physics properties (mass, velocity, etc.)  
+    Spring: Elastic connections between pucks with customizable properties  
+    RotatingTube: Base class for rotatable attachments (Jet/Gun)  
+    Jet: Propulsion system that can be attached to pucks  
+    Gun: Weapon system that can be mounted on pucks  
 
 Walls and Puck supports Box2D integration for advanced physics simulation when enabled.
 """
@@ -150,6 +150,7 @@ class Puck:
 
         self.b2d_body = None
 
+        self.pin = pin
         # Add puck to the lists of pucks, controlled pucks, and target pucks.
         if not pin:
             if (g.air_table.engine == 'box2d'):
@@ -214,6 +215,15 @@ class Puck:
         # Rotational speed.
         self.rotation_speed = self.b2d_body.angularVelocity
     
+    def set_pos_and_vel(self, pos_2d_m, vel_2d_m=Vec2D(0,0)):
+        # Update our vectors
+        self.pos_2d_m = pos_2d_m
+        self.vel_2d_mps = vel_2d_m
+        
+        # Update Box2D body
+        self.b2d_body.position = b2Vec2(pos_2d_m.x, pos_2d_m.y)
+        self.b2d_body.linearVelocity = b2Vec2(vel_2d_m.x, vel_2d_m.y)
+
     def delete(self):
         if (g.air_table.engine == 'box2d'):
             # Remove the puck from the dictionary.
@@ -282,12 +292,14 @@ class Puck:
             # Draw main puck body.
             pygame.draw.circle( g.game_window.surface, puck_color, self.pos_2d_px, self.radius_px, g.env.zoomLineThickness(puck_border_thickness))
             
-            if (g.air_table.engine == 'box2d'):
+            if (g.air_table.engine == 'box2d' and not self.pin):
                 # If it's not a bullet and not a rectangle, draw a spoke to indicate rotational orientation.
                 if ((self.bullet == False) and (self.rect_fixture==False)):
-                    # Shorten the spoke by a fraction of the thickness so that its end (and the blocky rendering) is hidden in the border.
+                    # Shorten the spoke by a fraction of the thickness so that its end
+                    # (and the blocky rendering) is hidden in the border.
                     reduction_m = g.env.px_to_m * self.border_thickness_px * 0.50
-                    # Position the outer-edge point right from the center (r_m, 0), so spoke will look like it's at zero angle.
+                    # Position the outer-edge point right from the center (r_m, 0), so
+                    # spoke will look like it's at zero angle.
                     point_on_radius_b2d_m = self.b2d_body.GetWorldPoint( b2Vec2(self.radius_m - reduction_m, 0.0))
                     point_on_radius_2d_m = Vec2D( point_on_radius_b2d_m.x, point_on_radius_b2d_m.y)
                     point_on_radius_2d_px = g.env.ConvertWorldToScreen( point_on_radius_2d_m)
@@ -362,7 +374,8 @@ class RotatingTube:
         return vertices_2d_px
         
     def draw_tube(self, line_thickness=3):
-        # Draw the tube on the game-window surface. Establish the base_point as the center of the puck.
+        # Draw the tube on the game-window surface. Establish the base_point as the center
+        # of the puck.
         pygame.draw.polygon(g.game_window.surface, self.color, 
                             self.convert_from_world_to_screen(self.tube_vertices_2d_m, self.puck.pos_2d_m), g.env.zoomLineThickness(line_thickness))
 
@@ -413,10 +426,10 @@ class Jet(RotatingTube):
             current_jet_angle = self.direction_2d_m.get_angle()
             self.rotate_everything(puck_velocity_angle - current_jet_angle)
             
-            # Reset this so it doesn't keep flipping. Just want it to flip the
-            # direction once but not keep flipping.
-            # This first line is enough to keep the local client from flipping again because
-            # the local keyboard doesn't keep sending the "D" event if the key is held down.
+            # Reset this so it doesn't keep flipping. Just want it to flip the direction
+            # once but not keep flipping. This first line is enough to keep the local
+            # client from flipping again because the local keyboard doesn't keep sending
+            # the "D" event if the key is held down.
             self.client.key_s = "U"
             # This second one is also needed for the network clients because they keep
             # sending the "D" until they release the key.
@@ -441,8 +454,9 @@ class Jet(RotatingTube):
         # Draw the jet tube.        
         self.draw_tube(line_thickness=0)
         
-        # Draw a little nose cone on the other side of the puck from the jet. This is a visual aid
-        # to help the player see the direction the puck will go when the jet is on.
+        # Draw a little nose cone on the other side of the puck from the jet. This is a
+        # visual aid to help the player see the direction the puck will go when the jet is
+        # on.
         pygame.draw.polygon(g.game_window.surface, THECOLORS["yellow1"], 
                             self.convert_from_world_to_screen(self.nose_vertices_2d_m, self.puck.pos_2d_m), 0)
         
@@ -499,10 +513,10 @@ class Gun( RotatingTube):
             current_gun_angle = self.direction_2d_m.get_angle()
             self.rotate_everything(puck_velocity_angle - current_gun_angle)
             
-            # Reset this so it doesn't keep flipping. Just want it to flip the
-            # direction once but not keep flipping.
-            # This first line is enough to keep the local client from flipping again because
-            # the local keyboard doesn't keep sending the "D" event if the key is held down.
+            # Reset this so it doesn't keep flipping. Just want it to flip the direction
+            # once but not keep flipping. This first line is enough to keep the local
+            # client from flipping again because the local keyboard doesn't keep sending
+            # the "D" event if the key is held down.
             self.client.key_k = "U"
             # This second one is also needed for the network clients because they keep
             # sending the "D" until they release the key.
@@ -543,28 +557,31 @@ class Gun( RotatingTube):
             self.gun_recharge_start_time_s = g.air_table.time_s
             self.gun_recharging = True
             self.bullet_count = 0
-            # At the beginning of the charging period, find a new target. This gives a human player an indication
-            # of what the drone is targeting. And since this is at the beginning of the gun charging period, it gives
-            # the player some time for evasive maneuvers.
+            # At the beginning of the charging period, find a new target. This gives a
+            # human player an indication of what the drone is targeting. And since this is
+            # at the beginning of the gun charging period, it gives the player some time
+            # for evasive maneuvers.
             if self.client.drone:
                 self.findNewTarget()
     
         # If recharged.
         if (self.gun_recharging and (g.air_table.time_s - self.gun_recharge_start_time_s) > self.gun_recharge_wait_s):
             self.gun_recharging = False
-            # If the puck the drone is aiming at has been destroyed, find a new target before starting to shoot.
+            # If the puck the drone is aiming at has been destroyed, find a new target
+            # before starting to shoot.
             if self.client.drone and not (self.targetPuck in g.air_table.target_pucks):
                 self.findNewTarget()
                 
     def fire_gun(self):
         bullet_radius_m = 0.05
-        # Set the initial position of the bullet so that it clears (doesn't collide with) the host puck.
+        # Set the initial position of the bullet so that it clears (doesn't collide with)
+        # the host puck.
         initial_position_2d_m = (self.puck.pos_2d_m +
                                 (self.direction_2d_m * (1.1 * self.puck.radius_m + 1.1 * bullet_radius_m)) )
         
-        # Relative velocity of the bullet: the bullet velocity as seen from the host puck. This is the
-        # speed of the bullet relative to the motion of the host puck (host velocity BEFORE the firing of 
-        # the bullet).
+        # Relative velocity of the bullet: the bullet velocity as seen from the host puck.
+        # This is the speed of the bullet relative to the motion of the host puck (host
+        # velocity BEFORE the firing of the bullet).
         bullet_relative_vel_2d_mps = self.direction_2d_m * self.bullet_speed_mps
         
         # Absolute velocity of the bullet
@@ -623,16 +640,16 @@ class Gun( RotatingTube):
                                    
                                    
 class Spring:
-    def __init__(self, p1, p2, length_m=3.0, strength_Npm=0.5, color=THECOLORS["yellow"], width_m=0.025, c_damp=0.5, c_drag=0.0):
+    def __init__(self, p1, p2, length_m=3.0, strength_Npm=0.5, pin_radius_m=0.05,
+        color=THECOLORS["dodgerblue"], width_m=0.025, c_damp=0.5, c_drag=0.0):
         
-        # Optionally this spring can have one end pinned to a vector point. Do this by passing in p2 as a vector.
+        # Optionally this spring can have one end pinned to a vector point. Do this by
+        # passing in p2 as a vector.
         if (p2.__class__.__name__ == 'Vec2D'):
-            # Create a point puck at the pinning location.
-            # The location of this point puck will never change because
-            # it is not in the pucks list that is processed by the
-            # physics engine.
-            p2 = Puck( p2, 1.0, 1.0, pin=True)
-            p2.vel_2d_mps = Vec2D(0.0,0.0)
+            # Create a point puck at the pinning location. The location of this point puck
+            # will never change because it is not in the pucks list that is processed by
+            # the physics engine.
+            p2 = Puck( p2, pin_radius_m, 1.0, pin=True, border_px=0, color=THECOLORS['white'])
             length_m = 0.0
         
         self.p1 = p1
@@ -681,10 +698,11 @@ class Spring:
         # Net force by both spring and damper
         SprDamp_force_2d_N = spring_force_on_1_2d_N - damper_force_on_1_N
         
-        # This force acts in opposite directions for each of the two pucks. Notice the "+=" here, this
-        # is an aggregate across all the springs. This aggregate MUST be reset (zeroed) after the movements are
-        # calculated. So by the time you've looped through all the springs, you get the NET force, on each puck,
-        # applied by all the individual springs.
+        # This force acts in opposite directions for each of the two pucks. Notice the
+        # "+=" here, this is an aggregate across all the springs. This aggregate MUST be
+        # reset (zeroed) after the movements are calculated. So by the time you've looped
+        # through all the springs, you get the NET force, on each puck, applied by all the
+        # individual springs.
         self.p1.SprDamp_force_2d_N += SprDamp_force_2d_N * (+1)
         self.p2.SprDamp_force_2d_N += SprDamp_force_2d_N * (-1)
         
@@ -703,9 +721,9 @@ class Spring:
         return width_m
     
     def draw(self):
-        # Change the width to indicate the stretch or compression in the spring. Note, it's good to 
-        # do this outside of the main calc loop (using the rendering timer). No need to do all this each
-        # time step.
+        # Change the width to indicate the stretch or compression in the spring. Note,
+        # it's good to do this outside of the main calc loop (using the rendering timer).
+        # No need to do all this each time step.
         
         width_m = self.width_to_draw_m()
         
@@ -728,3 +746,5 @@ class Spring:
                                                                        g.env.ConvertWorldToScreen(self.p2.pos_2d_m))
         else:
             pygame.draw.polygon(g.game_window.surface, self.color, self.spring_vertices_2d_px)
+
+        if self.p2.pin: self.p2.draw()

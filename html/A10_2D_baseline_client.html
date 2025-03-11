@@ -119,7 +119,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">K_c</span><span class="p">,</span> <span class="n">K_1</span><span class="p">,</span> <span class="n">K_2</span><span class="p">,</span> <span class="n">K_3</span><span class="p">,</span>
     <span class="n">K_a</span><span class="p">,</span> <span class="n">K_s</span><span class="p">,</span> <span class="n">K_d</span><span class="p">,</span> <span class="n">K_w</span><span class="p">,</span>
     <span class="n">K_j</span><span class="p">,</span> <span class="n">K_k</span><span class="p">,</span> <span class="n">K_l</span><span class="p">,</span> <span class="n">K_i</span><span class="p">,</span> <span class="n">K_SPACE</span><span class="p">,</span>
-    <span class="n">K_LSHIFT</span><span class="p">,</span> <span class="n">K_t</span>
+    <span class="n">K_LSHIFT</span><span class="p">,</span> <span class="n">K_RSHIFT</span><span class="p">,</span> <span class="n">K_t</span><span class="p">,</span> <span class="n">K_TAB</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pygame.color</span> <span class="kn">import</span> <span class="n">THECOLORS</span>
 
@@ -175,8 +175,15 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_SPACE</span><span class="p">):</span>
                 <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39; &#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
                 
-            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_LSHIFT</span><span class="p">):</span>
-                <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;ls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_LSHIFT</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_RSHIFT</span><span class="p">):</span>
+                <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;lrs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span> <span class="c1"># left or right shift key</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_TAB</span> <span class="ow">and</span> <span class="p">(</span><span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;lrs&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;socl&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;T&#39;</span><span class="p">):</span>
+                    <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;socl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span> <span class="c1"># select-off-center lock</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;socl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;select-off-center lock =&quot;</span><span class="p">,</span> <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;socl&#39;</span><span class="p">])</span>
+
             <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_t</span><span class="p">):</span>
                 <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
             
@@ -201,8 +208,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_SPACE</span><span class="p">):</span>
                 <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39; &#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
                 
-            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_LSHIFT</span><span class="p">):</span>
-                <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;ls&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_LSHIFT</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_RSHIFT</span><span class="p">):</span>
+                <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;lrs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
+
             <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_t</span><span class="p">):</span>
                 <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;U&#39;</span>
         
@@ -262,12 +270,14 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="c1"># Initialize client state dictionary.</span>
     <span class="n">client_state</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ID&#39;</span><span class="p">:</span> <span class="n">client</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-                    <span class="s1">&#39;mXY&#39;</span><span class="p">:(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;mBd&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;mB&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
-                    <span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> 
-                    <span class="s1">&#39;j&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;m&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;f&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span>
-                    <span class="s1">&#39;t&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;ls&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">}</span>
+        <span class="s1">&#39;mXY&#39;</span><span class="p">:(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;mBd&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;mB&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;j&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;l&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;i&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;m&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;f&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;t&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> 
+        <span class="s1">&#39;lrs&#39;</span><span class="p">:</span><span class="s1">&#39;U&#39;</span><span class="p">,</span> <span class="s1">&#39;socl&#39;</span><span class="p">:</span><span class="s1">&#39;F&#39;</span>
+    <span class="p">}</span>
         
     <span class="n">framerate_limit</span> <span class="o">=</span> <span class="mi">120</span>
     <span class="n">fr_avg</span> <span class="o">=</span> <span class="n">RunningAvg</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">pygame</span><span class="p">,</span> <span class="n">colorScheme</span><span class="o">=</span><span class="s1">&#39;light&#39;</span><span class="p">)</span>
