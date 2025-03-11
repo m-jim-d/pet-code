@@ -261,7 +261,7 @@ def make_some_pucks(demo):
         g.env.demo_variations[5]['count'] = len(initial_states)
         state = initial_states[g.env.demo_variations[5]['index']]
         
-        # No walls:
+        # no fence:
         g.air_table.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
 
         radius_m = 1.5
