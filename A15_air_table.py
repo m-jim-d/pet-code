@@ -206,6 +206,63 @@ class AirTable:
             f"  angle = {throw['angle']:.1f}  speed = {throw['speed_mps']:.1f}"
         )
 
+    def targetJello_variations(self):
+        initial_states = [
+            {'n_x':4,'n_y':3,'spr':True,'pa_i':1,'pb_i':10},
+            {'n_x':4,'n_y':3,'spr':False},
+
+            {'n_x':5,'n_y':3,'spr':True,'pa_i':1,'pb_i':13},
+            {'n_x':5,'n_y':3,'spr':False},
+
+            {'n_x':4,'n_y':2,'spr':True,'pa_i':3,'pb_i': 4},
+            {'n_x':4,'n_y':2,'spr':False},
+
+            {'n_x':4,'n_y':4,'spr':True,'pa_i':0,'pb_i':15,'angle':0},
+            {'n_x':4,'n_y':4,'spr':False,'angle':0},
+
+            {'n_x':5,'n_y':5,'spr':True,'pa_i':7,'pb_i':17},
+            {'n_x':5,'n_y':5,'spr':False}
+        ]
+        g.env.demo_variations[9]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[9]['index']]
+        
+        if 'angle' in state:
+            angle = state['angle']
+        else:
+            angle = 45
+        g.air_table.buildJelloGrid( angle=angle, speed=0, 
+            grid_x_n=state['n_x'], grid_y_n=state['n_y'],
+            pos_initial_2d_m=Vec2D(4.0, 2.5), 
+            puck_drag=1.5, show_health=True, coef_rest=0.85
+        )
+
+        # Center the grid in the window.
+        com_2d_m = Vec2D(0,0)
+        for puck in g.air_table.pucks:
+            com_2d_m += puck.pos_2d_m
+        com_2d_m = com_2d_m / len(g.air_table.pucks)
+        shift_2d_m = g.game_window.center_2d_m - com_2d_m
+        for puck in g.air_table.pucks:
+            puck.set_pos_and_vel(puck.pos_2d_m + shift_2d_m)
+
+        # Pin two pucks of the jello grid.
+        if state['spr']:
+            Spring(g.air_table.pucks[state['pa_i']], Vec2D(0.3, 0.3), color=THECOLORS['yellow'],
+                length_m=0.0, strength_Npm=800.0, width_m=0.02)
+            Spring(g.air_table.pucks[state['pb_i']], Vec2D(9.7, 8.4), color=THECOLORS['yellow'],
+                length_m=0.0, strength_Npm=800.0, width_m=0.02)
+
+        g.env.clients["C5"].active = True
+        g.env.clients["C5"].drone = True
+        g.air_table.buildControlledPuck( x_m=2.0, y_m=8.0, r_m=0.45, client_name="C5")
+
+        g.env.clients["C6"].active = True
+        g.env.clients["C6"].drone = True
+        g.air_table.buildControlledPuck( x_m=8.5, y_m=1.5, r_m=0.45, client_name="C6")
+
+        g.env.set_gravity("off")
+    
+
     """
     The following methods are used (only) by the circular versions of the air table (Circular and PerfectKiss).
     """

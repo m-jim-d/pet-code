@@ -327,10 +327,11 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="c1"># Update our vectors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pos_2d_m</span> <span class="o">=</span> <span class="n">pos_2d_m</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vel_2d_mps</span> <span class="o">=</span> <span class="n">vel_2d_m</span>
-        
-        <span class="c1"># Update Box2D body</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="n">pos_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">pos_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">linearVelocity</span> <span class="o">=</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="n">vel_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">vel_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;box2d&#39;</span><span class="p">):</span>
+            <span class="c1"># Update Box2D body</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="n">pos_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">pos_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span><span class="o">.</span><span class="n">linearVelocity</span> <span class="o">=</span> <span class="n">b2Vec2</span><span class="p">(</span><span class="n">vel_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">vel_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;box2d&#39;</span><span class="p">):</span>

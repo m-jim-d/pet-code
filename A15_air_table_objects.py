@@ -219,10 +219,11 @@ class Puck:
         # Update our vectors
         self.pos_2d_m = pos_2d_m
         self.vel_2d_mps = vel_2d_m
-        
-        # Update Box2D body
-        self.b2d_body.position = b2Vec2(pos_2d_m.x, pos_2d_m.y)
-        self.b2d_body.linearVelocity = b2Vec2(vel_2d_m.x, vel_2d_m.y)
+
+        if (g.air_table.engine == 'box2d'):
+            # Update Box2D body
+            self.b2d_body.position = b2Vec2(pos_2d_m.x, pos_2d_m.y)
+            self.b2d_body.linearVelocity = b2Vec2(vel_2d_m.x, vel_2d_m.y)
 
     def delete(self):
         if (g.air_table.engine == 'box2d'):

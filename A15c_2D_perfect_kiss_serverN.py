@@ -170,13 +170,15 @@ def make_some_pucks(demo):
         for m in range(0, 6): 
             pinPoint_2d = Vec2D(2.0 + (m * 0.65), 4.5)
             tempPuck = Puck( pinPoint_2d, 0.25, density, color=THECOLORS["orange"], hit_limit=20, show_health=True)
-            Spring(tempPuck, pinPoint_2d, strength_Npm=300.0, width_m=0.02, c_drag=1.5)
+            Spring(tempPuck, pinPoint_2d, strength_Npm=300.0, 
+                pin_radius_m=0.03, width_m=0.02, c_drag=1.5)
         
         # Make a vertical column of pinned-spring pucks.
         for m in range(-3, 4):
             pinPoint_2d = Vec2D(2 + 6*0.65, 4.5 + m*0.65)
             tempPuck = Puck( pinPoint_2d, 0.25, density, color=THECOLORS["orange"], hit_limit=20, show_health=True)
-            Spring(tempPuck, pinPoint_2d, strength_Npm=300.0, width_m=0.02, c_drag=1.5)
+            Spring(tempPuck, pinPoint_2d, strength_Npm=300.0, 
+                pin_radius_m=0.03, width_m=0.02, c_drag=1.5)
         
         # One free standing puck
         Puck( Vec2D(9.0, 4.5), 0.7, density, color=THECOLORS["cyan"], hit_limit=20, c_drag=0.7, show_health=True)
@@ -185,22 +187,8 @@ def make_some_pucks(demo):
         g.air_table.throwJello_variations()  # Variations handled within method
 
     elif demo == 9:
-        g.air_table.coef_rest = 1.00
-        
-        g.air_table.buildJelloGrid( angle=45, speed=0, pos_initial_2d_m=Vec2D(4.0, 2.5), puck_drag=1.5, show_health=True, coef_rest=0.85)
+        g.air_table.targetJello_variations()
 
-        g.env.clients["C5"].active = True
-        g.env.clients["C5"].drone = True
-        g.air_table.buildControlledPuck( x_m=2.0, y_m=8.0, r_m=0.45, client_name="C5")
-
-        g.env.clients["C6"].active = True
-        g.env.clients["C6"].drone = True
-        g.air_table.buildControlledPuck( x_m=8.5, y_m=1.5, r_m=0.45, client_name="C6")
-
-        # Pin two corners of the jello grid.
-        Spring(g.air_table.pucks[ 1], Vec2D(0.3, 0.3), length_m=0.0, strength_Npm=800.0, width_m=0.02)
-        Spring(g.air_table.pucks[10], Vec2D(9.7, 8.4), length_m=0.0, strength_Npm=800.0, width_m=0.02)
-        
     elif demo == '1p':
         g.env.demo_variations['1p']['count'] = 1  # Basic pool shot, no penetration correction, no perfect kiss
         g.air_table.correct_for_puck_penetration = False
@@ -427,21 +415,7 @@ def make_some_pucks(demo):
         g.air_table.throwJello_variations()
 
     elif demo == 9:
-        g.air_table.coef_rest = 1.00
-        
-        g.air_table.buildJelloGrid( angle=45, speed=0, pos_initial_2d_m=Vec2D(4.0, 2.5), puck_drag=1.5, show_health=True, coef_rest=0.85)
-
-        g.env.clients["C5"].active = True
-        g.env.clients["C5"].drone = True
-        g.air_table.buildControlledPuck( x_m=2.0, y_m=8.0, r_m=0.45, client_name="C5")
-
-        g.env.clients["C6"].active = True
-        g.env.clients["C6"].drone = True
-        g.air_table.buildControlledPuck( x_m=8.5, y_m=1.5, r_m=0.45, client_name="C6")
-
-        # Pin two corners of the jello grid.
-        Spring(g.air_table.pucks[ 1], Vec2D(0.3, 0.3), length_m=0.0, strength_Npm=800.0, width_m=0.02)
-        Spring(g.air_table.pucks[10], Vec2D(9.7, 8.4), length_m=0.0, strength_Npm=800.0, width_m=0.02)
+        g.air_table.targetJello_variations()
         
     elif demo == '1p':
         g.air_table.correct_for_puck_penetration = False
