@@ -214,11 +214,14 @@ class AirTable:
             {'n_x':5,'n_y':3,'spr':True,'pa_i':1,'pb_i':13},
             {'n_x':5,'n_y':3,'spr':False},
 
-            {'n_x':4,'n_y':2,'spr':True,'pa_i':3,'pb_i': 4},
-            {'n_x':4,'n_y':2,'spr':False},
+            {'n_x':4,'n_y':2,'spr':True,'pa_i':3,'pb_i': 4, 'angle':90},
+            {'n_x':4,'n_y':2,'spr':False, 'angle':90},
 
             {'n_x':4,'n_y':4,'spr':True,'pa_i':0,'pb_i':15,'angle':0},
             {'n_x':4,'n_y':4,'spr':False,'angle':0},
+
+            {'n_x':3,'n_y':3,'spr':True,'pa_i':0,'pb_i':8,'angle':0},
+            {'n_x':3,'n_y':3,'spr':False,'angle':0},
 
             {'n_x':5,'n_y':5,'spr':True,'pa_i':7,'pb_i':17},
             {'n_x':5,'n_y':5,'spr':False}
@@ -246,11 +249,15 @@ class AirTable:
             puck.set_pos_and_vel(puck.pos_2d_m + shift_2d_m)
 
         # Pin two pucks of the jello grid.
+        if g.env.demo_variations[9]['index'] == 4:
+            k_Npm = 700.0
+        else:
+            k_Npm = 800.0
         if state['spr']:
             Spring(g.air_table.pucks[state['pa_i']], Vec2D(0.3, 0.3), color=THECOLORS['yellow'],
-                length_m=0.0, strength_Npm=800.0, width_m=0.02)
+                length_m=0.0, strength_Npm=k_Npm, width_m=0.02)
             Spring(g.air_table.pucks[state['pb_i']], Vec2D(9.7, 8.4), color=THECOLORS['yellow'],
-                length_m=0.0, strength_Npm=800.0, width_m=0.02)
+                length_m=0.0, strength_Npm=k_Npm, width_m=0.02)
 
         g.env.clients["C5"].active = True
         g.env.clients["C5"].drone = True
@@ -262,6 +269,11 @@ class AirTable:
 
         g.env.set_gravity("off")
     
+        g.game_window.update_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo_variations[9]['index'] + 1}" +
+            f"     grid = ({state['n_x']}, {state['n_y']})" +
+            f"     pinned = {state['spr']}     angle = {angle}"
+        )
 
     """
     The following methods are used (only) by the circular versions of the air table (Circular and PerfectKiss).
