@@ -216,9 +216,7 @@ def make_some_pucks(demo):
 
 def main():
     g.make_some_pucks = make_some_pucks
-    w_px = 900
-    h_px = math.ceil(w_px * (7/8)) # Demos are best at an aspect ratio of 7/8.
-    game_loop = GameLoop(engine_type="circular-perfectKiss", window_dimensions_px=(w_px,h_px))
+    game_loop = GameLoop(engine_type="circular-perfectKiss", window_width_px=900)
     game_loop.start(demo_index=7)
 
 #============================================================

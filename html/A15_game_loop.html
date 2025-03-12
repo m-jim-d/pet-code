@@ -138,7 +138,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">platform</span><span class="o">,</span> <span class="nn">subprocess</span>
-<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">pygame</span>
 
 <span class="kn">from</span> <span class="nn">A08_network</span> <span class="kn">import</span> <span class="n">GameServer</span><span class="p">,</span> <span class="n">RunningAvg</span>
@@ -150,7 +150,11 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
 <span class="k">class</span> <span class="nc">GameLoop</span><span class="p">:</span>
     <span class="c1"># window dimensions: (width_px, height_px)</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engine_type</span><span class="o">=</span><span class="s2">&quot;box2d&quot;</span><span class="p">,</span> <span class="n">window_dimensions_px</span><span class="o">=</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span><span class="mi">700</span><span class="p">)):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engine_type</span><span class="o">=</span><span class="s2">&quot;box2d&quot;</span><span class="p">,</span> <span class="n">window_width_px</span><span class="o">=</span><span class="mi">800</span><span class="p">):</span>
+        <span class="c1"># Demos are best at an aspect ratio of 8/7.        </span>
+        <span class="n">aspect_ration</span> <span class="o">=</span> <span class="mi">8</span><span class="o">/</span><span class="mi">7</span> <span class="c1"># width/height</span>
+        <span class="n">window_dimensions_px</span> <span class="o">=</span> <span class="p">(</span><span class="n">window_width_px</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">window_width_px</span> <span class="o">/</span> <span class="n">aspect_ration</span><span class="p">))</span>
+        
         <span class="n">pygame</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
         
         <span class="c1"># Create the first user/client and the methods for moving between the screen and the world.</span>

@@ -30,7 +30,7 @@ Usage:
 """
 
 import platform, subprocess
-import socket
+import socket, math
 import pygame
 
 from A08_network import GameServer, RunningAvg
@@ -42,7 +42,11 @@ import A15_globals as g
 
 class GameLoop:
     # window dimensions: (width_px, height_px)
-    def __init__(self, engine_type="box2d", window_dimensions_px=(800,700)):
+    def __init__(self, engine_type="box2d", window_width_px=800):
+        # Demos are best at an aspect ratio of 8/7.        
+        aspect_ration = 8/7 # width/height
+        window_dimensions_px = (window_width_px, math.ceil(window_width_px / aspect_ration))
+        
         pygame.init()
         
         # Create the first user/client and the methods for moving between the screen and the world.
