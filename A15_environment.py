@@ -403,7 +403,7 @@ class GameWindow:
 
 class Environment:
     def __init__(self, screen_tuple_px, length_x_m):
-        self.screenSize_2d_px = Vec2D(round(screen_tuple_px[0]),round(screen_tuple_px[1]))
+        self.screenSize_2d_px = Vec2D(screen_tuple_px)
         self.viewOffset_2d_px = Vec2D(0,0)
         self.viewZoom = 1
         self.viewZoom_rate = 0.01

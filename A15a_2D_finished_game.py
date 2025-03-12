@@ -2,6 +2,8 @@
 
 # Filename: A15a_2D_finished_game.py
 
+import math
+
 from pygame.color import THECOLORS
 
 from A09_vec2d import Vec2D
@@ -178,7 +180,7 @@ def make_some_pucks(demo):
 def main():
     g.make_some_pucks = make_some_pucks
     w_px = 900
-    h_px = w_px * (7/8) # Demos are best at an aspect ratio of 7/8.
+    h_px = math.ceil(w_px * (7/8)) # Demos are best at an aspect ratio of 7/8.
     game_loop = GameLoop(engine_type="circular", window_dimensions_px=(w_px,h_px))
     game_loop.start(demo_index=7)
 

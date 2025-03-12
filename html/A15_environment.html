@@ -511,7 +511,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
 <span class="k">class</span> <span class="nc">Environment</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screen_tuple_px</span><span class="p">,</span> <span class="n">length_x_m</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">screenSize_2d_px</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">screen_tuple_px</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="nb">round</span><span class="p">(</span><span class="n">screen_tuple_px</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">screenSize_2d_px</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="n">screen_tuple_px</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewOffset_2d_px</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom_rate</span> <span class="o">=</span> <span class="mf">0.01</span>
