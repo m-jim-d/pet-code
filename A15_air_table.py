@@ -758,17 +758,22 @@ class Box2DAirTable(AirTable):
         width_m = 0.05 # 0.05
         fenceColor = THECOLORS['orangered1']
         border_px = 2
-        nudge_m = g.env.px_to_m * 1 # nudge of 1 pixel
+        # A nudge of 1 pixel is applied to top and left walls to keep them out of view.
+        nudge_m = g.env.px_to_m * 1 
         # Left and right walls
-        if onoff['L']: Wall( Vec2D( self.walls_dic["L_m"] - (width_m + nudge_m), self.walls_dic["T_m"]/2.0), 
-            width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
-        if onoff['R']: Wall( Vec2D( self.walls_dic["R_m"] + width_m, self.walls_dic["T_m"]/2.0), 
-            width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
+        if onoff['L']: 
+            Wall( Vec2D( self.walls_dic["L_m"] - (width_m + nudge_m), self.walls_dic["T_m"]/2.0), 
+                width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
+        if onoff['R']: 
+            Wall( Vec2D( self.walls_dic["R_m"] + width_m, self.walls_dic["T_m"]/2.0), 
+                width_m, self.walls_dic["T_m"]/2.0, fence=True, border_px=border_px, color=fenceColor)
         # Top and bottom walls
-        if onoff['T']: Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["T_m"] + (width_m + nudge_m)), 
-            self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
-        if onoff['B']: Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["B_m"] - width_m), 
-            self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
+        if onoff['T']: 
+            Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["T_m"] + (width_m + nudge_m)), 
+                self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
+        if onoff['B']: 
+            Wall( Vec2D( self.walls_dic["R_m"]/2.0, self.walls_dic["B_m"] - width_m), 
+                self.walls_dic["R_m"]/2.0, width_m, fence=True, border_px=border_px, color=fenceColor)
 
     def checkForPuckAtThisPosition_b2d(self, x_px_or_tuple, y_px = None):
         # This is used for cursor selection at a particular point on the puck.  #b2d

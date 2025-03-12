@@ -41,16 +41,15 @@ from A15_environment import Client, GameWindow, Environment, signInOut_function,
 import A15_globals as g
 
 class GameLoop:
-    def __init__(self, engine_type="box2d"):
+    # window dimensions: (width_px, height_px)
+    def __init__(self, engine_type="box2d", window_dimensions_px=(800,700)):
         pygame.init()
-
-        window_dimensions_px = (800, 700)  # window_width_px, window_height_px
         
         # Create the first user/client and the methods for moving between the screen and the world.
         self.env = Environment(window_dimensions_px, 10.0) # 10m in along the x axis.
         g.env = self.env
 
-        self.game_window = GameWindow(window_dimensions_px, 'Air Table Server')
+        self.game_window = GameWindow('Air Table Server')
         g.game_window = self.game_window
 
         # Define the Left, Right, Bottom, and Top boundaries of the game window.

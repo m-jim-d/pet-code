@@ -435,7 +435,9 @@ def make_some_pucks(demo):
 
 def main():
     g.make_some_pucks = make_some_pucks
-    game_loop = GameLoop(engine_type="box2d")
+    w_px = 900
+    h_px = w_px * (7/8) # demos are best at an aspect ratio of 7/8.
+    game_loop = GameLoop(engine_type="box2d", window_dimensions_px=(w_px,h_px))
     game_loop.start(demo_index=7)
 
 #============================================================

@@ -310,7 +310,7 @@ class Client:
             radius_px = 4  # * g.env.viewZoom
             pygame.draw.circle(g.game_window.surface, THECOLORS['red'], line_points[0], radius_px, 2)
 
-            # Draw green/red indicator circles (half radius) when applying torque.
+            # Draw green/red indicator circles when applying torque.
             if (g.air_table.engine == "box2d") and (self.key_t == "D"):
                 if self.selected_puck.rect_fixture:
                     indicator_r_px = self.selected_puck.aspect_ratio * self.selected_puck.radius_px
@@ -341,22 +341,23 @@ class Client:
 
 
 class GameWindow:
-    def __init__(self, screen_tuple_px, title):
-        self.width_px = screen_tuple_px[0]
-        self.height_px = screen_tuple_px[1]
+    def __init__(self, title):
+        self.width_px = g.env.screenSize_2d_px.x
+        self.height_px = g.env.screenSize_2d_px.y
         
         # The initial World position vector of the Upper Right corner of the screen.
-        # Yes, that's right, y_px = 0 for UR.
+        # Yes, y_px = 0 for UR.
         self.UR_2d_m = g.env.ConvertScreenToWorld(Vec2D(self.width_px, 0))
 
         self.center_2d_m = Vec2D(self.UR_2d_m.x / 2.0, self.UR_2d_m.y / 2.0)
         
-        print(f"Screen dimensions in meters: {self.UR_2d_m.x}, {self.UR_2d_m.y}")
-        print(f"One pixel = {g.env.px_to_m * 1} meters")
+        print(f"Screen dimensions in pixels: {g.env.screenSize_2d_px.x:.0f}, {g.env.screenSize_2d_px.y:.0f}")
+        print(f"Screen dimensions in meters: {self.UR_2d_m.x:.2f}, {self.UR_2d_m.y:.2f}")
+        print(f"One pixel = {g.env.px_to_m * 1:.4f} meters")
         
         # Create a reference to the display surface object. This is a pygame "surface".
         # Screen dimensions in pixels (tuple)
-        self.surface = pygame.display.set_mode(screen_tuple_px)
+        self.surface = pygame.display.set_mode(g.env.screenSize_2d_px.tuple())
 
         self.update_caption(title)
         
@@ -390,23 +391,25 @@ class GameWindow:
             fill = 6
             time_string = f"{numeric_value:{fill}.2f}"
             txt_surface = font_object.render( time_string, True, THECOLORS["white"])
-            self.surface.blit( txt_surface, [605, 11])
+            x_position_px = (self.width_px - 800) + 605
+            self.surface.blit( txt_surface, [x_position_px, 11])
         elif mode=='generalTimer':
             fill = 5
             time_string = f"{numeric_value:{fill}.1f}"
             txt_surface = font_object.render( time_string, True, THECOLORS["white"])
-            self.surface.blit( txt_surface, [710, 5])
+            x_position_px = (self.width_px - 800) + 710
+            self.surface.blit( txt_surface, [x_position_px, 5])
 
 
 class Environment:
-    def __init__(self, screenSize_px, length_x_m):
-        self.screenSize_px = Vec2D(screenSize_px)
+    def __init__(self, screen_tuple_px, length_x_m):
+        self.screenSize_2d_px = Vec2D(round(screen_tuple_px[0]),round(screen_tuple_px[1]))
         self.viewOffset_2d_px = Vec2D(0,0)
         self.viewZoom = 1
         self.viewZoom_rate = 0.01
     
-        self.px_to_m = length_x_m/float(self.screenSize_px.x)
-        self.m_to_px = (float(self.screenSize_px.x)/length_x_m)
+        self.px_to_m = length_x_m/float(self.screenSize_2d_px.x)
+        self.m_to_px = (float(self.screenSize_2d_px.x)/length_x_m)
         
         self.client_colors = setClientColors()
                               
@@ -489,13 +492,13 @@ class Environment:
 
     def ConvertScreenToWorld(self, point_2d_px):
         x_m = (                       point_2d_px.x + self.viewOffset_2d_px.x) / (self.m_to_px * self.viewZoom)
-        y_m = (self.screenSize_px.y - point_2d_px.y + self.viewOffset_2d_px.y) / (self.m_to_px * self.viewZoom)
+        y_m = (self.screenSize_2d_px.y - point_2d_px.y + self.viewOffset_2d_px.y) / (self.m_to_px * self.viewZoom)
         return Vec2D( x_m, y_m)
 
     def ConvertWorldToScreen(self, point_2d_m):
         x_px = (point_2d_m.x * self.m_to_px * self.viewZoom) - self.viewOffset_2d_px.x
         y_px = (point_2d_m.y * self.m_to_px * self.viewZoom) - self.viewOffset_2d_px.y
-        y_px = self.screenSize_px.y - y_px
+        y_px = self.screenSize_2d_px.y - y_px
 
         # Return a tuple of integers.
         return Vec2D(x_px, y_px, "int").tuple()
