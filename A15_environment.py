@@ -285,9 +285,10 @@ class Client:
             if (self.key_t == 'D'):
                 if (self.selected_puck.b2d_body.angularVelocity < 200.0):
                     if (self.key_shift == 'D'):
-                        spin_direction = -1.0
+                        spin_direction = +1.0 # Counter clockwise (positive torgue)
+                    
                     else:
-                        spin_direction = +1.0
+                        spin_direction = -1.0 # Clockwise (negative torque)
                     self.selected_puck.cursorString_torque_force_Nm = 10.0 * self.selected_puck.mass_kg * spin_direction
 
     def calc_string_forces_on_pucks(self):
@@ -310,11 +311,16 @@ class Client:
             pygame.draw.circle(g.game_window.surface, THECOLORS['red'], line_points[0], radius_px, 2)
 
             # Draw green/red indicator circles (half radius) when applying torque.
-            if (g.air_table.engine == "box2d"):
-                if (self.key_t == "D" and self.key_shift == "U"):
-                    pygame.draw.circle(g.game_window.surface, THECOLORS['green'], line_points[0], self.selected_puck.radius_px/2, 2)
-                elif (self.key_t == "D" and self.key_shift == "D"):
-                    pygame.draw.circle(g.game_window.surface, THECOLORS['red'], line_points[0], self.selected_puck.radius_px/2, 2)
+            if (g.air_table.engine == "box2d") and (self.key_t == "D"):
+                if self.selected_puck.rect_fixture:
+                    indicator_r_px = self.selected_puck.aspect_ratio * self.selected_puck.radius_px
+                else:
+                    indicator_r_px = self.selected_puck.radius_px / 3.0
+                if self.key_shift == "U":
+                    indicator_color = THECOLORS['green']
+                elif self.key_shift == "D":
+                    indicator_color = THECOLORS['red']
+                pygame.draw.circle(g.game_window.surface, indicator_color, line_points[0], indicator_r_px, 4)
 
             pygame.draw.line(g.game_window.surface, self.cursor_color, line_points[0], line_points[1], 1)  # g.env.zoomLineThickness(1)
                     

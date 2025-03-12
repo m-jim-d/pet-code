@@ -223,6 +223,9 @@ class AirTable:
             {'n_x':3,'n_y':3,'spr':True,'pa_i':0,'pb_i':8,'angle':0},
             {'n_x':3,'n_y':3,'spr':False,'angle':0},
 
+            {'n_x':2,'n_y':2,'spr':True,'pa_i':0,'pb_i':3,'angle':0},
+            {'n_x':2,'n_y':2,'spr':False,'angle':0},
+
             {'n_x':5,'n_y':5,'spr':True,'pa_i':7,'pb_i':17},
             {'n_x':5,'n_y':5,'spr':False}
         ]
