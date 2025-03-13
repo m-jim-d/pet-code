@@ -806,8 +806,10 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">stop_physics</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">stop_physics</span>
                     <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">stop_physics</span><span class="p">):</span>
                         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">game_time_s</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">pygame</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;game loop is active again&quot;</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
+                        <span class="n">pygame</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
                         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;game loop is paused&quot;</span><span class="p">)</span>
                 
                 <span class="c1"># Set equal-interval physics (more stability for Jello Madness)</span>

@@ -698,8 +698,10 @@ class Environment:
                     g.air_table.stop_physics = not g.air_table.stop_physics
                     if (not g.air_table.stop_physics):
                         g.air_table.game_time_s = 0
+                        pygame.mouse.set_visible(False)
                         print("game loop is active again")
                     else:
+                        pygame.mouse.set_visible(True)
                         print("game loop is paused")
                 
                 # Set equal-interval physics (more stability for Jello Madness)
