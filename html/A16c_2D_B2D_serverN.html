@@ -156,6 +156,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Single variation</span>
 
     <span class="k">if</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
         <span class="c1">#    position       , r_m , density</span>
         <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">),</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;orange&quot;</span><span class="p">])</span>
         <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">6.0</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">),</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
@@ -164,6 +165,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">7.5</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">),</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
     
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
         <span class="n">initial_states</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span><span class="s2">&quot;p1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;rps&quot;</span><span class="p">:</span>  <span class="mf">4.0</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;brown&quot;</span><span class="p">]},</span>
              <span class="s2">&quot;p2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;rps&quot;</span><span class="p">:</span>  <span class="mf">2.0</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;tan&quot;</span><span class="p">]}},</span>
@@ -215,6 +217,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
         <span class="n">initial_states</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span><span class="s2">&quot;p1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;rps&quot;</span><span class="p">:</span>   <span class="mf">4.0</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;white&quot;</span><span class="p">]},</span>
              <span class="s2">&quot;p2&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;rps&quot;</span><span class="p">:</span> <span class="o">-</span><span class="mf">34.0</span><span class="p">,</span> <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;darkred&quot;</span><span class="p">]},</span>
@@ -279,6 +282,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
         <span class="n">initial_states</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span><span class="s1">&#39;w1&#39;</span><span class="p">:{</span><span class="s1">&#39;angle_d&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">0.17</span><span class="p">},</span><span class="s1">&#39;w2&#39;</span><span class="p">:{</span><span class="s1">&#39;angle_d&#39;</span><span class="p">:</span><span class="o">+</span><span class="mf">4.00</span><span class="p">}},</span>
             <span class="p">{</span><span class="s1">&#39;w1&#39;</span><span class="p">:{</span><span class="s1">&#39;angle_d&#39;</span><span class="p">:</span><span class="o">-</span><span class="mf">5.00</span><span class="p">},</span><span class="s1">&#39;w2&#39;</span><span class="p">:{</span><span class="s1">&#39;angle_d&#39;</span><span class="p">:</span><span class="o">+</span><span class="mf">2.00</span><span class="p">}},</span>
@@ -350,6 +354,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Spring-pinned pucks are placed in a regular-polygons arrangement. Pucks are placed</span>
 <span class="sd">        at at polygon radius, R = r_puck / sin(π/n). The spring pins are positioned closer</span>
@@ -415,6 +420,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
         <span class="n">initial_states</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span><span class="s1">&#39;three-pucks&#39;</span><span class="p">},</span>
             <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span><span class="s1">&#39;two-pucks&#39;</span><span class="p">}</span>
@@ -460,6 +466,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
         <span class="n">density</span> <span class="o">=</span> <span class="mf">0.8</span>
         <span class="c1">#                              , r_m , density</span>
         <span class="n">tempPuck</span> <span class="o">=</span> <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="mf">0.55</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> 
@@ -509,16 +516,17 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">drone</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildControlledPuck</span><span class="p">(</span> <span class="n">x_m</span><span class="o">=</span><span class="mf">8.5</span><span class="p">,</span> <span class="n">y_m</span><span class="o">=</span><span class="mf">7.0</span><span class="p">,</span> <span class="n">r_m</span><span class="o">=</span><span class="mf">0.55</span><span class="p">,</span> <span class="n">client_name</span><span class="o">=</span><span class="n">client_name</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
             
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">throwJello_variations</span><span class="p">()</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">targetJello_variations</span><span class="p">()</span>
     
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
         <span class="n">density</span> <span class="o">=</span> <span class="mf">0.7</span>
         <span class="n">width_m</span> <span class="o">=</span> <span class="mf">0.01</span>
         <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="mf">9.0</span>
@@ -531,8 +539,6 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
         <span class="c1"># Drop a circular instigator with some spin, to get the chain reaction started.</span>
         <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span> <span class="mf">0.06</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">rect_fixture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">angularVelocity_rps</span><span class="o">=-</span><span class="mi">10</span><span class="p">)</span>
-        
-        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing set up for this key.&quot;</span><span class="p">)</span>

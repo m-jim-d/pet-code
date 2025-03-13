@@ -48,6 +48,7 @@ def make_some_pucks(demo):
     g.env.demo_variations[demo]['count'] = 1  # Single variation
 
     if demo == 1:
+        g.env.set_gravity("off")
         #    position       , r_m , density
         Puck(Vec2D(2.5, 7.5), 0.25, 0.3, color=THECOLORS["orange"])
         Puck(Vec2D(6.0, 2.5), 0.45, 0.3)
@@ -56,6 +57,7 @@ def make_some_pucks(demo):
         Puck(Vec2D(7.5, 7.5), 0.95, 0.3)
     
     elif demo == 2:
+        g.env.set_gravity("off")
         initial_states = [
             {"p1": {"rps":  4.0, "color": THECOLORS["brown"]},
              "p2": {"rps":  2.0, "color": THECOLORS["tan"]}},
@@ -107,6 +109,7 @@ def make_some_pucks(demo):
         )
 
     elif demo == 3:
+        g.env.set_gravity("off")
         initial_states = [
             {"p1": {"rps":   4.0, "color": THECOLORS["white"]},
              "p2": {"rps": -34.0, "color": THECOLORS["darkred"]},
@@ -171,6 +174,7 @@ def make_some_pucks(demo):
         )
 
     elif demo == 4:
+        g.env.set_gravity("on")
         initial_states = [
             {'w1':{'angle_d':-0.17},'w2':{'angle_d':+4.00}},
             {'w1':{'angle_d':-5.00},'w2':{'angle_d':+2.00}},
@@ -242,6 +246,7 @@ def make_some_pucks(demo):
         )
 
     elif demo == 5:
+        g.env.set_gravity("off")
         """
         Spring-pinned pucks are placed in a regular-polygons arrangement. Pucks are placed
         at at polygon radius, R = r_puck / sin(π/n). The spring pins are positioned closer
@@ -307,6 +312,7 @@ def make_some_pucks(demo):
         )
 
     elif demo == 6:
+        g.env.set_gravity("off")
         initial_states = [
             {'type':'three-pucks'},
             {'type':'two-pucks'}
@@ -352,6 +358,7 @@ def make_some_pucks(demo):
         )
 
     elif demo == 7:
+        g.env.set_gravity("off")
         density = 0.8
         #                              , r_m , density
         tempPuck = Puck(Vec2D(4.0, 1.0), 0.55, density, 
@@ -401,16 +408,17 @@ def make_some_pucks(demo):
         g.env.clients[client_name].active = True
         g.env.clients[client_name].drone = True
         g.air_table.buildControlledPuck( x_m=8.5, y_m=7.0, r_m=0.55, client_name=client_name, sf_abs=False)
-
-        g.env.set_gravity("off")
             
     elif demo == 8:
+        g.env.set_gravity("on")
         g.air_table.throwJello_variations()
 
     elif demo == 9:
+        g.env.set_gravity("off")
         g.air_table.targetJello_variations()
     
     elif demo == 0:
+        g.env.set_gravity("on")
         density = 0.7
         width_m = 0.01
         aspect_ratio = 9.0
@@ -423,8 +431,6 @@ def make_some_pucks(demo):
 
         # Drop a circular instigator with some spin, to get the chain reaction started.
         Puck(Vec2D(0.1, 0.2), 0.06, density, rect_fixture=False, angularVelocity_rps=-10)
-        
-        g.env.set_gravity("on")
 
     else:
         print("Nothing set up for this key.")
