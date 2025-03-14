@@ -181,7 +181,7 @@ def main():
     background_color = THECOLORS["yellow"]
 
     # Font object for rendering text onto display surface.
-    font_keys = pygame.font.SysFont("Arial", 16)
+    font_keys = pygame.font.SysFont("Courier", 16) # Arial
     
     # For displaying a smoothed framerate.
     fr_avg = RunningAvg(100, pygame)
