@@ -80,8 +80,8 @@ class AirTable:
         # Same with the gun.
         tempPuck.gun = Gun( tempPuck, sf_abs=sf_abs)
 
-    def pinnedPuck(self, puck_position_2d_m, pin_position_2d_m=None, 
-        angle_d=0, radius_m=1.5, density=1.0):
+    def pinnedPuck(self, puck_position_2d_m, radius_m=1.5, density=1.0, angle_d=0,
+                         pin_position_2d_m=None, strength_Npm=200.0):
 
         if not pin_position_2d_m:
             pin_position_2d_m = puck_position_2d_m
@@ -93,7 +93,7 @@ class AirTable:
             angle_r=g.env.radians(angle_d)
         )
         Spring(p1, pin_position_2d_m, color=THECOLORS['dodgerblue'],
-            strength_Npm=200.0, width_m=0.03, c_drag=15.0, c_damp=15.0
+            strength_Npm=strength_Npm, width_m=0.03, c_drag=15.0, c_damp=15.0
         )
             
     def buildJelloGrid(self, angle: Union[int, Tuple[int, int]] = 0, 
@@ -218,7 +218,7 @@ class AirTable:
         )
 
         if g.env.demo_variations[8]['index'] == 6:
-            self.pinnedPuck(Vec2D(g.game_window.center_2d_m.x, 2.5))
+            self.pinnedPuck(Vec2D(g.game_window.center_2d_m.x, 2.5), strength_Npm=500.0)
 
         g.game_window.update_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[8]['index'] + 1}" +

@@ -288,7 +288,8 @@ def make_some_pucks(demo):
                 rotated_c_to_pin_2d_m = center_to_pin_2d_m.rotated(angle)
                 pin_position_2d_m = g.game_window.center_2d_m + rotated_c_to_pin_2d_m
 
-                g.air_table.pinnedPuck(puck_position_2d_m, pin_position_2d_m, radius_m=radius_m)
+                g.air_table.pinnedPuck(puck_position_2d_m, radius_m=radius_m, 
+                                       pin_position_2d_m=pin_position_2d_m)
 
         g.game_window.update_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[5]['index'] + 1}" +
