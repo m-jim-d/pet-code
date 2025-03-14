@@ -703,6 +703,7 @@ def main():
     print("Server IP address:", local_ip)
 
     server = GameServer(host='0.0.0.0', port=8888, 
+                        window_xy_px=window_dimensions_px,
                         update_function=custom_update, clientStates=env.clients, 
                         signInOut_function=signInOut_function)
 

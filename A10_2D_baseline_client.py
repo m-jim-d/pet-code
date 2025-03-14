@@ -155,6 +155,7 @@ def main():
     client.connect()
 
     mydisplay = pygame.display.set_mode(client.window_xy_px)
+    print(f"Screen dimensions from server: {client.window_xy_px}")
     
     if client.running and client.client_name is not None:
         pygame.display.set_caption( "Client: " + client.client_name)
