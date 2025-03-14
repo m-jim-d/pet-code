@@ -26,7 +26,7 @@ The environment supports multiple physics engines (circular, perfect-kiss, Box2D
 provides consistent coordinate transformations and user interaction across all modes.
 """
 
-import sys, os
+import sys, math
 
 import pygame
 # key constants
@@ -84,6 +84,7 @@ def custom_update(self, client_name, state_dict):
 
     self.CS_data[client_name].key_shift = state_dict['lrs']
 
+    # cursor selecting at off-center points
     if (state_dict['socl'] == 'T'):
         self.CS_data[client_name].select_offCenter_lock = True
     else:
@@ -455,6 +456,9 @@ class Environment:
     def px_from_m(self, dx_m):
         return dx_m * self.m_to_px * self.viewZoom
     
+    def radians(self, degrees):
+        return degrees * math.pi/180.0
+
     # Convert from pixels to meters
     # Note: still floating values here
     def m_from_px(self, dx_px):

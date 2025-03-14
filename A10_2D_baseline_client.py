@@ -146,16 +146,15 @@ def main():
 
     pygame.init()
 
-    mydisplay = pygame.display.set_mode((800, 700))
     client_colors = setClientColors()
 
     # Clock to control the framerate.
     myclock = pygame.time.Clock()
 
-    client_ID = 0
-
     client = GameClient( host=args.serverIP, port=8888)
     client.connect()
+
+    mydisplay = pygame.display.set_mode(client.window_xy_px)
     
     if client.running and client.client_name is not None:
         pygame.display.set_caption( "Client: " + client.client_name)

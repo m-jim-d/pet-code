@@ -134,7 +134,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">provides consistent coordinate transformations and user interaction across all modes.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">math</span>
 
 <span class="kn">import</span> <span class="nn">pygame</span>
 <span class="c1"># key constants</span>
@@ -192,6 +192,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">key_shift</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;lrs&#39;</span><span class="p">]</span>
 
+    <span class="c1"># cursor selecting at off-center points</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;socl&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;T&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">CS_data</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">select_offCenter_lock</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
@@ -563,6 +564,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="k">def</span> <span class="nf">px_from_m</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx_m</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">dx_m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_to_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span>
     
+    <span class="k">def</span> <span class="nf">radians</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">degrees</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">degrees</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.0</span>
+
     <span class="c1"># Convert from pixels to meters</span>
     <span class="c1"># Note: still floating values here</span>
     <span class="k">def</span> <span class="nf">m_from_px</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx_px</span><span class="p">):</span>

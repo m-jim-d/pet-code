@@ -269,28 +269,12 @@ def make_some_pucks(demo):
         # no fence:
         g.air_table.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
 
-        radius_m = 1.5
-        density = 1.0
-
-        def pinnedPuck(puck_position_2d_m, pin_position_2d_m=None):
-            if not pin_position_2d_m:
-                pin_position_2d_m = puck_position_2d_m
-
-            p1 = Puck(puck_position_2d_m, radius_m, density,
-                color=THECOLORS["coral"],
-                friction=1.0, friction_fixed=True,
-                coef_rest=0.0, CR_fixed=True, border_px=5, 
-                angle_r=+0.0*math.pi/180.0
-            )
-            Spring(p1, pin_position_2d_m, color=THECOLORS['dodgerblue'],
-                strength_Npm=200.0, width_m=0.03, c_drag=15.0, c_damp=15.0
-            )
-
         n_pucks = state['n_pucks']
 
         if n_pucks == 1:
-            pinnedPuck(g.game_window.center_2d_m)
+            g.air_table.pinnedPuck(g.game_window.center_2d_m, radius_m=1.8)
         else:
+            radius_m = 1.5
             polygon_radius_m = radius_m / math.sin(math.pi/n_pucks)
             center_to_puck_2d_m = Vec2D(0.0, polygon_radius_m)
             pin_offset_m = 0.4
@@ -304,7 +288,7 @@ def make_some_pucks(demo):
                 rotated_c_to_pin_2d_m = center_to_pin_2d_m.rotated(angle)
                 pin_position_2d_m = g.game_window.center_2d_m + rotated_c_to_pin_2d_m
 
-                pinnedPuck(puck_position_2d_m, pin_position_2d_m)
+                g.air_table.pinnedPuck(puck_position_2d_m, pin_position_2d_m, radius_m=radius_m)
 
         g.game_window.update_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[5]['index'] + 1}" +

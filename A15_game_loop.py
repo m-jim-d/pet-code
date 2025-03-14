@@ -110,6 +110,7 @@ class GameLoop:
         self.server = GameServer(
             host='0.0.0.0', 
             port=8888,
+            window_xy_px=g.env.screenSize_2d_px.tuple(),
             update_function=custom_update,
             clientStates=self.env.clients,
             signInOut_function=signInOut_function

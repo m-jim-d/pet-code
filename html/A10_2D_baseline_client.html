@@ -254,16 +254,15 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="n">pygame</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 
-    <span class="n">mydisplay</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">((</span><span class="mi">800</span><span class="p">,</span> <span class="mi">700</span><span class="p">))</span>
     <span class="n">client_colors</span> <span class="o">=</span> <span class="n">setClientColors</span><span class="p">()</span>
 
     <span class="c1"># Clock to control the framerate.</span>
     <span class="n">myclock</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Clock</span><span class="p">()</span>
 
-    <span class="n">client_ID</span> <span class="o">=</span> <span class="mi">0</span>
-
     <span class="n">client</span> <span class="o">=</span> <span class="n">GameClient</span><span class="p">(</span> <span class="n">host</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">serverIP</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+
+    <span class="n">mydisplay</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">running</span> <span class="ow">and</span> <span class="n">client</span><span class="o">.</span><span class="n">client_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span> <span class="s2">&quot;Client: &quot;</span> <span class="o">+</span> <span class="n">client</span><span class="o">.</span><span class="n">client_name</span><span class="p">)</span>

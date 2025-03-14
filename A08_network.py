@@ -68,7 +68,7 @@ class GameServer:
     mouse movement latency and includes special handling for window drag operations.
     """
     
-    def __init__(self, host='localhost', port=8888, 
+    def __init__(self, host='localhost', port=8888, window_xy_px=(800,700),
                        update_function=None, clientStates=None, signInOut_function=None):
         """
         Initialize the server with state management and optional custom behavior.
@@ -92,6 +92,8 @@ class GameServer:
         self.running = True
         print(f"Server started on {host}:{port}")
         
+        self.window_xy_px = window_xy_px
+
         # Setup custom update handlers
         if update_function:
             self.custom_update = types.MethodType(update_function, self)
@@ -120,7 +122,7 @@ class GameServer:
                 break
             client_socket.recv(1024)  # Discard any queued data
     
-    def handle_client(self, client_socket, client_address, client_name):
+    def handle_client(self, client_socket, client_address, client_name, window_xy_px):
         """
         Process all communication with a connected client.
         
@@ -134,7 +136,7 @@ class GameServer:
         
         # Send client their assigned name
         try:
-            connection_info = {'client_name': client_name}
+            connection_info = {'client_name': client_name, 'window_xy_px':window_xy_px}
             client_socket.send(pickle.dumps(connection_info))
             if (self.signInOut_function):
                 self.signInOut_function(client_name, activate=True)
@@ -218,9 +220,9 @@ class GameServer:
                 # Create separate thread for this client's communication
                 client_thread = threading.Thread(
                     target=self.handle_client,
-                    args=(client_socket, client_address, client_name)
+                    args=(client_socket, client_address, client_name, self.window_xy_px)
                 )
-                client_thread.daemon = True  # Thread will close with main program
+                client_thread.daemon = True  # Thread will close with main program.
                 client_thread.start()
             
             except socket.error:
@@ -256,6 +258,7 @@ class GameClient:
         self.running = False
         self.client_name = "no-one" # default
         self.id = 0
+        self.window_xy_px = (800,700)
         
     def connect(self):
         """
@@ -277,6 +280,7 @@ class GameClient:
                 if data:
                     connection_info = pickle.loads(data)
                     self.client_name = connection_info['client_name']
+                    self.window_xy_px = connection_info['window_xy_px']
                     print(f"Connected to server as {self.client_name}")
                     self.id = int(self.client_name.strip("C"))
                     self.running = True

@@ -79,7 +79,23 @@ class AirTable:
         tempPuck.jet = Jet( tempPuck, sf_abs=sf_abs)
         # Same with the gun.
         tempPuck.gun = Gun( tempPuck, sf_abs=sf_abs)
-        
+
+    def pinnedPuck(self, puck_position_2d_m, pin_position_2d_m=None, 
+        angle_d=0, radius_m=1.5, density=1.0):
+
+        if not pin_position_2d_m:
+            pin_position_2d_m = puck_position_2d_m
+
+        p1 = Puck(puck_position_2d_m, radius_m, density,
+            color=THECOLORS["coral"],
+            friction=1.0, friction_fixed=True,
+            coef_rest=0.0, CR_fixed=True, border_px=5, 
+            angle_r=g.env.radians(angle_d)
+        )
+        Spring(p1, pin_position_2d_m, color=THECOLORS['dodgerblue'],
+            strength_Npm=200.0, width_m=0.03, c_drag=15.0, c_damp=15.0
+        )
+            
     def buildJelloGrid(self, angle: Union[int, Tuple[int, int]] = 0, 
                              pos_initial_2d_m: Vec2D = Vec2D(2.5, 1.0),
                              grid_x_n: int = 4, grid_y_n: int = 3,
@@ -184,6 +200,7 @@ class AirTable:
             {'x_n':5, 'y_n':3, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
             {'x_n':5, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
             {'x_n':6, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
+            {'x_n':6, 'y_n':2, 'ang_min': 90, 'ang_max':90, 'spd_min': 0,'spd_max':  0},
             {'x_n':3, 'y_n':3, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
             {'x_n':3, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
             {'x_n':2, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min': 0,'spd_max':200}
@@ -199,6 +216,9 @@ class AirTable:
             pos_initial_2d_m=Vec2D(3.0, 1.0), 
             grid_x_n=state['x_n'], grid_y_n=state['y_n']
         )
+
+        if g.env.demo_variations[8]['index'] == 6:
+            self.pinnedPuck(Vec2D(g.game_window.center_2d_m.x, 2.5))
 
         g.game_window.update_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[8]['index'] + 1}" +

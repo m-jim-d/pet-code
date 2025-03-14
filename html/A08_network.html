@@ -176,7 +176,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">    mouse movement latency and includes special handling for window drag operations.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">,</span> 
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">,</span> <span class="n">window_xy_px</span><span class="o">=</span><span class="p">(</span><span class="mi">800</span><span class="p">,</span><span class="mi">700</span><span class="p">),</span>
                        <span class="n">update_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">clientStates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">signInOut_function</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the server with state management and optional custom behavior.</span>
@@ -200,6 +200,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Server started on </span><span class="si">{</span><span class="n">host</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_xy_px</span> <span class="o">=</span> <span class="n">window_xy_px</span>
+
         <span class="c1"># Setup custom update handlers</span>
         <span class="k">if</span> <span class="n">update_function</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">custom_update</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MethodType</span><span class="p">(</span><span class="n">update_function</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
@@ -228,7 +230,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="k">break</span>
             <span class="n">client_socket</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>  <span class="c1"># Discard any queued data</span>
     
-    <span class="k">def</span> <span class="nf">handle_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_socket</span><span class="p">,</span> <span class="n">client_address</span><span class="p">,</span> <span class="n">client_name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">handle_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client_socket</span><span class="p">,</span> <span class="n">client_address</span><span class="p">,</span> <span class="n">client_name</span><span class="p">,</span> <span class="n">window_xy_px</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process all communication with a connected client.</span>
 <span class="sd">        </span>
@@ -242,7 +244,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         
         <span class="c1"># Send client their assigned name</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">connection_info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;client_name&#39;</span><span class="p">:</span> <span class="n">client_name</span><span class="p">}</span>
+            <span class="n">connection_info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;client_name&#39;</span><span class="p">:</span> <span class="n">client_name</span><span class="p">,</span> <span class="s1">&#39;window_xy_px&#39;</span><span class="p">:</span><span class="n">window_xy_px</span><span class="p">}</span>
             <span class="n">client_socket</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">connection_info</span><span class="p">))</span>
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signInOut_function</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">signInOut_function</span><span class="p">(</span><span class="n">client_name</span><span class="p">,</span> <span class="n">activate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -326,9 +328,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="c1"># Create separate thread for this client&#39;s communication</span>
                 <span class="n">client_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span>
                     <span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_client</span><span class="p">,</span>
-                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">client_socket</span><span class="p">,</span> <span class="n">client_address</span><span class="p">,</span> <span class="n">client_name</span><span class="p">)</span>
+                    <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">client_socket</span><span class="p">,</span> <span class="n">client_address</span><span class="p">,</span> <span class="n">client_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window_xy_px</span><span class="p">)</span>
                 <span class="p">)</span>
-                <span class="n">client_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Thread will close with main program</span>
+                <span class="n">client_thread</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Thread will close with main program.</span>
                 <span class="n">client_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
             
             <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
@@ -364,6 +366,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client_name</span> <span class="o">=</span> <span class="s2">&quot;no-one&quot;</span> <span class="c1"># default</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_xy_px</span> <span class="o">=</span> <span class="p">(</span><span class="mi">800</span><span class="p">,</span><span class="mi">700</span><span class="p">)</span>
         
     <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -385,6 +388,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
                     <span class="n">connection_info</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">client_name</span> <span class="o">=</span> <span class="n">connection_info</span><span class="p">[</span><span class="s1">&#39;client_name&#39;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">window_xy_px</span> <span class="o">=</span> <span class="n">connection_info</span><span class="p">[</span><span class="s1">&#39;window_xy_px&#39;</span><span class="p">]</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Connected to server as </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">client_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client_name</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>

@@ -218,6 +218,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">GameServer</span><span class="p">(</span>
             <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> 
             <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">,</span>
+            <span class="n">window_xy_px</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">screenSize_2d_px</span><span class="o">.</span><span class="n">tuple</span><span class="p">(),</span>
             <span class="n">update_function</span><span class="o">=</span><span class="n">custom_update</span><span class="p">,</span>
             <span class="n">clientStates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">,</span>
             <span class="n">signInOut_function</span><span class="o">=</span><span class="n">signInOut_function</span>
