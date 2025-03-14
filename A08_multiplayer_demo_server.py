@@ -168,7 +168,8 @@ def main():
         
     pygame.init()
 
-    server_display = pygame.display.set_mode((600,400))
+    window_dimensions_px = (600, 400) # window_width_px, window_height_px; 600,400
+    server_display = pygame.display.set_mode(window_dimensions_px)
     pygame.display.set_caption("SERVER: render state of network clients")
     
     # Hide the system cursor since we're drawing our own
@@ -206,6 +207,7 @@ def main():
     print("Server IP address:", local_ip)
 
     server = GameServer(host='0.0.0.0', port=8888, 
+                        window_xy_px=window_dimensions_px,
                         update_function=custom_update_example, clientStates=clients, 
                         signInOut_function=signInOut_function)
 

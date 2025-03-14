@@ -189,13 +189,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">background_color</span> <span class="o">=</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;yellow&quot;</span><span class="p">]</span> 
     <span class="n">client_colors</span> <span class="o">=</span> <span class="n">setClientColors</span><span class="p">()</span>
 
-    <span class="n">client_display</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">((</span><span class="mi">600</span><span class="p">,</span><span class="mi">400</span><span class="p">))</span>
-
     <span class="c1"># Instantiate clock to control the framerate.</span>
     <span class="n">client_clock</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Clock</span><span class="p">()</span>
-
-    <span class="c1"># background color of the game pad   </span>
-    <span class="n">client_display</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span> <span class="n">background_color</span><span class="p">)</span>
 
     <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Input client parameters.&#39;</span><span class="p">)</span>
     <span class="c1"># Example IP address used here; edit this line.</span>
@@ -205,7 +200,12 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                                   
     <span class="n">client</span> <span class="o">=</span> <span class="n">GameClient</span><span class="p">(</span> <span class="n">host</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">serverIP</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Screen dimensions from server: </span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     
+    <span class="n">client_display</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="p">)</span>
+    <span class="c1"># background color of the game pad   </span>
+    <span class="n">client_display</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span> <span class="n">background_color</span><span class="p">)</span>
+
     <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CLIENT </span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">client_name</span><span class="si">}</span><span class="s2"> : send mouse and keyboard state&quot;</span><span class="p">)</span>
 
     <span class="c1"># Initialize user state dictionary.</span>

@@ -81,13 +81,8 @@ def main():
     background_color = THECOLORS["yellow"] 
     client_colors = setClientColors()
 
-    client_display = pygame.display.set_mode((600,400))
-
     # Instantiate clock to control the framerate.
     client_clock = pygame.time.Clock()
-
-    # background color of the game pad   
-    client_display.fill( background_color)
 
     parser = argparse.ArgumentParser( description='Input client parameters.')
     # Example IP address used here; edit this line.
@@ -97,7 +92,12 @@ def main():
                                   
     client = GameClient( host=args.serverIP, port=8888)
     client.connect()
+    print(f"Screen dimensions from server: {client.window_xy_px}")
     
+    client_display = pygame.display.set_mode(client.window_xy_px)
+    # background color of the game pad   
+    client_display.fill( background_color)
+
     pygame.display.set_caption(f"CLIENT {client.client_name} : send mouse and keyboard state")
 
     # Initialize user state dictionary.
