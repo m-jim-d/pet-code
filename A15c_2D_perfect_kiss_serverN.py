@@ -60,6 +60,8 @@ def make_some_pucks(demo):
     g.air_table.timeDirection = 1
 
     g.air_table.perfect_kiss = False
+
+    g.env.set_gravity("off")
     
     if demo == 1:
         #    position       , r_m , density
@@ -184,6 +186,7 @@ def make_some_pucks(demo):
         Puck( Vec2D(9.0, 4.5), 0.7, density, color=THECOLORS["cyan"], hit_limit=20, c_drag=0.7, show_health=True)
                     
     elif demo == 8:
+        g.env.set_gravity("on")
         g.air_table.throwJello_variations()  # Variations handled within method
 
     elif demo == 9:

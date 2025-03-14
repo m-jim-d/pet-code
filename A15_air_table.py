@@ -332,10 +332,10 @@ class AirTable:
         return None
 
     """
-    Note that update_PuckSpeedAndPosition has a corresponding update_TotalForceVectorOnPuck method 
+    Note that update_TotalForce_Speed_Position has a corresponding update_TotalForceVectorOnPuck method 
     in the Box2DAirTable class (speed and position calculated by Box2D). 
     """
-    def update_PuckSpeedAndPosition(self, puck):
+    def update_TotalForce_Speed_Position(self, puck):
         # Net resulting force on the puck.
         puck_forces_2d_N = (self.g_2d_mps2 * puck.mass_kg) + (puck.SprDamp_force_2d_N + 
                                                               puck.jet_force_2d_N +

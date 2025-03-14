@@ -462,7 +462,7 @@ class AirTable:
                 return puck
         return None
 
-    def update_PuckSpeedAndPosition(self, puck, dt_s):
+    def update_TotalForce_Speed_Position(self, puck, dt_s):
         # Net resulting force on the puck.
         puck_forces_2d_N = (self.g_2d_mps2 * puck.mass_kg) + (puck.SprDamp_force_2d_N + 
                                                               puck.jet_force_2d_N +
@@ -1031,7 +1031,7 @@ def main():
                 
             # Apply forces to the pucks and calculate movements.
             for eachpuck in air_table.pucks:
-                air_table.update_PuckSpeedAndPosition( eachpuck, dt_physics_s)
+                air_table.update_TotalForce_Speed_Position( eachpuck, dt_physics_s)
             
             # Check for puck-wall and puck-puck collisions and make penetration corrections.
             air_table.check_for_collisions()

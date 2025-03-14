@@ -297,11 +297,12 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="n">eachspring</span><span class="o">.</span><span class="n">calc_spring_forces_on_pucks</span><span class="p">()</span>
                 
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;box2d&quot;</span><span class="p">):</span>
-                <span class="c1"># Apply forces to the pucks and calculate movements.</span>
+                <span class="c1"># Apply forces to the pucks.</span>
                 <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">update_TotalForceVectorOnPuck</span><span class="p">(</span><span class="n">eachpuck</span><span class="p">)</span>
                 
-                <span class="c1"># Advance by 1 dt step in Box2d</span>
+                <span class="c1"># Advance Box2d by a single time step (dt). This calculate movements and</span>
+                <span class="c1"># manages collisions.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">b2d_world</span><span class="o">.</span><span class="n">Step</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">dt_s</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
                 
                 <span class="c1"># Get new positions, translational velocities, and rotational speeds, from box2d</span>
@@ -314,7 +315,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Apply forces to the pucks and calculate movements.</span>
                 <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">update_PuckSpeedAndPosition</span><span class="p">(</span><span class="n">eachpuck</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">update_TotalForce_Speed_Position</span><span class="p">(</span><span class="n">eachpuck</span><span class="p">)</span>
                 
                 <span class="c1"># Check for puck-wall and puck-puck collisions and make penetration corrections.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">check_for_collisions</span><span class="p">()</span>
@@ -395,7 +396,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="c1"># below that of the physics calculations.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">render_timer_s</span> <span class="o">+=</span> <span class="n">dt_gameLoop_s</span>
             
-            <span class="c1"># Keep track of time for use in timestamping operations</span>
+            <span class="c1"># Keep track of time for use in timestamp operations</span>
             <span class="c1"># (determine the age of old bullets to be deleted)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">time_s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">dt_s</span>
             

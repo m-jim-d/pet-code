@@ -189,11 +189,12 @@ class GameLoop:
                 eachspring.calc_spring_forces_on_pucks()
                 
             if (self.air_table.engine == "box2d"):
-                # Apply forces to the pucks and calculate movements.
+                # Apply forces to the pucks.
                 for eachpuck in self.air_table.pucks:
                     self.air_table.update_TotalForceVectorOnPuck(eachpuck)
                 
-                # Advance by 1 dt step in Box2d
+                # Advance Box2d by a single time step (dt). This calculate movements and
+                # manages collisions.
                 self.air_table.b2d_world.Step( self.air_table.dt_s, 10, 10)
                 
                 # Get new positions, translational velocities, and rotational speeds, from box2d
@@ -206,7 +207,7 @@ class GameLoop:
             else:
                 # Apply forces to the pucks and calculate movements.
                 for eachpuck in self.air_table.pucks:
-                    self.air_table.update_PuckSpeedAndPosition(eachpuck)
+                    self.air_table.update_TotalForce_Speed_Position(eachpuck)
                 
                 # Check for puck-wall and puck-puck collisions and make penetration corrections.
                 self.air_table.check_for_collisions()
@@ -287,7 +288,7 @@ class GameLoop:
             # below that of the physics calculations.
             self.env.render_timer_s += dt_gameLoop_s
             
-            # Keep track of time for use in timestamping operations
+            # Keep track of time for use in timestamp operations
             # (determine the age of old bullets to be deleted)
             self.air_table.time_s += self.air_table.dt_s
             

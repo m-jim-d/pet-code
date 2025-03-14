@@ -42,6 +42,8 @@ def make_some_pucks(demo):
     # Each demo will have a single variation unless specified below.
     g.env.demo_variations[demo]['count'] = 1  # Single variation
 
+    g.env.set_gravity("off")
+
     if demo == 1:
         #    position       , r_m , density
         Puck(Vec2D(2.5, 7.5), 0.25, 0.3, color=THECOLORS["orange"])
@@ -165,6 +167,7 @@ def make_some_pucks(demo):
         Puck( Vec2D(9.0, 4.5), 0.7, density, color=THECOLORS["cyan"], hit_limit=20, c_drag=0.7, show_health=True)
                     
     elif demo == 8:
+        g.env.set_gravity("on")
         g.air_table.throwJello_variations()
 
     elif demo == 9:

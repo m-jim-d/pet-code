@@ -509,7 +509,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="k">return</span> <span class="n">puck</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="k">def</span> <span class="nf">update_PuckSpeedAndPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">puck</span><span class="p">,</span> <span class="n">dt_s</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_TotalForce_Speed_Position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">puck</span><span class="p">,</span> <span class="n">dt_s</span><span class="p">):</span>
         <span class="c1"># Net resulting force on the puck.</span>
         <span class="n">puck_forces_2d_N</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g_2d_mps2</span> <span class="o">*</span> <span class="n">puck</span><span class="o">.</span><span class="n">mass_kg</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">puck</span><span class="o">.</span><span class="n">SprDamp_force_2d_N</span> <span class="o">+</span> 
                                                               <span class="n">puck</span><span class="o">.</span><span class="n">jet_force_2d_N</span> <span class="o">+</span>
@@ -1066,7 +1066,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 
             <span class="c1"># Apply forces to the pucks and calculate movements.</span>
             <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                <span class="n">air_table</span><span class="o">.</span><span class="n">update_PuckSpeedAndPosition</span><span class="p">(</span> <span class="n">eachpuck</span><span class="p">,</span> <span class="n">dt_physics_s</span><span class="p">)</span>
+                <span class="n">air_table</span><span class="o">.</span><span class="n">update_TotalForce_Speed_Position</span><span class="p">(</span> <span class="n">eachpuck</span><span class="p">,</span> <span class="n">dt_physics_s</span><span class="p">)</span>
             
             <span class="c1"># Check for puck-wall and puck-puck collisions and make penetration corrections.</span>
             <span class="n">air_table</span><span class="o">.</span><span class="n">check_for_collisions</span><span class="p">()</span>
