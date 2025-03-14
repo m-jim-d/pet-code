@@ -556,10 +556,10 @@ def main():
 
     myclock = pygame.time.Clock()
 
-    window_dimensions_px = (800, 700)   #window_width_px, window_height_px
+    window_dimensions_px = (800, 700) # window_width_px, window_height_px
 
     # Create the first user/client and the methods for moving between the screen and the world.
-    env = Environment(window_dimensions_px, 10.0) # 10m in along the x axis.
+    env = Environment(window_dimensions_px, 10.0) # 10m along the x axis.
 
     game_window = GameWindow(window_dimensions_px, 'Vector Sandbox V.1')
 

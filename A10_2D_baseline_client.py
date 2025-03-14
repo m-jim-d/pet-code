@@ -154,9 +154,13 @@ def main():
     client = GameClient( host=args.serverIP, port=8888)
     client.connect()
 
+    # If the connection fails, the client's default window dimensions are used.
     mydisplay = pygame.display.set_mode(client.window_xy_px)
-    print(f"Screen dimensions from server: {client.window_xy_px}")
-    
+    if client.running:
+        print(f"Screen dimensions from server: {client.window_xy_px}")
+    else:
+        print(f"Default dimensions for client: {client.window_xy_px}")
+
     if client.running and client.client_name is not None:
         pygame.display.set_caption( "Client: " + client.client_name)
 

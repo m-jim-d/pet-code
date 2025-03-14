@@ -262,9 +262,13 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">client</span> <span class="o">=</span> <span class="n">GameClient</span><span class="p">(</span> <span class="n">host</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">serverIP</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 
+    <span class="c1"># If the connection fails, the client&#39;s default window dimensions are used.</span>
     <span class="n">mydisplay</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Screen dimensions from server: </span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    
+    <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Screen dimensions from server: </span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Default dimensions for client: </span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">running</span> <span class="ow">and</span> <span class="n">client</span><span class="o">.</span><span class="n">client_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span> <span class="s2">&quot;Client: &quot;</span> <span class="o">+</span> <span class="n">client</span><span class="o">.</span><span class="n">client_name</span><span class="p">)</span>
 

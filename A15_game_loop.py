@@ -49,8 +49,11 @@ class GameLoop:
         
         pygame.init()
         
-        # Create the first user/client and the methods for moving between the screen and the world.
-        self.env = Environment(window_dimensions_px, 10.0) # 10m in along the x axis.
+        # Create the first user/client and the methods for translating between screen and world.  
+        # The 10 parameter is in meters and indicates the the width of the world and establishes the
+        # relationship between screen pixels and world meters. Similar to the aspect ratio, currently, the
+        # positioning of the objects in the demos is best if this stays at 10.
+        self.env = Environment(window_dimensions_px, 10.0)
         g.env = self.env
 
         self.game_window = GameWindow('Air Table Server')
