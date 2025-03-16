@@ -343,57 +343,55 @@ def make_some_pucks(demo):
         )
 
     elif demo == 7:
-        g.env.set_gravity("off")
-        density = 0.8
-        #                              , r_m , density
-        tempPuck = Puck(Vec2D(4.0, 1.0), 0.55, density, 
-            color=THECOLORS["orange"], show_health=True, hit_limit=10
-        )
-        Spring(tempPuck, Vec2D(4.0, 1.0), strength_Npm=300.0, 
-            pin_radius_m=0.03, width_m=0.02, c_drag = 1.5)
-        
-        puck_position = Vec2D(0.0, g.game_window.UR_2d_m.y) + Vec2D(2.0, -2.0) # starting from upper left
-        tempPuck = Puck(puck_position, 1.4, density, 
-            angularVelocity_rps=0.5, rect_fixture=True, aspect_ratio=0.1, show_health=True
-        )
-        Spring(tempPuck, puck_position, strength_Npm=300.0, 
-            pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
+        def two_drone_special__rectangular():
+            density = 0.7
 
-        puck_position = Vec2D(8.5, 4.0)
-        tempPuck = Puck(puck_position, 1.4, density, 
-            angularVelocity_rps=0.5, rect_fixture=True, aspect_ratio=0.1, show_health=True
-        )
-        Spring(tempPuck, puck_position, strength_Npm=300.0, 
-            pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
-
-        # Make some pinned-spring pucks.
-        for m in range(0, 6): 
-            pinPoint_2d_m = Vec2D(2.0 + (m * 0.65), 4.0)
-            tempPuck = Puck(pinPoint_2d_m, 0.25, density, color=THECOLORS["orange"], show_health=True, hit_limit=15)
-            Spring(tempPuck, pinPoint_2d_m, strength_Npm=300.0, 
-                width_m=0.02, c_drag=1.5, pin_radius_m=0.03)
-        
-        # Make user/client controllable pucks
-        # for all the clients.
-        y_puck_position_m = 1.0
-        for client_name in g.env.clients:
-            client = g.env.clients[client_name]
-            if client.active and not client.drone:
-                # Box2D drag modeling is slightly different than that in the circular
-                # engines. So, c_drag set higher than the default value, 0.7.
-                g.air_table.buildControlledPuck( x_m=6.4, y_m=y_puck_position_m, r_m=0.45, client_name=client_name, sf_abs=False, c_drag=1.5)
-                y_puck_position_m += 1.2
-                        
-        # drone pucks
-        client_name = "C5"
-        g.env.clients[client_name].active = True
-        g.env.clients[client_name].drone = True
-        g.air_table.buildControlledPuck( x_m=1.0, y_m=1.0, r_m=0.55, client_name=client_name, sf_abs=False)
-        client_name = "C6"
-        g.env.clients[client_name].active = True
-        g.env.clients[client_name].drone = True
-        g.air_table.buildControlledPuck( x_m=8.5, y_m=7.0, r_m=0.55, client_name=client_name, sf_abs=False)
+            # a large pinned circular puck with a visible spoke
+            #                              , r_m , density
+            tempPuck = Puck(Vec2D(4.0, 1.0), 0.55, density, 
+                angularVelocity_rps=0.5, color=THECOLORS["orange"], show_health=True, hit_limit=10
+            )
+            Spring(tempPuck, Vec2D(4.0, 1.0), strength_Npm=300.0, 
+                pin_radius_m=0.03, width_m=0.02, c_drag = 1.5)
             
+            # two pinned rectangles
+            puck_position = Vec2D(0.0, g.game_window.UR_2d_m.y) + Vec2D(2.0, -2.0) # starting from upper left
+            tempPuck = Puck(puck_position, 1.4, density, 
+                angularVelocity_rps=0.5, rect_fixture=True, aspect_ratio=0.1, show_health=True
+            )
+            Spring(tempPuck, puck_position, strength_Npm=300.0, 
+                pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
+            puck_position = Vec2D(8.5, 4.0)
+            tempPuck = Puck(puck_position, 1.4, density, 
+                angularVelocity_rps=0.5, rect_fixture=True, aspect_ratio=0.1, show_health=True
+            )
+            Spring(tempPuck, puck_position, strength_Npm=300.0, 
+                pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
+
+            # row of small pinned pucks without spokes
+            for m in range(0, 6):
+                pinPoint_2d_m = Vec2D(2.0 + (m * 0.65), 4.0)
+                tempPuck = Puck(pinPoint_2d_m, 0.25, density, color=THECOLORS["orange"], 
+                                show_health=True, hit_limit=15, showSpoke=False)
+                Spring(tempPuck, pinPoint_2d_m, strength_Npm=300.0, 
+                    width_m=0.02, c_drag=1.5, pin_radius_m=0.03)
+            
+            # Make user/client controllable pucks for all the clients.
+            y_puck_position_m = 1.0
+            for client_name in g.env.clients:
+                client = g.env.clients[client_name]
+                if client.active and not client.drone:
+                    # Box2D drag modeling is slightly different than that in the circular
+                    # engines. So, c_drag set higher than the default value, 0.7.
+                    g.air_table.buildControlledPuck( x_m=6.4, y_m=y_puck_position_m, r_m=0.45, client_name=client_name, sf_abs=False, c_drag=1.5)
+                    y_puck_position_m += 1.2
+                            
+            # drone pucks
+            g.air_table.buildControlledPuck( x_m=1.0, y_m=1.0, r_m=0.55, client_name="C5", sf_abs=False, drone=True, bullet_age_limit_s=3.0)
+            g.air_table.buildControlledPuck( x_m=8.5, y_m=7.0, r_m=0.55, client_name="C6", sf_abs=False, drone=True, bullet_age_limit_s=3.0)
+        
+        g.air_table.puckPopper_variations(two_drone_special__rectangular)
+        
     elif demo == 8:
         g.env.set_gravity("on")
         g.air_table.throwJello_variations()

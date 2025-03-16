@@ -2,13 +2,15 @@
 
 # Filename: A15c_2D_perfect_kiss_serverN.py
 
-import math, random
+import random
 
 from pygame.color import THECOLORS
 
 from A09_vec2d import Vec2D
 from A15_air_table_objects import Puck, Spring
 from A15_game_loop import GameLoop
+
+from A15a_2D_finished_game import two_drone_special__circular
 
 import A15_globals as g
 
@@ -143,48 +145,8 @@ def make_some_pucks(demo):
             c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["gold"])
 
     elif demo == 7:
-        g.air_table.coef_rest = 1.00
-        
-        # Make user/client controllable pucks for all the active clients.
-        y_position_m = 1.0
-        
-        # Drone clients.
-        g.env.clients["C5"].active = True
-        g.env.clients["C5"].drone = True
-        g.env.clients["C6"].active = True
-        g.env.clients["C6"].drone = True
-        
-        # Arrange human-controlled pucks in a column.
-        for name in g.env.clients:
-            client = g.env.clients[name]
-            if client.active and (not client.drone):
-                g.air_table.buildControlledPuck( x_m=7.0, y_m=y_position_m, r_m=0.45, client_name=name, sf_abs=False)
-                y_position_m += 1.3
-        
-        # Position the drone-controlled pucks in specific locations.      
-        g.air_table.buildControlledPuck( x_m=3.0, y_m=7.0, r_m=0.55, client_name="C5", sf_abs=False)  
-        g.air_table.buildControlledPuck( x_m=3.0, y_m=1.0, r_m=0.55, client_name="C6", sf_abs=False)
-        
-        # Make some pucks that are not controllable.
-        density = 0.7
-        
-        # Make a horizontal row of pinned-spring pucks.
-        for m in range(0, 6): 
-            pinPoint_2d = Vec2D(2.0 + (m * 0.65), 4.5)
-            tempPuck = Puck( pinPoint_2d, 0.25, density, color=THECOLORS["orange"], hit_limit=20, show_health=True)
-            Spring(tempPuck, pinPoint_2d, strength_Npm=300.0, 
-                pin_radius_m=0.03, width_m=0.02, c_drag=1.5)
-        
-        # Make a vertical column of pinned-spring pucks.
-        for m in range(-3, 4):
-            pinPoint_2d = Vec2D(2 + 6*0.65, 4.5 + m*0.65)
-            tempPuck = Puck( pinPoint_2d, 0.25, density, color=THECOLORS["orange"], hit_limit=20, show_health=True)
-            Spring(tempPuck, pinPoint_2d, strength_Npm=300.0, 
-                pin_radius_m=0.03, width_m=0.02, c_drag=1.5)
-        
-        # One free standing puck
-        Puck( Vec2D(9.0, 4.5), 0.7, density, color=THECOLORS["cyan"], hit_limit=20, c_drag=0.7, show_health=True)
-                    
+        g.air_table.puckPopper_variations(two_drone_special__circular)
+
     elif demo == 8:
         g.env.set_gravity("on")
         g.air_table.throwJello_variations()  # Variations handled within method

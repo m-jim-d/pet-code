@@ -74,9 +74,9 @@ class Wall:
 
 class Puck:
     def __init__(self, pos_2d_m, radius_m, density_kgpm2, vel_2d_mps=Vec2D(0.0,0.0), 
-                       angle_r=math.pi/2, angularVelocity_rps=0,
+                       angle_r=math.pi/2, angularVelocity_rps=0, showSpoke=True,
                        c_drag=0.0, coef_rest=0.85, CR_fixed=False,
-                       hit_limit=50.0, show_health=False,
+                       hit_limit=50.0, show_health=False, age_limit_s=3.0,
                        color=THECOLORS["gray"], client_name=None, bullet=False, pin=False, border_px=3,
                        rect_fixture=False, aspect_ratio=1.0, friction=0.2, friction_fixed=False, c_angularDrag=0.0):
         
@@ -100,6 +100,7 @@ class Puck:
         self.vel_2d_mps = vel_2d_mps
         
         # Box2d puck
+        self.showSpoke = showSpoke
         self.angle_r = angle_r
         self.angularVelocity_rps = angularVelocity_rps
         
@@ -138,7 +139,7 @@ class Puck:
         # bullet nature
         self.bullet = bullet
         self.birth_time_s = g.air_table.time_s
-        self.age_limit_s = 3.0
+        self.age_limit_s = age_limit_s
         
         # Keep track of health.
         self.bullet_hit_count = 0
@@ -295,7 +296,7 @@ class Puck:
             
             if (g.air_table.engine == 'box2d' and not self.pin):
                 # If it's not a bullet and not a rectangle, draw a spoke to indicate rotational orientation.
-                if ((self.bullet == False) and (self.rect_fixture==False)):
+                if ((self.bullet == False) and (self.rect_fixture==False) and self.showSpoke):
                     # Shorten the spoke by a fraction of the thickness so that its end
                     # (and the blocky rendering) is hidden in the border.
                     reduction_m = g.env.px_to_m * self.border_thickness_px * 0.50
@@ -468,7 +469,7 @@ class Jet(RotatingTube):
                                 
 
 class Gun( RotatingTube):
-    def __init__(self, puck, sf_abs=True):
+    def __init__(self, puck, sf_abs=True, bullet_age_limit_s=3.0):
         # Associate the gun with the puck (referenced in the RotatingTube class).
         super().__init__(puck, sf_abs=sf_abs)
         
@@ -485,6 +486,7 @@ class Gun( RotatingTube):
         self.firing_delay_s = 0.1
         self.bullet_count = 0
         self.bullet_count_limit = 10
+        self.bullet_age_limit_s = bullet_age_limit_s
         self.gun_recharge_wait_s = 2.5
         self.gun_recharge_start_time_s = g.air_table.time_s
         self.gun_recharging = False
@@ -588,7 +590,8 @@ class Gun( RotatingTube):
         # Absolute velocity of the bullet
         bullet_absolute_vel_2d_mps = self.puck.vel_2d_mps + bullet_relative_vel_2d_mps
 
-        temp_bullet = Puck(initial_position_2d_m, bullet_radius_m, 0.3, vel_2d_mps=bullet_absolute_vel_2d_mps, bullet=True)
+        temp_bullet = Puck(initial_position_2d_m, bullet_radius_m, 0.3, vel_2d_mps=bullet_absolute_vel_2d_mps, 
+                           bullet=True, age_limit_s=self.bullet_age_limit_s)
         temp_bullet.color = self.client.cursor_color
         temp_bullet.client_name = self.puck.client_name
                 

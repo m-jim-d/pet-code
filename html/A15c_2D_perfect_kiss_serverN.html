@@ -110,13 +110,15 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
 <span class="c1"># Filename: A15c_2D_perfect_kiss_serverN.py</span>
 
-<span class="kn">import</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">random</span>
 
 <span class="kn">from</span> <span class="nn">pygame.color</span> <span class="kn">import</span> <span class="n">THECOLORS</span>
 
 <span class="kn">from</span> <span class="nn">A09_vec2d</span> <span class="kn">import</span> <span class="n">Vec2D</span>
 <span class="kn">from</span> <span class="nn">A15_air_table_objects</span> <span class="kn">import</span> <span class="n">Puck</span><span class="p">,</span> <span class="n">Spring</span>
 <span class="kn">from</span> <span class="nn">A15_game_loop</span> <span class="kn">import</span> <span class="n">GameLoop</span>
+
+<span class="kn">from</span> <span class="nn">A15a_2D_finished_game</span> <span class="kn">import</span> <span class="n">two_drone_special__circular</span>
 
 <span class="kn">import</span> <span class="nn">A15_globals</span> <span class="k">as</span> <span class="nn">g</span>
 
@@ -251,48 +253,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="n">c_drag</span><span class="o">=</span><span class="n">spring_drag</span><span class="p">,</span> <span class="n">c_damp</span><span class="o">=</span><span class="n">spring_damper</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;gold&quot;</span><span class="p">])</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span> <span class="mf">1.00</span>
-        
-        <span class="c1"># Make user/client controllable pucks for all the active clients.</span>
-        <span class="n">y_position_m</span> <span class="o">=</span> <span class="mf">1.0</span>
-        
-        <span class="c1"># Drone clients.</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="s2">&quot;C5&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="s2">&quot;C5&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drone</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="s2">&quot;C6&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="s2">&quot;C6&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">drone</span> <span class="o">=</span> <span class="kc">True</span>
-        
-        <span class="c1"># Arrange human-controlled pucks in a column.</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
-            <span class="n">client</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">client</span><span class="o">.</span><span class="n">drone</span><span class="p">):</span>
-                <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildControlledPuck</span><span class="p">(</span> <span class="n">x_m</span><span class="o">=</span><span class="mf">7.0</span><span class="p">,</span> <span class="n">y_m</span><span class="o">=</span><span class="n">y_position_m</span><span class="p">,</span> <span class="n">r_m</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">client_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="n">y_position_m</span> <span class="o">+=</span> <span class="mf">1.3</span>
-        
-        <span class="c1"># Position the drone-controlled pucks in specific locations.      </span>
-        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildControlledPuck</span><span class="p">(</span> <span class="n">x_m</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">y_m</span><span class="o">=</span><span class="mf">7.0</span><span class="p">,</span> <span class="n">r_m</span><span class="o">=</span><span class="mf">0.55</span><span class="p">,</span> <span class="n">client_name</span><span class="o">=</span><span class="s2">&quot;C5&quot;</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  
-        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildControlledPuck</span><span class="p">(</span> <span class="n">x_m</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">y_m</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">r_m</span><span class="o">=</span><span class="mf">0.55</span><span class="p">,</span> <span class="n">client_name</span><span class="o">=</span><span class="s2">&quot;C6&quot;</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        
-        <span class="c1"># Make some pucks that are not controllable.</span>
-        <span class="n">density</span> <span class="o">=</span> <span class="mf">0.7</span>
-        
-        <span class="c1"># Make a horizontal row of pinned-spring pucks.</span>
-        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> 
-            <span class="n">pinPoint_2d</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">+</span> <span class="p">(</span><span class="n">m</span> <span class="o">*</span> <span class="mf">0.65</span><span class="p">),</span> <span class="mf">4.5</span><span class="p">)</span>
-            <span class="n">tempPuck</span> <span class="o">=</span> <span class="n">Puck</span><span class="p">(</span> <span class="n">pinPoint_2d</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;orange&quot;</span><span class="p">],</span> <span class="n">hit_limit</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">show_health</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">Spring</span><span class="p">(</span><span class="n">tempPuck</span><span class="p">,</span> <span class="n">pinPoint_2d</span><span class="p">,</span> <span class="n">strength_Npm</span><span class="o">=</span><span class="mf">300.0</span><span class="p">,</span> 
-                <span class="n">pin_radius_m</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">c_drag</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
-        
-        <span class="c1"># Make a vertical column of pinned-spring pucks.</span>
-        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
-            <span class="n">pinPoint_2d</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">6</span><span class="o">*</span><span class="mf">0.65</span><span class="p">,</span> <span class="mf">4.5</span> <span class="o">+</span> <span class="n">m</span><span class="o">*</span><span class="mf">0.65</span><span class="p">)</span>
-            <span class="n">tempPuck</span> <span class="o">=</span> <span class="n">Puck</span><span class="p">(</span> <span class="n">pinPoint_2d</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;orange&quot;</span><span class="p">],</span> <span class="n">hit_limit</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">show_health</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">Spring</span><span class="p">(</span><span class="n">tempPuck</span><span class="p">,</span> <span class="n">pinPoint_2d</span><span class="p">,</span> <span class="n">strength_Npm</span><span class="o">=</span><span class="mf">300.0</span><span class="p">,</span> 
-                <span class="n">pin_radius_m</span><span class="o">=</span><span class="mf">0.03</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">c_drag</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
-        
-        <span class="c1"># One free standing puck</span>
-        <span class="n">Puck</span><span class="p">(</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mf">9.0</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">),</span> <span class="mf">0.7</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;cyan&quot;</span><span class="p">],</span> <span class="n">hit_limit</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">c_drag</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">show_health</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    
+        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">puckPopper_variations</span><span class="p">(</span><span class="n">two_drone_special__circular</span><span class="p">)</span>
+
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">throwJello_variations</span><span class="p">()</span>  <span class="c1"># Variations handled within method</span>

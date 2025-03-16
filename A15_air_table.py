@@ -71,14 +71,24 @@ class AirTable:
         self.FPS_display = True
         self.engine = "not yet established"
 
-    def buildControlledPuck(self, x_m=1.0, y_m=1.0, r_m=0.45, density=0.7, c_drag=0.7, client_name=None, sf_abs=True):
-        tempPuck = Puck( Vec2D( x_m, y_m), r_m, density, c_drag=c_drag, c_angularDrag=0.5,
-                         client_name=client_name, show_health=True)
+    def buildControlledPuck(self, x_m=1.0, y_m=1.0, pos_2d_m=None, r_m=0.45, density=0.7, c_drag=0.7, 
+                                  client_name=None, sf_abs=True, showSpoke=False, drone=False, bullet_age_limit_s=3):       
+        if (drone): 
+            g.env.clients[client_name].active = True
+            g.env.clients[client_name].drone = True
+
+        if (pos_2d_m):
+            puck_position_2d_m = pos_2d_m
+        else:
+            puck_position_2d_m = Vec2D(x_m, y_m)
+
+        tempPuck = Puck(puck_position_2d_m, r_m, density, c_drag=c_drag, c_angularDrag=0.5,
+                         client_name=client_name, show_health=True, showSpoke=showSpoke)
         
         # Let the puck reference the jet and the jet reference the puck.
         tempPuck.jet = Jet( tempPuck, sf_abs=sf_abs)
         # Same with the gun.
-        tempPuck.gun = Gun( tempPuck, sf_abs=sf_abs)
+        tempPuck.gun = Gun( tempPuck, sf_abs=sf_abs, bullet_age_limit_s=bullet_age_limit_s)
 
     def pinnedPuck(self, puck_position_2d_m, radius_m=1.5, density=1.0, angle_d=0,
                          pin_position_2d_m=None, strength_Npm=200.0):
@@ -296,6 +306,62 @@ class AirTable:
             f"     Variation {g.env.demo_variations[9]['index'] + 1}" +
             f"     grid = ({state['n_x']}, {state['n_y']})" +
             f"     pinned = {state['spr']}     angle = {angle}"
+        )
+
+    def puckPopper_variations(self, twoDrone_special=None):
+        g.env.set_gravity("off")
+
+        initial_states = [
+            {'type':'two-drones'},
+            {'type':'n-drones', 'n-drones':2, 'bullet_age_limit_s': 2.5},
+            {'type':'n-drones', 'n-drones':3, 'bullet_age_limit_s': 2.2},
+            {'type':'n-drones', 'n-drones':4, 'bullet_age_limit_s': 2.2},
+            {'type':'n-drones', 'n-drones':5, 'bullet_age_limit_s': 2.2},
+        ]
+        g.env.demo_variations[7]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[7]['index']]
+
+        if state['type'] == 'two-drones':
+            twoDrone_special()
+
+        elif state['type'] == 'n-drones':
+            # Make user/client controllable pucks for all the clients.
+            y_puck_position_m = 1.0
+            for client_name in g.env.clients:
+                client = g.env.clients[client_name]
+                if client.active and not client.drone:
+                    # Box2D drag modeling is slightly different than that in the circular
+                    # engines. So, c_drag set higher than the default value, 0.7.
+                    g.air_table.buildControlledPuck(pos_2d_m=g.game_window.center_2d_m, r_m=0.45, 
+                        client_name=client_name, sf_abs=False, c_drag=1.5, bullet_age_limit_s=3.0)
+                    y_puck_position_m += 1.2
+
+            n_drones = state['n-drones']
+            age_limit_s = state['bullet_age_limit_s']
+
+            placement_radius_m = 3.75
+            center_to_puck_2d_m = Vec2D(0.0, placement_radius_m)
+            for i in range(0, n_drones):
+                angle = (360 / n_drones) * i
+
+                rotated_c_to_puck_2d_m = center_to_puck_2d_m.rotated(angle)
+                puck_position_2d_m = g.game_window.center_2d_m + rotated_c_to_puck_2d_m
+                            
+                # drone pucks
+                client_name = f"C{i+5}"
+                g.air_table.buildControlledPuck(pos_2d_m=puck_position_2d_m, r_m=0.55, 
+                    client_name=client_name, sf_abs=False, drone=True, bullet_age_limit_s=age_limit_s)
+
+        # Establish initial targets.
+        for controlled_puck in g.air_table.controlled_pucks:
+            if g.env.clients[ controlled_puck.client_name].drone:
+                if state['type'] == 'n-drones' and state['n-drones'] == 5:
+                    controlled_puck.gun.targetPuck = g.air_table.pucks[0] # 0 is the host client
+                else:    
+                    controlled_puck.gun.findNewTarget()
+        
+        g.game_window.update_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo_variations[7]['index'] + 1}"
         )
 
     """
