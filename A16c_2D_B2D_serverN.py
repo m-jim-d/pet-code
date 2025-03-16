@@ -44,8 +44,8 @@ def make_some_pucks(demo):
             client.active = False
             client.drone = False
 
-    # Each demo will have a single variation unless specified below.
-    g.env.demo_variations[demo]['count'] = 1  # Single variation
+    # Each demo will have a single variation unless specified.
+    g.env.demo_variations[demo]['count'] = 1
 
     if demo == 1:
         g.env.set_gravity("off")

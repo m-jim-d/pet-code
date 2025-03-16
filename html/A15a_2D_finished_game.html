@@ -182,8 +182,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span> <span class="mf">1.00</span>
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">time_s</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-    <span class="c1"># Each demo will have a single variation unless specified below.</span>
-    <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Single variation</span>
+    <span class="c1"># Each demo will have a single variation unless specified.</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
 
@@ -268,7 +268,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">puckPopper_variations</span><span class="p">(</span><span class="n">two_drone_special__circular</span><span class="p">)</span>
-                    
+        
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">throwJello_variations</span><span class="p">()</span>

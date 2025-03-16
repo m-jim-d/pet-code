@@ -171,6 +171,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">perfect_kiss</span> <span class="o">=</span> <span class="kc">False</span>
 
+    <span class="c1"># Each demo will have a single variation unless specified.</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
     <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
     
     <span class="k">if</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -257,25 +260,25 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;on&quot;</span><span class="p">)</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">throwJello_variations</span><span class="p">()</span>  <span class="c1"># Variations handled within method</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">throwJello_variations</span><span class="p">()</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">targetJello_variations</span><span class="p">()</span>
         
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="s1">&#39;1p&#39;</span><span class="p">:</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="s1">&#39;1p&#39;</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Basic pool shot, no penetration correction, no perfect kiss</span>
+        <span class="c1"># Basic pool shot, no penetration correction, no perfect kiss</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">correct_for_puck_penetration</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">perfect_kiss</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">setup_pool_shot</span><span class="p">()</span>
         
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="s1">&#39;2p&#39;</span><span class="p">:</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="s1">&#39;2p&#39;</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Pool shot with penetration correction only</span>
+        <span class="c1"># Pool shot with penetration correction only</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">correct_for_puck_penetration</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">perfect_kiss</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">setup_pool_shot</span><span class="p">()</span>
         
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="s1">&#39;3p&#39;</span><span class="p">:</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="s1">&#39;3p&#39;</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Pool shot with both penetration correction and perfect kiss</span>
+        <span class="c1"># Pool shot with both penetration correction and perfect kiss</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">correct_for_puck_penetration</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">perfect_kiss</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">setup_pool_shot</span><span class="p">()</span>
@@ -284,7 +287,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing set up for this key.&quot;</span><span class="p">)</span>
 
 <span class="c1">#============================================================</span>
-<span class="c1"># Main procedural script.</span>
+<span class="c1"># main procedural script</span>
 <span class="c1">#============================================================</span>
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
@@ -293,7 +296,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">game_loop</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="n">demo_index</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
 
 <span class="c1">#============================================================</span>
-<span class="c1"># Start everything.  </span>
+<span class="c1"># Start everything.</span>
 <span class="c1">#============================================================</span>
         
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>

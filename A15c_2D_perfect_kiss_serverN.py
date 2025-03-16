@@ -63,6 +63,9 @@ def make_some_pucks(demo):
 
     g.air_table.perfect_kiss = False
 
+    # Each demo will have a single variation unless specified.
+    g.env.demo_variations[demo]['count'] = 1
+
     g.env.set_gravity("off")
     
     if demo == 1:
@@ -149,25 +152,25 @@ def make_some_pucks(demo):
 
     elif demo == 8:
         g.env.set_gravity("on")
-        g.air_table.throwJello_variations()  # Variations handled within method
+        g.air_table.throwJello_variations()
 
     elif demo == 9:
         g.air_table.targetJello_variations()
         
     elif demo == '1p':
-        g.env.demo_variations['1p']['count'] = 1  # Basic pool shot, no penetration correction, no perfect kiss
+        # Basic pool shot, no penetration correction, no perfect kiss
         g.air_table.correct_for_puck_penetration = False
         g.air_table.perfect_kiss = False
         setup_pool_shot()
         
     elif demo == '2p':
-        g.env.demo_variations['2p']['count'] = 1  # Pool shot with penetration correction only
+        # Pool shot with penetration correction only
         g.air_table.correct_for_puck_penetration = True
         g.air_table.perfect_kiss = False
         setup_pool_shot()
         
     elif demo == '3p':
-        g.env.demo_variations['3p']['count'] = 1  # Pool shot with both penetration correction and perfect kiss
+        # Pool shot with both penetration correction and perfect kiss
         g.air_table.correct_for_puck_penetration = True
         g.air_table.perfect_kiss = True
         setup_pool_shot()
@@ -176,7 +179,7 @@ def make_some_pucks(demo):
         print("Nothing set up for this key.")
 
 #============================================================
-# Main procedural script.
+# main procedural script
 #============================================================
 
 def main():
@@ -185,7 +188,7 @@ def main():
     game_loop.start(demo_index=7)
 
 #============================================================
-# Start everything.  
+# Start everything.
 #============================================================
         
 if __name__ == '__main__':

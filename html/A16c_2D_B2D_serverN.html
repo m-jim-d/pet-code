@@ -152,8 +152,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="n">client</span><span class="o">.</span><span class="n">active</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">client</span><span class="o">.</span><span class="n">drone</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="c1"># Each demo will have a single variation unless specified below.</span>
-    <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Single variation</span>
+    <span class="c1"># Each demo will have a single variation unless specified.</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>

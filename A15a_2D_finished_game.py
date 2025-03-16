@@ -74,8 +74,8 @@ def make_some_pucks(demo):
     g.air_table.coef_rest = 1.00
     g.air_table.time_s = 0.0
 
-    # Each demo will have a single variation unless specified below.
-    g.env.demo_variations[demo]['count'] = 1  # Single variation
+    # Each demo will have a single variation unless specified.
+    g.env.demo_variations[demo]['count'] = 1
 
     g.env.set_gravity("off")
 
@@ -160,7 +160,7 @@ def make_some_pucks(demo):
 
     elif demo == 7:
         g.air_table.puckPopper_variations(two_drone_special__circular)
-                    
+        
     elif demo == 8:
         g.env.set_gravity("on")
         g.air_table.throwJello_variations()
