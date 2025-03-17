@@ -230,7 +230,7 @@ class AirTable:
         if g.env.demo_variations[8]['index'] == 6:
             self.pinnedPuck(Vec2D(g.game_window.center_2d_m.x, 2.5), strength_Npm=500.0)
 
-        g.game_window.update_caption( g.game_window.caption + 
+        g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[8]['index'] + 1}" +
             f"     grid = ({state['x_n']}, {state['y_n']})" +
             f"  angle = {throw['angle']:.1f}  speed = {throw['speed_mps']:.1f}"
@@ -302,7 +302,7 @@ class AirTable:
 
         g.env.set_gravity("off")
     
-        g.game_window.update_caption( g.game_window.caption + 
+        g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[9]['index'] + 1}" +
             f"     grid = ({state['n_x']}, {state['n_y']})" +
             f"     pinned = {state['spr']}     angle = {angle}"
@@ -360,7 +360,7 @@ class AirTable:
                 else:    
                     controlled_puck.gun.findNewTarget()
         
-        g.game_window.update_caption( g.game_window.caption + 
+        g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[7]['index'] + 1}"
         )
 
@@ -667,7 +667,7 @@ class PerfectKissAirTable(AirTable):
                 
                 # Keep this check fast by avoiding square roots.
                 if (p_to_p_m2 < r_plus_r_m2):
-                    
+
                     # Ignore collisions within same negative group
                     if (puck.groupIndex == otherpuck.groupIndex) and (puck.groupIndex < 0):
                         return

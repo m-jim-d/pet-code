@@ -94,6 +94,7 @@ class GameLoop:
 
         # Initialize demo
         g.make_some_pucks(demo_index)
+        g.game_window.update_caption()
         
         # Setup network server
         self._setup_network_server()
@@ -151,7 +152,8 @@ class GameLoop:
                 print(demo_index)
                 
                 # Start, or restart a demo.
-                g.make_some_pucks(demo_index)               
+                g.make_some_pucks(demo_index)
+                g.game_window.update_caption()
                         
             if (self.env.render_timer_s > self.env.dt_render_limit_s):
                 # Get input from network clients.

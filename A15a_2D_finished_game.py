@@ -52,7 +52,7 @@ def two_drone_special__circular():
     Puck( Vec2D(9.0, 4.5), 0.7, density, color=THECOLORS["cyan"], hit_limit=20, c_drag=0.7, show_health=True)
         
 def make_some_pucks(demo):
-    g.game_window.update_caption("Air-Table Server A15a     Demo #" + str(demo))
+    g.game_window.set_caption("Air-Table Server A15a     Demo #" + str(demo))
     g.env.timestep_fixed = False
 
     # This removes all references to pucks and walls and effectively deletes them. 

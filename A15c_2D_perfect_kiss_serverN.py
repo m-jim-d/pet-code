@@ -30,7 +30,7 @@ def setup_pool_shot():
     Puck(Vec2D(4.0,                 4.30), 0.45, 0.3,                            coef_rest=1.0, CR_fixed=True, vel_2d_mps=Vec2D(   0.0, 0.0))
        
 def make_some_pucks(demo):
-    g.game_window.update_caption("Perfect Kiss Air-Table Server A15c     Demo #" + str(demo))
+    g.game_window.set_caption("Perfect Kiss Air-Table Server A15c     Demo #" + str(demo))
     g.env.timestep_fixed = False
 
     # This removes all references to pucks and walls and effectively deletes them. 

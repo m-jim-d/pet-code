@@ -360,20 +360,22 @@ class GameWindow:
         # Screen dimensions in pixels (tuple)
         self.surface = pygame.display.set_mode(g.env.screenSize_2d_px.tuple())
 
-        self.update_caption(title)
+        self.set_caption(title)
         
         self.surface.fill(THECOLORS["black"])
         pygame.display.update()
 
         # Inhibit the operating-system cursor in the game window.
         pygame.mouse.set_visible(False)
-        
-    def update_caption(self, title):
+
+    def set_caption(self, title):
+        # Set the caption text without updating the display.
         self.caption = title
 
+    def update_caption(self):
         """Update window caption using multiple methods for better Linux compatibility"""
         # Try standard Pygame method
-        pygame.display.set_caption(title)
+        pygame.display.set_caption(self.caption)
 
         if platform.system() == 'Linux':
             try:
@@ -383,7 +385,7 @@ class GameWindow:
                     x_display = Xlib.display.Display()
                     x_window = x_display.get_input_focus().focus
                     if x_window:
-                        x_window.set_wm_name(title)
+                        x_window.set_wm_name(self.caption)
                         x_display.sync()
             except ImportError:
                 print("Import error. Try this: 'pip install python-xlib'.")

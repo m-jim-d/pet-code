@@ -202,6 +202,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
         <span class="c1"># Initialize demo</span>
         <span class="n">g</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">update_caption</span><span class="p">()</span>
         
         <span class="c1"># Setup network server</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_setup_network_server</span><span class="p">()</span>
@@ -259,7 +260,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="nb">print</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
                 
                 <span class="c1"># Start, or restart a demo.</span>
-                <span class="n">g</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>               
+                <span class="n">g</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">update_caption</span><span class="p">()</span>
                         
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">render_timer_s</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">dt_render_limit_s</span><span class="p">):</span>
                 <span class="c1"># Get input from network clients.</span>

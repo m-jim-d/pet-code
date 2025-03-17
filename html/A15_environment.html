@@ -468,20 +468,22 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="c1"># Screen dimensions in pixels (tuple)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">surface</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">screenSize_2d_px</span><span class="o">.</span><span class="n">tuple</span><span class="p">())</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_caption</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">])</span>
         <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
         <span class="c1"># Inhibit the operating-system cursor in the game window.</span>
         <span class="n">pygame</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-        
-    <span class="k">def</span> <span class="nf">update_caption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">set_caption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
+        <span class="c1"># Set the caption text without updating the display.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">caption</span> <span class="o">=</span> <span class="n">title</span>
 
+    <span class="k">def</span> <span class="nf">update_caption</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update window caption using multiple methods for better Linux compatibility&quot;&quot;&quot;</span>
         <span class="c1"># Try standard Pygame method</span>
-        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Linux&#39;</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -491,7 +493,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                     <span class="n">x_display</span> <span class="o">=</span> <span class="n">Xlib</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">Display</span><span class="p">()</span>
                     <span class="n">x_window</span> <span class="o">=</span> <span class="n">x_display</span><span class="o">.</span><span class="n">get_input_focus</span><span class="p">()</span><span class="o">.</span><span class="n">focus</span>
                     <span class="k">if</span> <span class="n">x_window</span><span class="p">:</span>
-                        <span class="n">x_window</span><span class="o">.</span><span class="n">set_wm_name</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+                        <span class="n">x_window</span><span class="o">.</span><span class="n">set_wm_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">caption</span><span class="p">)</span>
                         <span class="n">x_display</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Import error. Try this: &#39;pip install python-xlib&#39;.&quot;</span><span class="p">)</span>

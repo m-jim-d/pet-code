@@ -17,7 +17,7 @@ import A15_globals as g
 #===========================================================
         
 def make_some_pucks(demo):
-    g.game_window.update_caption("PyBox2D Air-Table Server A16c     Demo #" + str(demo))
+    g.game_window.set_caption("PyBox2D Air-Table Server A16c     Demo #" + str(demo))
     g.env.timestep_fixed = False
 
     # This removes all references to pucks and walls and effectively deletes them. 
@@ -103,7 +103,7 @@ def make_some_pucks(demo):
         spring_length_m = 1.0
         Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=0.15, c_damp=50.0, color=THECOLORS["yellow"])
     
-        g.game_window.update_caption( g.game_window.caption + 
+        g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[2]['index'] + 1}" +
             f"     rps = ({state['p1']['rps']:.1f}, {state['p2']['rps']:.1f})"
         )
@@ -168,7 +168,7 @@ def make_some_pucks(demo):
         Spring(p1, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
         Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, c_damp=50.0, color=THECOLORS["yellow"])
 
-        g.game_window.update_caption( g.game_window.caption + 
+        g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[3]['index'] + 1}" +
             f"     rps = ({state['p1']['rps']:.1f}, {state['p2']['rps']:.1f}, {state['p3']['rps']:.1f})"
         )
@@ -240,7 +240,7 @@ def make_some_pucks(demo):
 
             details_desc = f"funnel angle = {state['funnel_angle_d']}"
 
-        g.game_window.update_caption( g.game_window.caption + 
+        g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[4]['index'] + 1}" +
             f"     {details_desc}"
         )
@@ -291,7 +291,7 @@ def make_some_pucks(demo):
                 g.air_table.pinnedPuck(puck_position_2d_m, radius_m=radius_m, 
                                        pin_position_2d_m=pin_position_2d_m)
 
-        g.game_window.update_caption( g.game_window.caption + 
+        g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[5]['index'] + 1}" +
             f"     pinned pucks = {n_pucks}"
         )
@@ -338,7 +338,7 @@ def make_some_pucks(demo):
             spring_length_m = 1.5
             Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=0.2)
 
-        g.game_window.update_caption( g.game_window.caption + 
+        g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[6]['index'] + 1}"
         )
 
