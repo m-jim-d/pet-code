@@ -24,7 +24,8 @@ def two_drone_special__circular():
     for name in g.env.clients:
         client = g.env.clients[name]
         if client.active and (not client.drone):
-            g.air_table.buildControlledPuck( x_m=7.0, y_m=y_position_m, r_m=0.45, client_name=name, sf_abs=False)
+            g.air_table.buildControlledPuck(x_m=7.0, y_m=y_position_m, r_m=0.45, client_name=name, 
+                                            sf_abs=False, c_drag=0.7)
             y_position_m += 1.3
     
     # Position the drone-controlled pucks in specific locations.      

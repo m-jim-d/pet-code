@@ -72,7 +72,7 @@ class AirTable:
         self.engine = "not yet established"
 
     def buildControlledPuck(self, x_m=1.0, y_m=1.0, pos_2d_m=None, r_m=0.45, density=0.7, c_drag=0.7, 
-                                  client_name=None, sf_abs=True, showSpoke=False, drone=False, bullet_age_limit_s=3):       
+                                  client_name=None, sf_abs=True, showSpoke=False, drone=False, bullet_age_limit_s=3):
         if (drone): 
             g.env.clients[client_name].active = True
             g.env.clients[client_name].drone = True
@@ -332,8 +332,12 @@ class AirTable:
                 if client.active and not client.drone:
                     # Box2D drag modeling is slightly different than that in the circular
                     # engines. So, c_drag set higher than the default value, 0.7.
+                    if self.engine == 'box2d':
+                        c_drag = 1.5
+                    else:
+                        c_drag = 0.7
                     g.air_table.buildControlledPuck(pos_2d_m=g.game_window.center_2d_m, r_m=0.45, 
-                        client_name=client_name, sf_abs=False, c_drag=1.5, bullet_age_limit_s=3.0)
+                        client_name=client_name, sf_abs=False, c_drag=c_drag, bullet_age_limit_s=3.0)
                     y_puck_position_m += 1.2
 
             n_drones = state['n-drones']
