@@ -26,7 +26,7 @@ The environment supports multiple physics engines (circular, perfect-kiss, Box2D
 provides consistent coordinate transformations and user interaction across all modes.
 """
 
-import sys, math
+import sys, math, platform, os
 
 import pygame
 # key constants
@@ -374,21 +374,21 @@ class GameWindow:
         """Update window caption using multiple methods for better Linux compatibility"""
         # Try standard Pygame method
         pygame.display.set_caption(title)
-    
-        try:
-            # Try to get the X11 display and window
-            import os
-            if 'DISPLAY' in os.environ:  # Only try X11 if running in X environment
-                import Xlib.display
-                x_display = Xlib.display.Display()
-                x_window = x_display.get_input_focus().focus
-                if x_window:
-                    x_window.set_wm_name(title)
-                    x_display.sync()
-        except ImportError:
-            pass  # python-xlib not available
-        except Exception:
-            pass  # Any other X11 related error
+
+        if platform.system() == 'Linux':
+            try:
+                # Try to get the X11 display and window
+                if 'DISPLAY' in os.environ:  # Only try X11 if running in X environment
+                    import Xlib.display
+                    x_display = Xlib.display.Display()
+                    x_window = x_display.get_input_focus().focus
+                    if x_window:
+                        x_window.set_wm_name(title)
+                        x_display.sync()
+            except ImportError:
+                print("Import error. Try this: 'pip install python-xlib'.")
+            except Exception:
+                pass  # Any other X11 related error
 
     def update(self):
         pygame.display.update()
