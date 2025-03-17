@@ -619,12 +619,17 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 
                 <span class="c1"># Keep this check fast by avoiding square roots.</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">p_to_p_m2</span> <span class="o">&lt;</span> <span class="n">r_plus_r_m2</span><span class="p">):</span>
+                
+                    <span class="c1"># Ignore collisions within same negative group</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">puck</span><span class="o">.</span><span class="n">groupIndex</span> <span class="o">==</span> <span class="n">otherpuck</span><span class="o">.</span><span class="n">groupIndex</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">puck</span><span class="o">.</span><span class="n">groupIndex</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="k">return</span>
+
                     <span class="bp">self</span><span class="o">.</span><span class="n">collision_count</span> <span class="o">+=</span> <span class="mi">1</span>
                     
                     <span class="c1"># If it&#39;s a bullet coming from another client, add to the</span>
                     <span class="c1"># hit count for non-bullet client.</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">otherpuck</span><span class="o">.</span><span class="n">client_name</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="n">puck</span><span class="o">.</span><span class="n">client_name</span> <span class="o">!=</span> <span class="n">otherpuck</span><span class="o">.</span><span class="n">client_name</span><span class="p">):</span> 
+                        <span class="k">if</span> <span class="p">(</span><span class="n">puck</span><span class="o">.</span><span class="n">client_name</span> <span class="o">!=</span> <span class="n">otherpuck</span><span class="o">.</span><span class="n">client_name</span><span class="p">):</span>
                             <span class="k">if</span> <span class="p">(</span><span class="n">otherpuck</span><span class="o">.</span><span class="n">bullet</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">puck</span><span class="o">.</span><span class="n">bullet</span><span class="p">)):</span>
                                 <span class="k">if</span> <span class="n">puck</span><span class="o">.</span><span class="n">gun</span> <span class="ow">and</span> <span class="n">puck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">shield</span><span class="p">:</span>
                                     <span class="n">puck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">shield_hit_count</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -751,6 +756,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
             <span class="c1"># Collisions with other pucks. </span>
             <span class="k">for</span> <span class="n">otherpuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]:</span>
+                
                 <span class="c1"># Check if the two puck circles are overlapping.</span>
                 
                 <span class="c1"># Parallel to the normal</span>
@@ -769,6 +775,11 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 
                 <span class="c1"># Keep this check fast by avoiding square roots.</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">p_to_p_m2</span> <span class="o">&lt;</span> <span class="n">r_plus_r_m2</span><span class="p">):</span>
+                    
+                    <span class="c1"># Ignore collisions within same negative group</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">puck</span><span class="o">.</span><span class="n">groupIndex</span> <span class="o">==</span> <span class="n">otherpuck</span><span class="o">.</span><span class="n">groupIndex</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">puck</span><span class="o">.</span><span class="n">groupIndex</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="k">return</span>
+                    
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">perfect_kiss</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">collision_count</span> <span class="o">+=</span> <span class="mi">1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">count_direction</span>
                     
                     <span class="c1"># If it&#39;s a bullet coming from another client, add to the</span>

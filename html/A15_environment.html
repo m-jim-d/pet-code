@@ -134,7 +134,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">provides consistent coordinate transformations and user interaction across all modes.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">math</span><span class="o">,</span> <span class="nn">platform</span><span class="o">,</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">pygame</span>
 <span class="c1"># key constants</span>
@@ -477,9 +477,27 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="n">pygame</span><span class="o">.</span><span class="n">mouse</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         
     <span class="k">def</span> <span class="nf">update_caption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="p">):</span>
-        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">caption</span> <span class="o">=</span> <span class="n">title</span>
-    
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update window caption using multiple methods for better Linux compatibility&quot;&quot;&quot;</span>
+        <span class="c1"># Try standard Pygame method</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Linux&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Try to get the X11 display and window</span>
+                <span class="k">if</span> <span class="s1">&#39;DISPLAY&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>  <span class="c1"># Only try X11 if running in X environment</span>
+                    <span class="kn">import</span> <span class="nn">Xlib.display</span>
+                    <span class="n">x_display</span> <span class="o">=</span> <span class="n">Xlib</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">Display</span><span class="p">()</span>
+                    <span class="n">x_window</span> <span class="o">=</span> <span class="n">x_display</span><span class="o">.</span><span class="n">get_input_focus</span><span class="p">()</span><span class="o">.</span><span class="n">focus</span>
+                    <span class="k">if</span> <span class="n">x_window</span><span class="p">:</span>
+                        <span class="n">x_window</span><span class="o">.</span><span class="n">set_wm_name</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+                        <span class="n">x_display</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Import error. Try this: &#39;pip install python-xlib&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># Any other X11 related error</span>
+
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
         
