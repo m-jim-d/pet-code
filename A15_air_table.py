@@ -511,12 +511,17 @@ class CircularAirTable(AirTable):
                 
                 # Keep this check fast by avoiding square roots.
                 if (p_to_p_m2 < r_plus_r_m2):
+                
+                    # Ignore collisions within same negative group
+                    if (puck.groupIndex == otherpuck.groupIndex) and (puck.groupIndex < 0):
+                        return
+
                     self.collision_count += 1
                     
                     # If it's a bullet coming from another client, add to the
                     # hit count for non-bullet client.
                     if (otherpuck.client_name != None):
-                        if (puck.client_name != otherpuck.client_name): 
+                        if (puck.client_name != otherpuck.client_name):
                             if (otherpuck.bullet and (not puck.bullet)):
                                 if puck.gun and puck.gun.shield:
                                     puck.gun.shield_hit_count += 1
@@ -643,6 +648,7 @@ class PerfectKissAirTable(AirTable):
 
             # Collisions with other pucks. 
             for otherpuck in self.pucks[i+1:]:
+                
                 # Check if the two puck circles are overlapping.
                 
                 # Parallel to the normal
@@ -661,6 +667,11 @@ class PerfectKissAirTable(AirTable):
                 
                 # Keep this check fast by avoiding square roots.
                 if (p_to_p_m2 < r_plus_r_m2):
+                    
+                    # Ignore collisions within same negative group
+                    if (puck.groupIndex == otherpuck.groupIndex) and (puck.groupIndex < 0):
+                        return
+                    
                     if self.perfect_kiss: self.collision_count += 1 * self.count_direction
                     
                     # If it's a bullet coming from another client, add to the

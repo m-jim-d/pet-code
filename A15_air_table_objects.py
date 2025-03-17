@@ -78,7 +78,8 @@ class Puck:
                        c_drag=0.0, coef_rest=0.85, CR_fixed=False,
                        hit_limit=50.0, show_health=False, age_limit_s=3.0,
                        color=THECOLORS["gray"], client_name=None, bullet=False, pin=False, border_px=3,
-                       rect_fixture=False, aspect_ratio=1.0, friction=0.2, friction_fixed=False, c_angularDrag=0.0):
+                       rect_fixture=False, aspect_ratio=1.0, groupIndex=0,
+                       friction=0.2, friction_fixed=False, c_angularDrag=0.0):
         
         self.radius_m = radius_m
         self.radius_px = round(g.env.px_from_m(self.radius_m * g.env.viewZoom))
@@ -103,6 +104,7 @@ class Puck:
         self.showSpoke = showSpoke
         self.angle_r = angle_r
         self.angularVelocity_rps = angularVelocity_rps
+        self.groupIndex = groupIndex
         
         self.SprDamp_force_2d_N = Vec2D(0.0,0.0)
         self.jet_force_2d_N = Vec2D(0.0,0.0)
@@ -192,6 +194,8 @@ class Puck:
                 density=self.density_kgpm2, 
                 friction=self.friction_atBirth, restitution=self.coef_rest_atBirth
             )
+
+        dynamic_body.fixtures[0].filterData.groupIndex = self.groupIndex
 
         # Set the mass attribute based on what box2d calculates.
         self.mass_kg = dynamic_body.mass
@@ -477,7 +481,13 @@ class Gun( RotatingTube):
         self.rotation_rate_dps = 180.0
         
         self.color = g.env.clients[self.puck.client_name].cursor_color
-        
+
+        # Set a negative group index for bullet stream (inhibit collisions with itself)
+        if self.puck.client_name == "local":
+            self.groupIndex = -100
+        else:
+            self.groupIndex = -int(self.puck.client_name[1:])
+
         # Run this method of the RotationTube class to set the initial angle of each new gun.
         self.rotate_everything( 45)
         
@@ -591,7 +601,7 @@ class Gun( RotatingTube):
         bullet_absolute_vel_2d_mps = self.puck.vel_2d_mps + bullet_relative_vel_2d_mps
 
         temp_bullet = Puck(initial_position_2d_m, bullet_radius_m, 0.3, vel_2d_mps=bullet_absolute_vel_2d_mps, 
-                           bullet=True, age_limit_s=self.bullet_age_limit_s)
+                           bullet=True, age_limit_s=self.bullet_age_limit_s, groupIndex=self.groupIndex)
         temp_bullet.color = self.client.cursor_color
         temp_bullet.client_name = self.puck.client_name
                 

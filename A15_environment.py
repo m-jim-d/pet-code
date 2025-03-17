@@ -369,9 +369,27 @@ class GameWindow:
         pygame.mouse.set_visible(False)
         
     def update_caption(self, title):
-        pygame.display.set_caption(title)
         self.caption = title
+
+        """Update window caption using multiple methods for better Linux compatibility"""
+        # Try standard Pygame method
+        pygame.display.set_caption(title)
     
+        try:
+            # Try to get the X11 display and window
+            import os
+            if 'DISPLAY' in os.environ:  # Only try X11 if running in X environment
+                import Xlib.display
+                x_display = Xlib.display.Display()
+                x_window = x_display.get_input_focus().focus
+                if x_window:
+                    x_window.set_wm_name(title)
+                    x_display.sync()
+        except ImportError:
+            pass  # python-xlib not available
+        except Exception:
+            pass  # Any other X11 related error
+
     def update(self):
         pygame.display.update()
         
