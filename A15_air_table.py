@@ -313,13 +313,22 @@ class AirTable:
 
         initial_states = [
             {'type':'two-drones'},
+            {'type':'n-drones', 'n-drones':1, 'bullet_age_limit_s': 2.5},
             {'type':'n-drones', 'n-drones':2, 'bullet_age_limit_s': 2.5},
             {'type':'n-drones', 'n-drones':3, 'bullet_age_limit_s': 2.2},
             {'type':'n-drones', 'n-drones':4, 'bullet_age_limit_s': 2.2},
             {'type':'n-drones', 'n-drones':5, 'bullet_age_limit_s': 2.2},
+            {'type':'n-drones', 'n-drones':6, 'bullet_age_limit_s': 2.2},
         ]
         g.env.demo_variations[7]['count'] = len(initial_states)
         state = initial_states[g.env.demo_variations[7]['index']]
+                    
+        # Box2D drag modeling is slightly different than that in the circular engines. So,
+        # c_drag is set higher than the default value, 0.7.
+        if self.engine == 'box2d':
+            c_drag = 1.5
+        else:
+            c_drag = 0.7
 
         if state['type'] == 'two-drones':
             twoDrone_special()
@@ -330,12 +339,6 @@ class AirTable:
             for client_name in g.env.clients:
                 client = g.env.clients[client_name]
                 if client.active and not client.drone:
-                    # Box2D drag modeling is slightly different than that in the circular
-                    # engines. So, c_drag set higher than the default value, 0.7.
-                    if self.engine == 'box2d':
-                        c_drag = 1.5
-                    else:
-                        c_drag = 0.7
                     g.air_table.buildControlledPuck(pos_2d_m=g.game_window.center_2d_m, r_m=0.45, 
                         client_name=client_name, sf_abs=False, c_drag=c_drag, bullet_age_limit_s=3.0)
                     y_puck_position_m += 1.2
@@ -352,7 +355,8 @@ class AirTable:
                 puck_position_2d_m = g.game_window.center_2d_m + rotated_c_to_puck_2d_m
                             
                 # drone pucks
-                client_name = f"C{i+5}"
+                # Start at C4, leaving room for local, C1, C2, and C3 human players.
+                client_name = f"C{i+4}"
                 g.air_table.buildControlledPuck(pos_2d_m=puck_position_2d_m, r_m=0.55, 
                     client_name=client_name, sf_abs=False, drone=True, bullet_age_limit_s=age_limit_s)
 
