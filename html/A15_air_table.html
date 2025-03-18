@@ -442,14 +442,29 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="n">twoDrone_special</span><span class="p">()</span>
 
         <span class="k">elif</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;n-drones&#39;</span><span class="p">:</span>
-            <span class="c1"># Make user/client controllable pucks for all the clients.</span>
-            <span class="n">y_puck_position_m</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+            <span class="c1"># Make controllable pucks for all the clients.</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;n-drones&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span> 
+                <span class="n">center_pos_2d_m</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">center_2d_m</span> <span class="o">-</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">center_pos_2d_m</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">center_2d_m</span>
+
+            <span class="n">n_not_drone</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">c</span><span class="o">.</span><span class="n">drone</span><span class="p">])</span>
+
+            <span class="c1"># Calculate starting position to center the row.  </span>
+            <span class="c1">#    total width = (n-1) * spacing  </span>
+            <span class="c1"># We want to start half of this to the left of center.  </span>
+            <span class="c1"># Spacing is the distance between the centers of the pucks. This should be</span>
+            <span class="c1"># greater than twice the puck radius.</span>
+            <span class="n">spacing_m</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">human_pos_2d_m</span> <span class="o">=</span> <span class="n">center_pos_2d_m</span> <span class="o">-</span> <span class="n">Vec2D</span><span class="p">((</span><span class="n">n_not_drone</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">spacing_m</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
             <span class="k">for</span> <span class="n">client_name</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
                 <span class="n">client</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">active</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">client</span><span class="o">.</span><span class="n">drone</span><span class="p">:</span>
-                    <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildControlledPuck</span><span class="p">(</span><span class="n">pos_2d_m</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">center_2d_m</span><span class="p">,</span> <span class="n">r_m</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> 
+                    <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildControlledPuck</span><span class="p">(</span><span class="n">pos_2d_m</span><span class="o">=</span><span class="n">human_pos_2d_m</span><span class="p">,</span> <span class="n">r_m</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> 
                         <span class="n">client_name</span><span class="o">=</span><span class="n">client_name</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">c_drag</span><span class="o">=</span><span class="n">c_drag</span><span class="p">,</span> <span class="n">bullet_age_limit_s</span><span class="o">=</span><span class="mf">3.0</span><span class="p">)</span>
-                    <span class="n">y_puck_position_m</span> <span class="o">+=</span> <span class="mf">1.2</span>
+                    <span class="n">human_pos_2d_m</span> <span class="o">+=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="n">spacing_m</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
 
             <span class="n">n_drones</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;n-drones&#39;</span><span class="p">]</span>
             <span class="n">age_limit_s</span> <span class="o">=</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;bullet_age_limit_s&#39;</span><span class="p">]</span>

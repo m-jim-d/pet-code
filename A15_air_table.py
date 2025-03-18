@@ -334,14 +334,29 @@ class AirTable:
             twoDrone_special()
 
         elif state['type'] == 'n-drones':
-            # Make user/client controllable pucks for all the clients.
-            y_puck_position_m = 1.0
+
+            # Make controllable pucks for all the clients.
+            if (state['n-drones'] == 2): 
+                center_pos_2d_m = g.game_window.center_2d_m - Vec2D(2.5, 0)
+            else:
+                center_pos_2d_m = g.game_window.center_2d_m
+
+            n_not_drone = len([c for c in g.env.clients.values() if c.active and not c.drone])
+
+            # Calculate starting position to center the row.  
+            #    total width = (n-1) * spacing  
+            # We want to start half of this to the left of center.  
+            # Spacing is the distance between the centers of the pucks. This should be
+            # greater than twice the puck radius.
+            spacing_m = 1.0
+            human_pos_2d_m = center_pos_2d_m - Vec2D((n_not_drone - 1) * spacing_m / 2, 0)
+
             for client_name in g.env.clients:
                 client = g.env.clients[client_name]
                 if client.active and not client.drone:
-                    g.air_table.buildControlledPuck(pos_2d_m=g.game_window.center_2d_m, r_m=0.45, 
+                    g.air_table.buildControlledPuck(pos_2d_m=human_pos_2d_m, r_m=0.45, 
                         client_name=client_name, sf_abs=False, c_drag=c_drag, bullet_age_limit_s=3.0)
-                    y_puck_position_m += 1.2
+                    human_pos_2d_m += Vec2D(spacing_m, 0.0)
 
             n_drones = state['n-drones']
             age_limit_s = state['bullet_age_limit_s']
