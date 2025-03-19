@@ -109,6 +109,7 @@ def make_some_pucks(demo):
         )
 
     elif demo == 3:
+        g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
         g.env.set_gravity("off")
         initial_states = [
             {"p1": {"rps":   4.0, "color": THECOLORS["white"]},
@@ -401,6 +402,7 @@ def make_some_pucks(demo):
         g.air_table.targetJello_variations()
     
     elif demo == 0:
+        g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
         g.env.set_gravity("on")
         density = 0.7
         width_m = 0.01
