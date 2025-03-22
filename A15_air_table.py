@@ -302,6 +302,11 @@ class AirTable:
 
         g.env.set_gravity("off")
     
+        # Establish initial targets.
+        for controlled_puck in g.air_table.controlled_pucks:
+            if g.env.clients[ controlled_puck.client_name].drone:
+                controlled_puck.gun.findNewTarget()
+    
         g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[9]['index'] + 1}" +
             f"     grid = ({state['n_x']}, {state['n_y']})" +
