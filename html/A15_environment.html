@@ -243,6 +243,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">select_offCenter_lock</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">key_t</span> <span class="o">=</span> <span class="s2">&quot;U&quot;</span>
+
+        <span class="c1"># Note that key_e state is not used. However, there is an event (toggle) on K_e</span>
+        <span class="c1"># for inhibiting screen erasing.</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">COM_selection</span> <span class="o">=</span> <span class="kc">True</span>
@@ -422,7 +425,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="c1"># Draw green/red indicator circles when applying torque.</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;box2d&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key_t</span> <span class="o">==</span> <span class="s2">&quot;D&quot;</span><span class="p">):</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">rect_fixture</span><span class="p">:</span>
-                    <span class="n">indicator_r_px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">aspect_ratio</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">radius_px</span>
+                    <span class="n">indicator_r_px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">hw_ratio</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">radius_px</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">indicator_r_px</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selected_puck</span><span class="o">.</span><span class="n">radius_px</span> <span class="o">/</span> <span class="mf">3.0</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_shift</span> <span class="o">==</span> <span class="s2">&quot;U&quot;</span><span class="p">:</span>

@@ -135,6 +135,9 @@ class Client:
         self.select_offCenter_lock = False
 
         self.key_t = "U"
+
+        # Note that key_e state is not used. However, there is an event (toggle) on K_e
+        # for inhibiting screen erasing.
         
         self.selected_puck = None
         self.COM_selection = True
@@ -314,7 +317,7 @@ class Client:
             # Draw green/red indicator circles when applying torque.
             if (g.air_table.engine == "box2d") and (self.key_t == "D"):
                 if self.selected_puck.rect_fixture:
-                    indicator_r_px = self.selected_puck.aspect_ratio * self.selected_puck.radius_px
+                    indicator_r_px = self.selected_puck.hw_ratio * self.selected_puck.radius_px
                 else:
                     indicator_r_px = self.selected_puck.radius_px / 3.0
                 if self.key_shift == "U":

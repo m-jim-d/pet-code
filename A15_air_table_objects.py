@@ -78,7 +78,7 @@ class Puck:
                        c_drag=0.0, coef_rest=0.85, CR_fixed=False,
                        hit_limit=50.0, show_health=False, age_limit_s=3.0,
                        color=THECOLORS["gray"], client_name=None, bullet=False, pin=False, border_px=3,
-                       rect_fixture=False, aspect_ratio=1.0, groupIndex=0,
+                       rect_fixture=False, hw_ratio=1.0, groupIndex=0, awake=True,
                        friction=0.2, friction_fixed=False, c_angularDrag=0.0):
         
         self.radius_m = radius_m
@@ -148,8 +148,9 @@ class Puck:
         self.bullet_hit_limit = hit_limit
         
         # For a Box2d puck.
-        self.aspect_ratio = aspect_ratio
+        self.hw_ratio = hw_ratio # height to width ratio
         self.rect_fixture = rect_fixture
+        self.awake = awake
 
         self.b2d_body = None
 
@@ -177,13 +178,16 @@ class Puck:
         dynamic_body = g.air_table.b2d_world.CreateDynamicBody(
             position=b2Vec2(self.pos_2d_m.tuple()), 
             angle=self.angle_r, angularVelocity=self.angularVelocity_rps,
-            linearVelocity=b2Vec2(self.vel_2d_mps.tuple())
+            linearVelocity=b2Vec2(self.vel_2d_mps.tuple()),
+            awake=self.awake
         )
         
         if self.rect_fixture:
             # And add a box fixture onto it.
+            half_width_m = self.radius_m
+            half_height_m = half_width_m * self.hw_ratio
             dynamic_body.CreatePolygonFixture(
-                box=(self.radius_m, self.radius_m * self.aspect_ratio), 
+                box=(half_width_m, half_height_m), 
                 density=self.density_kgpm2, 
                 friction=self.friction_atBirth, restitution=self.coef_rest_atBirth
             )
@@ -323,7 +327,7 @@ class Puck:
             spent_fraction = float(self.bullet_hit_count) / float(self.bullet_hit_limit)
             
             if self.rect_fixture:
-                life_radius_px = spent_fraction * self.radius_px * self.aspect_ratio
+                life_radius_px = spent_fraction * self.radius_px * self.hw_ratio
             else:
                 life_radius_px = spent_fraction * self.radius_px
             

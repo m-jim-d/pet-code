@@ -179,6 +179,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">FPS_display</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="s2">&quot;not yet established&quot;</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">delayed_throw</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">def</span> <span class="nf">buildControlledPuck</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_m</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">y_m</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">pos_2d_m</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">r_m</span><span class="o">=</span><span class="mf">0.45</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> <span class="n">c_drag</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> 
                                   <span class="n">client_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">showSpoke</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">drone</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bullet_age_limit_s</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">drone</span><span class="p">):</span> 
@@ -1043,8 +1045,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="n">local_b2d_m</span> <span class="o">=</span> <span class="n">selected_b2d_body</span><span class="o">.</span><span class="n">GetLocalPoint</span><span class="p">(</span> <span class="n">p</span><span class="p">)</span>
         
             <span class="c1"># Use a dictionary to identify the puck based on the b2d body.</span>
-            <span class="c1"># Bullets have not been added to the dictionary.</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">selected_b2d_body</span><span class="o">.</span><span class="n">bullet</span><span class="p">:</span>
+            <span class="n">bulletFromGun</span> <span class="o">=</span> <span class="p">(</span><span class="n">selected_b2d_body</span><span class="o">.</span><span class="n">bullet</span> <span class="ow">and</span> <span class="p">(</span><span class="n">selected_b2d_body</span><span class="o">.</span><span class="n">fixtures</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">filterData</span><span class="o">.</span><span class="n">groupIndex</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">bulletFromGun</span><span class="p">:</span>
                 <span class="n">selected_puck</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">puck_dictionary</span><span class="p">[</span> <span class="n">selected_b2d_body</span><span class="p">]</span>
                 <span class="n">selected_puck</span><span class="o">.</span><span class="n">selected</span> <span class="o">=</span> <span class="kc">True</span>
         

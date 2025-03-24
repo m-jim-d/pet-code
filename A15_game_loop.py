@@ -43,9 +43,9 @@ import A15_globals as g
 class GameLoop:
     # window dimensions: (width_px, height_px)
     def __init__(self, engine_type="box2d", window_width_px=800):
-        # Demos are best at an aspect ratio of 8/7.        
-        aspect_ration = 8/7 # width/height
-        window_dimensions_px = (window_width_px, math.ceil(window_width_px / aspect_ration))
+        # Demos are best at an aspect ratio of 8/7.
+        aspect_ratio_wh = 8/7 # width/height
+        window_dimensions_px = (window_width_px, math.ceil(window_width_px / aspect_ratio_wh))
         
         pygame.init()
         
@@ -252,7 +252,7 @@ class GameLoop:
                 
                 # Clean out old bullets.
                 for thisPuck in self.air_table.pucks[:]:  # [:] indicates a copy 
-                    if (thisPuck.bullet) and ((self.air_table.time_s - thisPuck.birth_time_s) > thisPuck.age_limit_s):
+                    if (thisPuck.bullet) and (thisPuck.groupIndex != 0) and ((self.air_table.time_s - thisPuck.birth_time_s) > thisPuck.age_limit_s):
                         thisPuck.delete()
 
                 self.env.remove_healthless_pucks()

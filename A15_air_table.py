@@ -71,6 +71,8 @@ class AirTable:
         self.FPS_display = True
         self.engine = "not yet established"
 
+        self.delayed_throw = None
+
     def buildControlledPuck(self, x_m=1.0, y_m=1.0, pos_2d_m=None, r_m=0.45, density=0.7, c_drag=0.7, 
                                   client_name=None, sf_abs=True, showSpoke=False, drone=False, bullet_age_limit_s=3):
         if (drone): 
@@ -935,8 +937,8 @@ class Box2DAirTable(AirTable):
             local_b2d_m = selected_b2d_body.GetLocalPoint( p)
         
             # Use a dictionary to identify the puck based on the b2d body.
-            # Bullets have not been added to the dictionary.
-            if not selected_b2d_body.bullet:
+            bulletFromGun = (selected_b2d_body.bullet and (selected_b2d_body.fixtures[0].filterData.groupIndex != 0))
+            if not bulletFromGun:
                 selected_puck = self.puck_dictionary[ selected_b2d_body]
                 selected_puck.selected = True
         

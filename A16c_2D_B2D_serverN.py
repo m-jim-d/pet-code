@@ -9,7 +9,8 @@ from pygame.color import THECOLORS
 from A09_vec2d import Vec2D
 from A15_air_table_objects import Wall, Puck, Spring
 from A15_game_loop import GameLoop
-
+import threading
+import time
 import A15_globals as g
 
 #===========================================================
@@ -32,6 +33,8 @@ def make_some_pucks(demo):
     # Most of the demos don't need the tangle checker.
     g.air_table.jello_tangle_checking_enabled = False
     
+    g.air_table.delayed_throw = None
+
     # Now just black out the screen.
     g.game_window.clear()
 
@@ -358,13 +361,13 @@ def make_some_pucks(demo):
             # two pinned rectangles
             puck_position = Vec2D(0.0, g.game_window.UR_2d_m.y) + Vec2D(2.0, -2.0) # starting from upper left
             tempPuck = Puck(puck_position, 1.4, density, 
-                angularVelocity_rps=0.5, rect_fixture=True, aspect_ratio=0.1, show_health=True
+                angularVelocity_rps=0.5, rect_fixture=True, hw_ratio=0.1, show_health=True
             )
             Spring(tempPuck, puck_position, strength_Npm=300.0, 
                 pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
             puck_position = Vec2D(8.5, 4.0)
             tempPuck = Puck(puck_position, 1.4, density, 
-                angularVelocity_rps=0.5, rect_fixture=True, aspect_ratio=0.1, show_health=True
+                angularVelocity_rps=0.5, rect_fixture=True, hw_ratio=0.1, show_health=True
             )
             Spring(tempPuck, puck_position, strength_Npm=300.0, 
                 pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
@@ -402,21 +405,121 @@ def make_some_pucks(demo):
         g.air_table.targetJello_variations()
     
     elif demo == 0:
-        g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
-        g.env.set_gravity("on")
-        density = 0.7
-        width_m = 0.01
-        aspect_ratio = 9.0
-        x_position_m = 0.3
-        for j in range(0, 9):
-            y_puck_position_m = (width_m * aspect_ratio) + 0.01
-            Puck(Vec2D(x_position_m, y_puck_position_m), width_m, density, rect_fixture=True, aspect_ratio=aspect_ratio, angle_r=0)
-            width_m *= 1.5
-            x_position_m *= 1.5
+        initial_states = [
+            {'variation':'a'},
+            {'variation':'b'},
+            {'variation':'c'}
+        ]
+        g.env.demo_variations[0]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[0]['index']]
+        
+        if state['variation'] == 'a':
+            g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
+            g.env.set_gravity("on")
+            density = 0.7
+            width_m = 0.01
+            hw_ratio = 9.0
+            x_position_m = 0.3
+            for j in range(0, 9):
+                y_puck_position_m = (width_m * hw_ratio) + 0.01
+                Puck(Vec2D(x_position_m, y_puck_position_m), width_m, density, rect_fixture=True, hw_ratio=hw_ratio, angle_r=0)
+                width_m *= 1.5
+                x_position_m *= 1.5
 
-        # Drop a circular instigator with some spin, to get the chain reaction started.
-        Puck(Vec2D(0.1, 0.2), 0.06, density, rect_fixture=False, angularVelocity_rps=-10)
+            # Throw a puck to get the chain reaction started.
+            p1 = Puck(Vec2D(0.15, 0.06), 0.06, density, rect_fixture=False, angularVelocity_rps=0, bullet=True)
+            
+            def throw_it_later():
+                time.sleep(2)
+                if p1 in g.air_table.pucks:
+                    p1.set_pos_and_vel(p1.pos_2d_m, Vec2D(1, 2) * 0.5)
+            
+            g.air_table.delayed_throw = threading.Thread(target=throw_it_later, daemon=True)
+            g.air_table.delayed_throw.start()
 
+        elif state['variation'] == 'b':
+            g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
+            g.env.set_gravity("on")
+
+            # Pyramid on the ground        
+            puck_half_width_m = 0.1
+            hw_ratio = 3.0 # height/width
+            puck_half_height_m = puck_half_width_m * hw_ratio
+            density = 1.0
+            n_rows = 11
+
+            x_gap_fraction = 0.70
+            deltaX_m = 2*puck_half_width_m + (2*puck_half_width_m * x_gap_fraction)
+            y_gap_fraction = 0.03
+            deltaY_m = 2*puck_half_height_m + (2*puck_half_height_m * y_gap_fraction)
+
+            x_position_m = 1.0
+            y_position_m = puck_half_height_m + (2*puck_half_height_m * y_gap_fraction)
+
+            for i in range(n_rows):
+                for j in range(i, n_rows):
+                    Puck(Vec2D(x_position_m, y_position_m), puck_half_width_m, density, 
+                        color=THECOLORS['darkkhaki'], border_px=0,
+                        rect_fixture=True, hw_ratio=hw_ratio, angle_r=0, awake=False,
+                        coef_rest=0.8, CR_fixed=True)
+                    x_position_m += deltaX_m
+                y_position_m += deltaY_m
+                x_position_m = x_position_m - ((n_rows - i) * deltaX_m) + deltaX_m/2.0
+
+            # This puck will be flung or bowled by the user at the target stack
+            bowlingBall_density = 3.0
+            bowlingBall_r_m = 0.3
+            p1 = Puck(Vec2D(9.0, bowlingBall_r_m), bowlingBall_r_m, bowlingBall_density,
+                        coef_rest=0.7, CR_fixed=True,
+                        bullet=True, angularVelocity_rps=0, color=THECOLORS['royalblue'], border_px=0)
+
+            def throw_it_later():
+                time.sleep(2)
+                if p1 in g.air_table.pucks:
+                    p1.set_pos_and_vel(p1.pos_2d_m, Vec2D(-10, 1.0) * 10)
+            
+            g.air_table.delayed_throw = threading.Thread(target=throw_it_later, daemon=True)
+            g.air_table.delayed_throw.start()
+
+        elif state['variation'] == 'c':
+            g.air_table.buildFence(onoff={'L':True,'R':True,'T':True,'B':True})
+            g.env.set_gravity("off")
+
+            # Create a circular arrangement of rectangular pucks
+            center_x, center_y = 5.0, 4.0
+            radius = 2.0
+            n_pucks = 12
+            puck_half_width_m = 0.15
+            hw_ratio = 2.5
+            density = 1.0
+
+            for i in range(n_pucks):
+                angle = 2 * math.pi * i / n_pucks
+                x = center_x + radius * math.cos(angle)
+                y = center_y + radius * math.sin(angle)
+                # Point each puck towards the center
+                angle_to_center = math.atan2(center_y - y, center_x - x)
+                Puck(Vec2D(x, y), puck_half_width_m, density,
+                    color=THECOLORS['darkkhaki'], border_px=0,
+                    rect_fixture=True, hw_ratio=hw_ratio, 
+                    angle_r=angle_to_center, awake=False,
+                    coef_rest=0.8, CR_fixed=True)
+
+            # Create a spinning bowling ball
+            bowlingBall_density = 3.0
+            bowlingBall_r_m = 0.3
+            p1 = Puck(Vec2D(9.5, center_y), bowlingBall_r_m, bowlingBall_density,
+                    coef_rest=0.7, CR_fixed=True,
+                    bullet=True, angularVelocity_rps=5, color=THECOLORS['royalblue'], border_px=0)
+
+            def throw_it_later():
+                time.sleep(1)
+                if p1 in g.air_table.pucks:
+                    p1.set_pos_and_vel(p1.pos_2d_m, Vec2D(-8, -3) * 4)
+            
+            g.air_table.delayed_throw = threading.Thread(target=throw_it_later, daemon=True)
+            g.air_table.delayed_throw.start()
+            
     else:
         print("Nothing set up for this key.")
 

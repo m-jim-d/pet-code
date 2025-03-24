@@ -186,7 +186,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                        <span class="n">c_drag</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">0.85</span><span class="p">,</span> <span class="n">CR_fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                        <span class="n">hit_limit</span><span class="o">=</span><span class="mf">50.0</span><span class="p">,</span> <span class="n">show_health</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">age_limit_s</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span>
                        <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;gray&quot;</span><span class="p">],</span> <span class="n">client_name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bullet</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">pin</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">border_px</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-                       <span class="n">rect_fixture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">aspect_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">groupIndex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                       <span class="n">rect_fixture</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">hw_ratio</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">groupIndex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">awake</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                        <span class="n">friction</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">friction_fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">c_angularDrag</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">radius_m</span> <span class="o">=</span> <span class="n">radius_m</span>
@@ -256,8 +256,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">bullet_hit_limit</span> <span class="o">=</span> <span class="n">hit_limit</span>
         
         <span class="c1"># For a Box2d puck.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span> <span class="o">=</span> <span class="n">aspect_ratio</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hw_ratio</span> <span class="o">=</span> <span class="n">hw_ratio</span> <span class="c1"># height to width ratio</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">rect_fixture</span> <span class="o">=</span> <span class="n">rect_fixture</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">awake</span> <span class="o">=</span> <span class="n">awake</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">b2d_body</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -285,13 +286,16 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="n">dynamic_body</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">b2d_world</span><span class="o">.</span><span class="n">CreateDynamicBody</span><span class="p">(</span>
             <span class="n">position</span><span class="o">=</span><span class="n">b2Vec2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pos_2d_m</span><span class="o">.</span><span class="n">tuple</span><span class="p">()),</span> 
             <span class="n">angle</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">angle_r</span><span class="p">,</span> <span class="n">angularVelocity</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">angularVelocity_rps</span><span class="p">,</span>
-            <span class="n">linearVelocity</span><span class="o">=</span><span class="n">b2Vec2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vel_2d_mps</span><span class="o">.</span><span class="n">tuple</span><span class="p">())</span>
+            <span class="n">linearVelocity</span><span class="o">=</span><span class="n">b2Vec2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vel_2d_mps</span><span class="o">.</span><span class="n">tuple</span><span class="p">()),</span>
+            <span class="n">awake</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">awake</span>
         <span class="p">)</span>
         
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect_fixture</span><span class="p">:</span>
             <span class="c1"># And add a box fixture onto it.</span>
+            <span class="n">half_width_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_m</span>
+            <span class="n">half_height_m</span> <span class="o">=</span> <span class="n">half_width_m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hw_ratio</span>
             <span class="n">dynamic_body</span><span class="o">.</span><span class="n">CreatePolygonFixture</span><span class="p">(</span>
-                <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span><span class="p">),</span> 
+                <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="n">half_width_m</span><span class="p">,</span> <span class="n">half_height_m</span><span class="p">),</span> 
                 <span class="n">density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">density_kgpm2</span><span class="p">,</span> 
                 <span class="n">friction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">friction_atBirth</span><span class="p">,</span> <span class="n">restitution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coef_rest_atBirth</span>
             <span class="p">)</span>
@@ -431,7 +435,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="n">spent_fraction</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bullet_hit_count</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bullet_hit_limit</span><span class="p">)</span>
             
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rect_fixture</span><span class="p">:</span>
-                <span class="n">life_radius_px</span> <span class="o">=</span> <span class="n">spent_fraction</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">aspect_ratio</span>
+                <span class="n">life_radius_px</span> <span class="o">=</span> <span class="n">spent_fraction</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hw_ratio</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">life_radius_px</span> <span class="o">=</span> <span class="n">spent_fraction</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span>
             
