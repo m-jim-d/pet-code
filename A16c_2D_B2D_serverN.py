@@ -405,6 +405,14 @@ def make_some_pucks(demo):
         g.air_table.targetJello_variations()
     
     elif demo == 0:
+        # Demo 0 has three variations showing different puck arrangements and collisions:
+        # a: Growing rectangles - Creates a row of increasingly larger rectangular pucks,
+        #    then throws a small round puck to start a chain reaction
+        # b: Pyramid stack - Builds a pyramid of tall rectangular pucks on the ground,
+        #    then launches a heavy bowling ball at it
+        # c: Billiards setup - Arranges circular pucks in a partial ring formation,
+        #    with a cue ball that's thrown to scatter them
+
         initial_states = [
             {'variation':'a'},
             {'variation':'b'},
@@ -427,7 +435,8 @@ def make_some_pucks(demo):
                 x_position_m *= 1.5
 
             # Throw a puck to get the chain reaction started.
-            p1 = Puck(Vec2D(0.15, 0.06), 0.06, density, rect_fixture=False, angularVelocity_rps=0, bullet=True)
+            p1 = Puck(Vec2D(0.15, 0.06), 0.06, density, rect_fixture=False, angularVelocity_rps=0, 
+                      bullet=True, color=THECOLORS['royalblue'], border_px=0)
             
             def throw_it_later():
                 time.sleep(2)
@@ -441,7 +450,7 @@ def make_some_pucks(demo):
             g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
             g.env.set_gravity("on")
 
-            # Pyramid on the ground        
+            # Pyramid on the ground
             puck_half_width_m = 0.1
             hw_ratio = 3.0 # height/width
             puck_half_height_m = puck_half_width_m * hw_ratio
@@ -482,9 +491,7 @@ def make_some_pucks(demo):
             g.air_table.delayed_throw.start()
 
         elif state['variation'] == 'c':
-            g.air_table.buildFence(onoff={'L':True,'R':True,'T':True,'B':True})
             g.env.set_gravity("off")
-
             # no fence:
             g.air_table.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
 
