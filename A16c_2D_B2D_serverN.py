@@ -485,40 +485,55 @@ def make_some_pucks(demo):
             g.air_table.buildFence(onoff={'L':True,'R':True,'T':True,'B':True})
             g.env.set_gravity("off")
 
-            # Create a circular arrangement of rectangular pucks
-            center_x, center_y = 5.0, 4.0
-            radius = 2.0
-            n_pucks = 12
-            puck_half_width_m = 0.15
-            hw_ratio = 2.5
+            # no fence:
+            g.air_table.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
+
             density = 1.0
 
-            for i in range(n_pucks):
-                angle = 2 * math.pi * i / n_pucks
-                x = center_x + radius * math.cos(angle)
-                y = center_y + radius * math.sin(angle)
-                # Point each puck towards the center
-                angle_to_center = math.atan2(center_y - y, center_x - x)
-                Puck(Vec2D(x, y), puck_half_width_m, density,
+            n_pucks = 15
+            radius_m = 0.4
+
+            polygon_radius_m = radius_m / math.sin(math.pi/n_pucks)
+
+            # Place the pucks a little farther out than their touching point.
+            little_extra_m = 0.3
+            center_to_puck_2d_m = Vec2D(0.0, polygon_radius_m + little_extra_m)
+            pin_offset_m = 0.4
+            center_to_pin_2d_m = Vec2D(0.0, polygon_radius_m - pin_offset_m)
+            for i in range(0, n_pucks-2):
+                angle = (360 / n_pucks) * i
+
+                rotated_c_to_puck_2d_m = center_to_puck_2d_m.rotated(angle)
+                puck_position_2d_m = g.game_window.center_2d_m + rotated_c_to_puck_2d_m
+
+                rotated_c_to_pin_2d_m = center_to_pin_2d_m.rotated(angle)
+                pin_position_2d_m = g.game_window.center_2d_m + rotated_c_to_pin_2d_m
+
+                Puck(puck_position_2d_m, radius_m, density, 
                     color=THECOLORS['darkkhaki'], border_px=0,
-                    rect_fixture=True, hw_ratio=hw_ratio, 
-                    angle_r=angle_to_center, awake=False,
-                    coef_rest=0.8, CR_fixed=True)
+                    rect_fixture=False,
+                    coef_rest=1.0, CR_fixed=True,
+                    friction=0, friction_fixed=True)
 
-            # Create a spinning bowling ball
-            bowlingBall_density = 3.0
-            bowlingBall_r_m = 0.3
-            p1 = Puck(Vec2D(9.5, center_y), bowlingBall_r_m, bowlingBall_density,
-                    coef_rest=0.7, CR_fixed=True,
-                    bullet=True, angularVelocity_rps=5, color=THECOLORS['royalblue'], border_px=0)
-
+            # This puck will be flung or bowled by the user at the target stack
+            bowlingBall_density = density
+            bowlingBall_r_m = radius_m
+            bB_init_pos_2d_m = g.air_table.pucks[0].pos_2d_m + Vec2D(4.0, 0.0)
+            p1 = Puck(bB_init_pos_2d_m, bowlingBall_r_m, bowlingBall_density,
+                        coef_rest=1.0, CR_fixed=True,
+                        bullet=True, angularVelocity_rps=0, color=THECOLORS['royalblue'], border_px=0)
+            
             def throw_it_later():
                 time.sleep(1)
                 if p1 in g.air_table.pucks:
-                    p1.set_pos_and_vel(p1.pos_2d_m, Vec2D(-8, -3) * 4)
+                    p1.set_pos_and_vel(p1.pos_2d_m, Vec2D(-1, 0) * 4.0)
             
             g.air_table.delayed_throw = threading.Thread(target=throw_it_later, daemon=True)
             g.air_table.delayed_throw.start()
+            
+        g.game_window.set_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo_variations[0]['index'] + 1}"
+        )
             
     else:
         print("Nothing set up for this key.")
