@@ -393,7 +393,23 @@ def make_some_pucks(demo):
             g.air_table.buildControlledPuck( x_m=1.0, y_m=1.0, r_m=0.55, client_name="C5", sf_abs=False, drone=True, bullet_age_limit_s=3.0)
             g.air_table.buildControlledPuck( x_m=8.5, y_m=7.0, r_m=0.55, client_name="C6", sf_abs=False, drone=True, bullet_age_limit_s=3.0)
         
-        g.air_table.puckPopper_variations(two_drone_special__rectangular)
+        def rectangle_in_middle():
+            g.air_table.buildFence(onoff={'L':True,'R':False,'T':True,'B':True})
+
+            density = 0.7
+            puck_position_2d_m = g.game_window.center_2d_m
+            tempPuck = Puck(puck_position_2d_m, 3.0, density, 
+                angularVelocity_rps=0.5, rect_fixture=True, hw_ratio=0.05, show_health=True
+            )
+            Spring(tempPuck, puck_position_2d_m, strength_Npm=300.0, 
+                pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
+            
+            radius_m = 0.45
+            set_off_m = radius_m + 0.5
+            init_2d_m = Vec2D(set_off_m, set_off_m)
+            g.air_table.buildControlledPuck(x_m=init_2d_m.x, y_m=init_2d_m.y, r_m=radius_m, client_name='local', sf_abs=False, c_drag=1.5)
+
+        g.air_table.puckPopper_variations(two_drone_special__rectangular, rectangle_in_middle)
         
     elif demo == 8:
         g.env.set_gravity("on")

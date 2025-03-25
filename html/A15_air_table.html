@@ -477,7 +477,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="sa">f</span><span class="s2">&quot;     pinned = </span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;spr&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">     angle = </span><span class="si">{</span><span class="n">angle</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">puckPopper_variations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">twoDrone_special</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">puckPopper_variations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">twoDrone_special</span><span class="p">,</span> <span class="n">custom_1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">custom_2</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
 
         <span class="n">initial_states</span> <span class="o">=</span> <span class="p">[</span>
@@ -489,6 +489,12 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span><span class="s1">&#39;n-drones&#39;</span><span class="p">,</span> <span class="s1">&#39;n-drones&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;bullet_age_limit_s&#39;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">},</span>
             <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span><span class="s1">&#39;n-drones&#39;</span><span class="p">,</span> <span class="s1">&#39;n-drones&#39;</span><span class="p">:</span><span class="mi">6</span><span class="p">,</span> <span class="s1">&#39;bullet_age_limit_s&#39;</span><span class="p">:</span> <span class="mf">2.2</span><span class="p">},</span>
         <span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">custom_1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">initial_states</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span><span class="s1">&#39;custom-1&#39;</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">custom_2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">initial_states</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span><span class="s1">&#39;custom-2&#39;</span><span class="p">})</span>
+
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="mi">7</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_states</span><span class="p">)</span>
         <span class="n">state</span> <span class="o">=</span> <span class="n">initial_states</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="mi">7</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]]</span>
                     
@@ -501,6 +507,12 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
         <span class="k">if</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;two-drones&#39;</span><span class="p">:</span>
             <span class="n">twoDrone_special</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;custom-1&#39;</span><span class="p">:</span>
+            <span class="n">custom_1</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;custom-2&#39;</span><span class="p">:</span>
+            <span class="n">custom_2</span><span class="p">()</span>
 
         <span class="k">elif</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;n-drones&#39;</span><span class="p">:</span>
 

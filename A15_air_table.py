@@ -369,7 +369,7 @@ class AirTable:
             f"     pinned = {state['spr']}     angle = {angle}"
         )
 
-    def puckPopper_variations(self, twoDrone_special=None):
+    def puckPopper_variations(self, twoDrone_special, custom_1=None, custom_2=None):
         g.env.set_gravity("off")
 
         initial_states = [
@@ -381,6 +381,12 @@ class AirTable:
             {'type':'n-drones', 'n-drones':5, 'bullet_age_limit_s': 2.2},
             {'type':'n-drones', 'n-drones':6, 'bullet_age_limit_s': 2.2},
         ]
+
+        if custom_1 is not None:
+            initial_states.append({'type':'custom-1'})
+        if custom_2 is not None:
+            initial_states.append({'type':'custom-2'})
+
         g.env.demo_variations[7]['count'] = len(initial_states)
         state = initial_states[g.env.demo_variations[7]['index']]
                     
@@ -393,6 +399,12 @@ class AirTable:
 
         if state['type'] == 'two-drones':
             twoDrone_special()
+
+        elif state['type'] == 'custom-1':
+            custom_1()
+
+        elif state['type'] == 'custom-2':
+            custom_2()
 
         elif state['type'] == 'n-drones':
 
