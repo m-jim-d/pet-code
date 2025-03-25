@@ -67,6 +67,9 @@ def make_some_pucks(demo):
     # Most of the demos don't need the tangle checker.
     g.air_table.jello_tangle_checking_enabled = False
     
+    # Make sure the throwing thread is not still running.
+    g.air_table.delayed_throw = None
+        
     # Now just black out the screen.
     g.game_window.clear()
 
@@ -74,6 +77,8 @@ def make_some_pucks(demo):
     g.env.tickCount = 0
     g.air_table.coef_rest = 1.00
     g.air_table.time_s = 0.0
+
+    g.air_table.inhibit_wall_collisions = False
 
     # Each demo will have a single variation unless specified.
     g.env.demo_variations[demo]['count'] = 1
@@ -168,6 +173,9 @@ def make_some_pucks(demo):
 
     elif demo == 9:
         g.air_table.targetJello_variations()
+
+    elif demo == 0:
+        g.air_table.pool_trick_shot()
 
     else:
         print("Nothing set up for this key.")

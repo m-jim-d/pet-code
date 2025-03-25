@@ -152,6 +152,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="c1"># Most of the demos don&#39;t need the tangle checker.</span>
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">jello_tangle_checking_enabled</span> <span class="o">=</span> <span class="kc">False</span>
     
+    <span class="c1"># Make sure the throwing thread is not still running.</span>
+    <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">delayed_throw</span> <span class="o">=</span> <span class="kc">None</span>
+    
     <span class="c1"># Now just black out the screen.</span>
     <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 
@@ -264,6 +267,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">targetJello_variations</span><span class="p">()</span>
+    
+    <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">pool_trick_shot</span><span class="p">()</span>
         
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="s1">&#39;1p&#39;</span><span class="p">:</span>
         <span class="c1"># Basic pool shot, no penetration correction, no perfect kiss</span>

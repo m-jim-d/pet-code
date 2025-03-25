@@ -19,7 +19,7 @@ Each table type supports puck and spring objects, and customizable physics param
 for different simulation needs.
 """
 
-import random
+import random, threading, time, math
 
 from typing import Union, Tuple
 
@@ -72,6 +72,60 @@ class AirTable:
         self.engine = "not yet established"
 
         self.delayed_throw = None
+
+    def throw_puck(self, puck, velocity_2d_mps, delay_s=1.0):
+        def throw_it_later():
+            time.sleep(delay_s)
+            if puck in self.pucks:
+                puck.set_pos_and_vel(puck.pos_2d_m, velocity_2d_mps)
+        
+        # This thread is removed at the start of the next demo in make_some_pucks.
+        self.delayed_throw = threading.Thread(daemon=True, target=throw_it_later)
+        self.delayed_throw.start()
+
+    def pool_trick_shot(self):
+        g.env.set_gravity("off")
+
+        if self.engine == 'box2d':
+            # no fence:
+            self.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
+        else:
+            self.inhibit_wall_collisions = True
+        
+        density = 1.0
+
+        n_pucks = 15
+        radius_m = 0.4
+
+        polygon_radius_m = radius_m / math.sin(math.pi/n_pucks)
+
+        # Place the pucks a little farther out than their touching point.
+        little_extra_m = 0.3
+        center_to_puck_2d_m = Vec2D(0.0, polygon_radius_m + little_extra_m)
+        pin_offset_m = 0.4
+        center_to_pin_2d_m = Vec2D(0.0, polygon_radius_m - pin_offset_m)
+        for i in range(0, n_pucks-2):
+            angle = (360 / n_pucks) * i
+
+            rotated_c_to_puck_2d_m = center_to_puck_2d_m.rotated(angle)
+            puck_position_2d_m = g.game_window.center_2d_m + rotated_c_to_puck_2d_m
+
+            Puck(puck_position_2d_m, radius_m, density, 
+                color=THECOLORS['darkkhaki'], border_px=0,
+                rect_fixture=False,
+                coef_rest=1.0, CR_fixed=True,
+                friction=0, friction_fixed=True)
+
+        # This puck will be flung or bowled by the user at the target stack
+        bowlingBall_density = density
+        bowlingBall_r_m = radius_m
+        # To the right of the first puck.
+        bB_init_pos_2d_m = self.pucks[0].pos_2d_m + Vec2D(4.0, 0.0)
+        p1 = Puck(bB_init_pos_2d_m, bowlingBall_r_m, bowlingBall_density,
+                    coef_rest=1.0, CR_fixed=True,
+                    bullet=True, angularVelocity_rps=0, color=THECOLORS['royalblue'], border_px=0)
+        
+        self.throw_puck(p1, Vec2D(-1, 0) * 4.0, delay_s=1.0)
 
     def buildControlledPuck(self, x_m=1.0, y_m=1.0, pos_2d_m=None, r_m=0.45, density=0.7, c_drag=0.7, 
                                   client_name=None, sf_abs=True, showSpoke=False, drone=False, bullet_age_limit_s=3):
@@ -268,7 +322,7 @@ class AirTable:
             angle = state['angle']
         else:
             angle = 45
-        g.air_table.buildJelloGrid( angle=angle, speed=0, 
+        self.buildJelloGrid( angle=angle, speed=0, 
             grid_x_n=state['n_x'], grid_y_n=state['n_y'],
             pos_initial_2d_m=Vec2D(4.0, 2.5), 
             puck_drag=1.5, show_health=True, coef_rest=0.85
@@ -276,11 +330,11 @@ class AirTable:
 
         # Center the grid in the window.
         com_2d_m = Vec2D(0,0)
-        for puck in g.air_table.pucks:
+        for puck in self.pucks:
             com_2d_m += puck.pos_2d_m
-        com_2d_m = com_2d_m / len(g.air_table.pucks)
+        com_2d_m = com_2d_m / len(self.pucks)
         shift_2d_m = g.game_window.center_2d_m - com_2d_m
-        for puck in g.air_table.pucks:
+        for puck in self.pucks:
             puck.set_pos_and_vel(puck.pos_2d_m + shift_2d_m)
 
         # Pin two pucks of the jello grid.
@@ -289,23 +343,23 @@ class AirTable:
         else:
             k_Npm = 800.0
         if state['spr']:
-            Spring(g.air_table.pucks[state['pa_i']], Vec2D(0.3, 0.3), color=THECOLORS['yellow'],
+            Spring(self.pucks[state['pa_i']], Vec2D(0.3, 0.3), color=THECOLORS['yellow'],
                 length_m=0.0, strength_Npm=k_Npm, width_m=0.02)
-            Spring(g.air_table.pucks[state['pb_i']], Vec2D(9.7, 8.4), color=THECOLORS['yellow'],
+            Spring(self.pucks[state['pb_i']], Vec2D(9.7, 8.4), color=THECOLORS['yellow'],
                 length_m=0.0, strength_Npm=k_Npm, width_m=0.02)
 
         g.env.clients["C5"].active = True
         g.env.clients["C5"].drone = True
-        g.air_table.buildControlledPuck( x_m=2.0, y_m=8.0, r_m=0.45, client_name="C5")
+        self.buildControlledPuck( x_m=2.0, y_m=8.0, r_m=0.45, client_name="C5")
 
         g.env.clients["C6"].active = True
         g.env.clients["C6"].drone = True
-        g.air_table.buildControlledPuck( x_m=8.5, y_m=1.5, r_m=0.45, client_name="C6")
+        self.buildControlledPuck( x_m=8.5, y_m=1.5, r_m=0.45, client_name="C6")
 
         g.env.set_gravity("off")
     
         # Establish initial targets.
-        for controlled_puck in g.air_table.controlled_pucks:
+        for controlled_puck in self.controlled_pucks:
             if g.env.clients[ controlled_puck.client_name].drone:
                 controlled_puck.gun.findNewTarget()
     
@@ -361,7 +415,7 @@ class AirTable:
             for client_name in g.env.clients:
                 client = g.env.clients[client_name]
                 if client.active and not client.drone:
-                    g.air_table.buildControlledPuck(pos_2d_m=human_pos_2d_m, r_m=0.45, 
+                    self.buildControlledPuck(pos_2d_m=human_pos_2d_m, r_m=0.45, 
                         client_name=client_name, sf_abs=False, c_drag=c_drag, bullet_age_limit_s=3.0)
                     human_pos_2d_m += Vec2D(spacing_m, 0.0)
 
@@ -379,14 +433,14 @@ class AirTable:
                 # drone pucks
                 # Start at C4, leaving room for local, C1, C2, and C3 human players.
                 client_name = f"C{i+4}"
-                g.air_table.buildControlledPuck(pos_2d_m=puck_position_2d_m, r_m=0.55, 
+                self.buildControlledPuck(pos_2d_m=puck_position_2d_m, r_m=0.55, 
                     client_name=client_name, sf_abs=False, drone=True, bullet_age_limit_s=age_limit_s)
 
         # Establish initial targets.
-        for controlled_puck in g.air_table.controlled_pucks:
+        for controlled_puck in self.controlled_pucks:
             if g.env.clients[ controlled_puck.client_name].drone:
                 if state['type'] == 'n-drones' and state['n-drones'] == 5:
-                    controlled_puck.gun.targetPuck = g.air_table.pucks[0] # 0 is the host client
+                    controlled_puck.gun.targetPuck = self.pucks[0] # 0 is the host client
                 else:    
                     controlled_puck.gun.findNewTarget()
         
@@ -398,16 +452,17 @@ class AirTable:
     The following methods are used (only) by the circular versions of the air table (Circular and PerfectKiss).
     """
     def draw(self):
-        #{"L_m":0.0, "R_m":10.0, "B_m":0.0, "T_m":10.0}
-        topLeft_2d_px =   g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['L_m'],        self.walls_dic['T_m']))
-        topRight_2d_px =  g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['R_m']-0.01,   self.walls_dic['T_m']))
-        botLeft_2d_px =   g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['L_m'],        self.walls_dic['B_m']+0.01))
-        botRight_2d_px =  g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['R_m']-0.01,   self.walls_dic['B_m']+0.01))
-        
-        pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], topLeft_2d_px,  topRight_2d_px, 1)
-        pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], topRight_2d_px, botRight_2d_px, 1)
-        pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], botRight_2d_px, botLeft_2d_px,  1)
-        pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], botLeft_2d_px,  topLeft_2d_px,  1)
+        if not self.inhibit_wall_collisions:
+            #{"L_m":0.0, "R_m":10.0, "B_m":0.0, "T_m":10.0}
+            topLeft_2d_px =   g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['L_m'],        self.walls_dic['T_m']))
+            topRight_2d_px =  g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['R_m']-0.01,   self.walls_dic['T_m']))
+            botLeft_2d_px =   g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['L_m'],        self.walls_dic['B_m']+0.01))
+            botRight_2d_px =  g.env.ConvertWorldToScreen( Vec2D( self.walls_dic['R_m']-0.01,   self.walls_dic['B_m']+0.01))
+            
+            pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], topLeft_2d_px,  topRight_2d_px, 1)
+            pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], topRight_2d_px, botRight_2d_px, 1)
+            pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], botRight_2d_px, botLeft_2d_px,  1)
+            pygame.draw.line(g.game_window.surface, THECOLORS["orangered1"], botLeft_2d_px,  topLeft_2d_px,  1)
     
     def checkForPuckAtThisPosition(self, x_px_or_tuple, y_px = None):
         if y_px == None:
@@ -662,7 +717,7 @@ class PerfectKissAirTable(AirTable):
         d_2d_m = puckA_2p_pos_2d_m - puckA_2_kiss_2d_m
         
         # Time between detection and kiss. Avoid zero in the denominator.
-        if puckA_relvel_2d_mps.x > 0:
+        if abs(puckA_relvel_2d_mps.x) > 0:
             time_between_kiss_and_detection_s = d_2d_m.x / puckA_relvel_2d_mps.x
         else:
             time_between_kiss_and_detection_s = d_2d_m.y / puckA_relvel_2d_mps.y

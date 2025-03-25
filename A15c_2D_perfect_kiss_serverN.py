@@ -44,6 +44,9 @@ def make_some_pucks(demo):
     # Most of the demos don't need the tangle checker.
     g.air_table.jello_tangle_checking_enabled = False
     
+    # Make sure the throwing thread is not still running.
+    g.air_table.delayed_throw = None
+    
     # Now just black out the screen.
     g.game_window.clear()
 
@@ -156,6 +159,9 @@ def make_some_pucks(demo):
 
     elif demo == 9:
         g.air_table.targetJello_variations()
+    
+    elif demo == 0:
+        g.air_table.pool_trick_shot()
         
     elif demo == '1p':
         # Basic pool shot, no penetration correction, no perfect kiss

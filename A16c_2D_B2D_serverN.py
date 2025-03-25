@@ -9,8 +9,6 @@ from pygame.color import THECOLORS
 from A09_vec2d import Vec2D
 from A15_air_table_objects import Wall, Puck, Spring
 from A15_game_loop import GameLoop
-import threading
-import time
 import A15_globals as g
 
 #===========================================================
@@ -33,6 +31,7 @@ def make_some_pucks(demo):
     # Most of the demos don't need the tangle checker.
     g.air_table.jello_tangle_checking_enabled = False
     
+    # Make sure the throwing thread is not still running.
     g.air_table.delayed_throw = None
 
     # Now just black out the screen.
@@ -437,14 +436,8 @@ def make_some_pucks(demo):
             # Throw a puck to get the chain reaction started.
             p1 = Puck(Vec2D(0.15, 0.06), 0.06, density, rect_fixture=False, angularVelocity_rps=0, 
                       bullet=True, color=THECOLORS['royalblue'], border_px=0)
-            
-            def throw_it_later():
-                time.sleep(2)
-                if p1 in g.air_table.pucks:
-                    p1.set_pos_and_vel(p1.pos_2d_m, Vec2D(1, 2) * 0.5)
-            
-            g.air_table.delayed_throw = threading.Thread(target=throw_it_later, daemon=True)
-            g.air_table.delayed_throw.start()
+
+            g.air_table.throw_puck(p1, Vec2D(1, 2) * 0.5, delay_s=2.0)
 
         elif state['variation'] == 'b':
             g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
@@ -481,63 +474,12 @@ def make_some_pucks(demo):
             p1 = Puck(Vec2D(9.0, bowlingBall_r_m), bowlingBall_r_m, bowlingBall_density,
                         coef_rest=0.7, CR_fixed=True,
                         bullet=True, angularVelocity_rps=0, color=THECOLORS['royalblue'], border_px=0)
-
-            def throw_it_later():
-                time.sleep(2)
-                if p1 in g.air_table.pucks:
-                    p1.set_pos_and_vel(p1.pos_2d_m, Vec2D(-10, 1.0) * 10)
             
-            g.air_table.delayed_throw = threading.Thread(target=throw_it_later, daemon=True)
-            g.air_table.delayed_throw.start()
+            g.air_table.throw_puck(p1, Vec2D(-10, 1.0) * 10, delay_s=2.0)
 
         elif state['variation'] == 'c':
-            g.env.set_gravity("off")
-            # no fence:
-            g.air_table.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
+            g.air_table.pool_trick_shot()
 
-            density = 1.0
-
-            n_pucks = 15
-            radius_m = 0.4
-
-            polygon_radius_m = radius_m / math.sin(math.pi/n_pucks)
-
-            # Place the pucks a little farther out than their touching point.
-            little_extra_m = 0.3
-            center_to_puck_2d_m = Vec2D(0.0, polygon_radius_m + little_extra_m)
-            pin_offset_m = 0.4
-            center_to_pin_2d_m = Vec2D(0.0, polygon_radius_m - pin_offset_m)
-            for i in range(0, n_pucks-2):
-                angle = (360 / n_pucks) * i
-
-                rotated_c_to_puck_2d_m = center_to_puck_2d_m.rotated(angle)
-                puck_position_2d_m = g.game_window.center_2d_m + rotated_c_to_puck_2d_m
-
-                rotated_c_to_pin_2d_m = center_to_pin_2d_m.rotated(angle)
-                pin_position_2d_m = g.game_window.center_2d_m + rotated_c_to_pin_2d_m
-
-                Puck(puck_position_2d_m, radius_m, density, 
-                    color=THECOLORS['darkkhaki'], border_px=0,
-                    rect_fixture=False,
-                    coef_rest=1.0, CR_fixed=True,
-                    friction=0, friction_fixed=True)
-
-            # This puck will be flung or bowled by the user at the target stack
-            bowlingBall_density = density
-            bowlingBall_r_m = radius_m
-            bB_init_pos_2d_m = g.air_table.pucks[0].pos_2d_m + Vec2D(4.0, 0.0)
-            p1 = Puck(bB_init_pos_2d_m, bowlingBall_r_m, bowlingBall_density,
-                        coef_rest=1.0, CR_fixed=True,
-                        bullet=True, angularVelocity_rps=0, color=THECOLORS['royalblue'], border_px=0)
-            
-            def throw_it_later():
-                time.sleep(1)
-                if p1 in g.air_table.pucks:
-                    p1.set_pos_and_vel(p1.pos_2d_m, Vec2D(-1, 0) * 4.0)
-            
-            g.air_table.delayed_throw = threading.Thread(target=throw_it_later, daemon=True)
-            g.air_table.delayed_throw.start()
-            
         g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[0]['index'] + 1}"
         )
