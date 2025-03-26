@@ -190,7 +190,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                        <span class="n">friction</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">friction_fixed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">c_angularDrag</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">radius_m</span> <span class="o">=</span> <span class="n">radius_m</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">px_from_m</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius_m</span> <span class="o">*</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">viewZoom</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diameter_m</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">radius_m</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radius_px</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">px_from_m</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">radius_m</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">density_kgpm2</span> <span class="o">=</span> <span class="n">density_kgpm2</span>    <span class="c1"># mass per unit area</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mass_kg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">density_kgpm2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_m</span> <span class="o">**</span> <span class="mi">2</span>
@@ -201,6 +202,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">CR_fixed</span> <span class="o">=</span> <span class="n">CR_fixed</span>
 
         <span class="c1"># For a Box2d puck.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">width_m</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height_m</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">friction</span> <span class="o">=</span> <span class="n">friction</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">friction_atBirth</span> <span class="o">=</span> <span class="n">friction</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">friction_fixed</span> <span class="o">=</span> <span class="n">friction_fixed</span>
@@ -294,6 +297,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="c1"># And add a box fixture onto it.</span>
             <span class="n">half_width_m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">radius_m</span>
             <span class="n">half_height_m</span> <span class="o">=</span> <span class="n">half_width_m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">hw_ratio</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">width_m</span> <span class="o">=</span> <span class="n">half_width_m</span> <span class="o">*</span> <span class="mf">2.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">height_m</span> <span class="o">=</span> <span class="n">half_height_m</span> <span class="o">*</span> <span class="mf">2.0</span>
             <span class="n">dynamic_body</span><span class="o">.</span><span class="n">CreatePolygonFixture</span><span class="p">(</span>
                 <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="n">half_width_m</span><span class="p">,</span> <span class="n">half_height_m</span><span class="p">),</span> 
                 <span class="n">density</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">density_kgpm2</span><span class="p">,</span> 

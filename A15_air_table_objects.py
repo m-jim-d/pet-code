@@ -82,7 +82,8 @@ class Puck:
                        friction=0.2, friction_fixed=False, c_angularDrag=0.0):
         
         self.radius_m = radius_m
-        self.radius_px = round(g.env.px_from_m(self.radius_m * g.env.viewZoom))
+        self.diameter_m = 2 * radius_m
+        self.radius_px = round(g.env.px_from_m(self.radius_m))
 
         self.density_kgpm2 = density_kgpm2    # mass per unit area
         self.mass_kg = self.density_kgpm2 * math.pi * self.radius_m ** 2
@@ -93,6 +94,8 @@ class Puck:
         self.CR_fixed = CR_fixed
 
         # For a Box2d puck.
+        self.width_m = None
+        self.height_m = None
         self.friction = friction
         self.friction_atBirth = friction
         self.friction_fixed = friction_fixed
@@ -186,6 +189,8 @@ class Puck:
             # And add a box fixture onto it.
             half_width_m = self.radius_m
             half_height_m = half_width_m * self.hw_ratio
+            self.width_m = half_width_m * 2.0
+            self.height_m = half_height_m * 2.0
             dynamic_body.CreatePolygonFixture(
                 box=(half_width_m, half_height_m), 
                 density=self.density_kgpm2, 

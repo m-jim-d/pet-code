@@ -363,13 +363,14 @@ def make_some_pucks(demo):
                 angularVelocity_rps=0.5, rect_fixture=True, hw_ratio=0.1, show_health=True
             )
             Spring(tempPuck, puck_position, strength_Npm=300.0, 
-                pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
+                pin_radius_m=0.03, width_m=0.02, c_drag=10.0)
+            
             puck_position = Vec2D(8.5, 4.0)
             tempPuck = Puck(puck_position, 1.4, density, 
                 angularVelocity_rps=0.5, rect_fixture=True, hw_ratio=0.1, show_health=True
             )
             Spring(tempPuck, puck_position, strength_Npm=300.0, 
-                pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
+                pin_radius_m=0.03, width_m=0.02, c_drag=10.0)
 
             # row of small pinned pucks without spokes
             for m in range(0, 6):
@@ -402,14 +403,14 @@ def make_some_pucks(demo):
                 angularVelocity_rps=0.5, rect_fixture=True, hw_ratio=0.05, show_health=True
             )
             Spring(tempPuck, puck_position_2d_m, strength_Npm=300.0, 
-                pin_radius_m=0.03, width_m=0.02, c_drag = 1.5 + 10.0)
+                pin_radius_m=0.03, width_m=0.02, c_drag=10.0)
             
             radius_m = 0.45
             set_off_m = radius_m + 0.5
             init_2d_m = Vec2D(set_off_m, set_off_m)
             g.air_table.buildControlledPuck(x_m=init_2d_m.x, y_m=init_2d_m.y, r_m=radius_m, client_name='local', sf_abs=False, c_drag=1.5)
 
-        g.air_table.puckPopper_variations(two_drone_special__rectangular, rectangle_in_middle)
+        g.air_table.puckPopper_variations(two_drone_special__rectangular, custom_1=rectangle_in_middle)
         
     elif demo == 8:
         g.env.set_gravity("on")
@@ -421,12 +422,12 @@ def make_some_pucks(demo):
     
     elif demo == 0:
         # Demo 0 has three variations showing different puck arrangements and collisions:
-        # a: Growing rectangles - Creates a row of increasingly larger rectangular pucks,
+        # a: Dominoes - Creates a row of increasingly larger rectangular pucks,
         #    then throws a small round puck to start a chain reaction
         # b: Pyramid stack - Builds a pyramid of tall rectangular pucks on the ground,
         #    then launches a heavy bowling ball at it
-        # c: Billiards setup - Arranges circular pucks in a partial ring formation,
-        #    with a cue ball that's thrown to scatter them
+        # c: Billiards trick shot - Arranges circular pucks in a partial ring formation,
+        #    with a cue ball that's shot to scatter them
 
         initial_states = [
             {'variation':'a'},
@@ -440,13 +441,16 @@ def make_some_pucks(demo):
             g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
             g.env.set_gravity("on")
             density = 0.7
-            width_m = 0.01
+            half_width_m = 0.01
             hw_ratio = 9.0
             x_position_m = 0.3
             for j in range(0, 9):
-                y_puck_position_m = (width_m * hw_ratio) + 0.01
-                Puck(Vec2D(x_position_m, y_puck_position_m), width_m, density, rect_fixture=True, hw_ratio=hw_ratio, angle_r=0)
-                width_m *= 1.5
+                y_puck_position_m = (half_width_m * hw_ratio) + 0.01
+                Puck(Vec2D(x_position_m, y_puck_position_m), half_width_m, density, 
+                    coef_rest=0.82,
+                    color=THECOLORS['darkkhaki'], border_px=0,
+                    rect_fixture=True, hw_ratio=hw_ratio, angle_r=0)
+                half_width_m *= 1.5
                 x_position_m *= 1.5
 
             # Throw a puck to get the chain reaction started.
@@ -471,10 +475,12 @@ def make_some_pucks(demo):
             y_gap_fraction = 0.03
             deltaY_m = 2*puck_half_height_m + (2*puck_half_height_m * y_gap_fraction)
 
-            x_position_m = 1.0
+            x_position_start_m = 1.0
+            x_position_m = x_position_start_m
             y_position_m = puck_half_height_m + (2*puck_half_height_m * y_gap_fraction)
 
             for i in range(n_rows):
+                print(i)
                 for j in range(i, n_rows):
                     Puck(Vec2D(x_position_m, y_position_m), puck_half_width_m, density, 
                         color=THECOLORS['darkkhaki'], border_px=0,
@@ -482,7 +488,7 @@ def make_some_pucks(demo):
                         coef_rest=0.8, CR_fixed=True)
                     x_position_m += deltaX_m
                 y_position_m += deltaY_m
-                x_position_m = x_position_m - ((n_rows - i) * deltaX_m) + deltaX_m/2.0
+                x_position_m = x_position_start_m + ((i+1) * deltaX_m/2.0)
 
             # This puck will be flung or bowled by the user at the target stack
             bowlingBall_density = 3.0

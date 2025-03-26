@@ -422,8 +422,6 @@ class Environment:
         return dx_m * self.m_to_px * self.viewZoom
     
     # Convert from pixels to meters
-    # Note: still floating values here)
-    def m_from_px(self, dx_px):
         return dx_px * self.px_to_m / self.viewZoom
     
     def control_zoom_and_view(self):

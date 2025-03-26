@@ -530,8 +530,6 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="k">return</span> <span class="n">dx_m</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_to_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span>
     
     <span class="c1"># Convert from pixels to meters</span>
-    <span class="c1"># Note: still floating values here)</span>
-    <span class="k">def</span> <span class="nf">m_from_px</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx_px</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">dx_px</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">px_to_m</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewZoom</span>
     
     <span class="k">def</span> <span class="nf">control_zoom_and_view</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

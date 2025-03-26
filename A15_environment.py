@@ -317,7 +317,10 @@ class Client:
             # Draw green/red indicator circles when applying torque.
             if (g.air_table.engine == "box2d") and (self.key_t == "D"):
                 if self.selected_puck.rect_fixture:
-                    indicator_r_px = self.selected_puck.hw_ratio * self.selected_puck.radius_px
+                    height_px = 2 * self.selected_puck.hw_ratio * self.selected_puck.radius_px
+                    width_px = 2 * self.selected_puck.radius_px
+                    longest_side_px = max(height_px, width_px)
+                    indicator_r_px = longest_side_px / 3.0
                 else:
                     indicator_r_px = self.selected_puck.radius_px / 3.0
                 if self.key_shift == "U":
@@ -483,9 +486,8 @@ class Environment:
         return degrees * math.pi/180.0
 
     # Convert from pixels to meters
-    # Note: still floating values here
     def m_from_px(self, dx_px):
-        return float(dx_px) * self.px_to_m / self.viewZoom
+        return dx_px * self.px_to_m / self.viewZoom
     
     def control_zoom_and_view(self):
         local_user = self.clients['local']
