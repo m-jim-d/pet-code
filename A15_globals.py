@@ -18,4 +18,3 @@ Global Variables:
 env = None
 game_window = None
 air_table = None
-make_some_pucks = None

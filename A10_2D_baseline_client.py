@@ -172,7 +172,8 @@ def main():
         'm':'U',
         'f':'U',
         't':'U', 
-        'lrs':'U', 'socl':'F'
+        'lrs':'U', # left/right shift keys 
+        'socl':'F' # select-off-center lock
     }
         
     framerate_limit = 120

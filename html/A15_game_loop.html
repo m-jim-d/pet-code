@@ -150,7 +150,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
 <span class="k">class</span> <span class="nc">GameLoop</span><span class="p">:</span>
     <span class="c1"># window dimensions: (width_px, height_px)</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engine_type</span><span class="o">=</span><span class="s2">&quot;box2d&quot;</span><span class="p">,</span> <span class="n">window_width_px</span><span class="o">=</span><span class="mi">800</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engine_type</span><span class="o">=</span><span class="s2">&quot;box2d&quot;</span><span class="p">,</span> <span class="n">window_width_px</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">make_some_pucks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_some_pucks</span> <span class="o">=</span> <span class="n">make_some_pucks</span>
+
         <span class="c1"># Demos are best at an aspect ratio of 8/7.</span>
         <span class="n">aspect_ratio_wh</span> <span class="o">=</span> <span class="mi">8</span><span class="o">/</span><span class="mi">7</span> <span class="c1"># width/height</span>
         <span class="n">window_dimensions_px</span> <span class="o">=</span> <span class="p">(</span><span class="n">window_width_px</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">window_width_px</span> <span class="o">/</span> <span class="n">aspect_ratio_wh</span><span class="p">))</span>
@@ -201,7 +203,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildFence</span><span class="p">()</span> <span class="c1"># walls at the window boundaries.</span>
 
         <span class="c1"># Initialize demo</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">update_caption</span><span class="p">()</span>
         
         <span class="c1"># Setup network server</span>
@@ -260,7 +262,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="nb">print</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
                 
                 <span class="c1"># Start, or restart a demo.</span>
-                <span class="n">g</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
                 <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">update_caption</span><span class="p">()</span>
                         
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">render_timer_s</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">dt_render_limit_s</span><span class="p">):</span>

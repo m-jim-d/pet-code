@@ -244,7 +244,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         
             
 <span class="k">class</span> <span class="nc">Spring</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">length_m</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">strength_Npm</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">spring_color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;yellow&quot;</span><span class="p">],</span> <span class="n">width_m</span><span class="o">=</span><span class="mf">0.025</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">length_m</span><span class="o">=</span><span class="mf">3.0</span><span class="p">,</span> <span class="n">strength_Npm</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;yellow&quot;</span><span class="p">],</span> 
+                       <span class="n">damper_Ns2pm2</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p1</span> <span class="o">=</span> <span class="n">p1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p2</span> <span class="o">=</span> <span class="n">p2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">p1p2_separation_2d_m</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
@@ -253,13 +254,13 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         
         <span class="bp">self</span><span class="o">.</span><span class="n">length_m</span> <span class="o">=</span> <span class="n">length_m</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">strength_Npm</span> <span class="o">=</span> <span class="n">strength_Npm</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">damper_Ns2pm2</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c1">#5.0 #0.05 #0.15</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">damper_Ns2pm2</span> <span class="o">=</span> <span class="n">damper_Ns2pm2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unstretched_width_m</span> <span class="o">=</span> <span class="n">width_m</span> <span class="c1">#0.05</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">spring_vertices_2d_m</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">spring_vertices_2d_px</span> <span class="o">=</span> <span class="p">[]</span>
         
-        <span class="bp">self</span><span class="o">.</span><span class="n">spring_color</span> <span class="o">=</span> <span class="n">spring_color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">color</span> <span class="o">=</span> <span class="n">color</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">draw_as_line</span> <span class="o">=</span> <span class="kc">False</span>
         
         <span class="n">air_table</span><span class="o">.</span><span class="n">springs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -320,10 +321,10 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         
         <span class="c1"># Draw the spring</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">draw_as_line</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">aaline</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spring_color</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">ConvertWorldToScreen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">pos_2d_m</span><span class="p">),</span>
+            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">aaline</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">,</span> <span class="n">env</span><span class="o">.</span><span class="n">ConvertWorldToScreen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p1</span><span class="o">.</span><span class="n">pos_2d_m</span><span class="p">),</span>
                                                                        <span class="n">env</span><span class="o">.</span><span class="n">ConvertWorldToScreen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p2</span><span class="o">.</span><span class="n">pos_2d_m</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spring_color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spring_vertices_2d_px</span><span class="p">)</span>
+            <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">polygon</span><span class="p">(</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">color</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spring_vertices_2d_px</span><span class="p">)</span>
         
 <span class="k">class</span> <span class="nc">AirTable</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">walls_dic</span><span class="p">):</span>
@@ -674,6 +675,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Useful for shifting between the various demos.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">])</span>
+        
         <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
 
 <span class="c1">#===========================================================</span>
@@ -682,7 +684,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         
 <span class="k">def</span> <span class="nf">make_some_pucks</span><span class="p">(</span> <span class="n">demo</span><span class="p">):</span>
     <span class="n">game_window</span><span class="o">.</span><span class="n">update_caption</span><span class="p">(</span><span class="s2">&quot;Air Table: Demo #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">demo</span><span class="p">))</span> 
-    
+    <span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest_puck</span> <span class="o">=</span>  <span class="mf">0.90</span> <span class="c1"># reset to default</span>
+    <span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest_table</span> <span class="o">=</span> <span class="mf">0.90</span> <span class="c1"># reset to default</span>
+
     <span class="k">if</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1">#                   , r_m , density</span>
         <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">2.5</span><span class="p">,</span> <span class="mf">7.5</span><span class="p">),</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;orange&quot;</span><span class="p">])</span>
@@ -728,22 +732,31 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     
         <span class="n">spring_strength_Npm2</span> <span class="o">=</span> <span class="mf">20.0</span>
         <span class="n">spring_length_m</span> <span class="o">=</span> <span class="mf">1.5</span>
-        <span class="n">Spring</span><span class="p">(</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">spring_length_m</span><span class="p">,</span> <span class="n">spring_strength_Npm2</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+        <span class="n">Spring</span><span class="p">(</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">spring_length_m</span><span class="p">,</span> <span class="n">spring_strength_Npm2</span><span class="p">,</span> 
+               <span class="n">width_m</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;gold&quot;</span><span class="p">])</span>
         
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
-        <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">2.00</span><span class="p">,</span> <span class="mf">3.00</span><span class="p">),</span>  <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
-        <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">3.50</span><span class="p">,</span> <span class="mf">4.50</span><span class="p">),</span>  <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
-        <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">5.00</span><span class="p">,</span> <span class="mf">3.00</span><span class="p">),</span>  <span class="mf">0.65</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
-        
+        <span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest_puck</span> <span class="o">=</span> <span class="mf">0.7</span>
+        <span class="n">density</span> <span class="o">=</span> <span class="mf">0.9</span>
+
         <span class="c1"># No springs on this one.</span>
-        <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">3.50</span><span class="p">,</span> <span class="mf">7.00</span><span class="p">),</span>  <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">)</span>
-    
-        <span class="n">spring_strength_Npm2</span> <span class="o">=</span> <span class="mf">200.0</span> <span class="c1">#18.0</span>
+        <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">3.50</span><span class="p">,</span> <span class="mf">7.00</span><span class="p">),</span> <span class="mf">0.90</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+
+        <span class="n">radius</span> <span class="o">=</span> <span class="mf">0.75</span>
+        <span class="n">p1</span> <span class="o">=</span> <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">2.00</span><span class="p">,</span> <span class="mf">3.00</span><span class="p">),</span> <span class="n">radius</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+        <span class="n">p2</span> <span class="o">=</span> <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">3.50</span><span class="p">,</span> <span class="mf">4.50</span><span class="p">),</span> <span class="n">radius</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+        <span class="n">p3</span> <span class="o">=</span> <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">5.00</span><span class="p">,</span> <span class="mf">3.00</span><span class="p">),</span> <span class="n">radius</span><span class="p">,</span> <span class="n">density</span><span class="p">)</span>
+        
+        <span class="n">spring_strength_Npm2</span> <span class="o">=</span> <span class="mi">250</span>
         <span class="n">spring_length_m</span> <span class="o">=</span> <span class="mf">2.5</span>
         <span class="n">spring_width_m</span> <span class="o">=</span> <span class="mf">0.07</span>
-        <span class="n">Spring</span><span class="p">(</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">spring_length_m</span><span class="p">,</span> <span class="n">spring_strength_Npm2</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="n">spring_width_m</span><span class="p">)</span>
-        <span class="n">Spring</span><span class="p">(</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">spring_length_m</span><span class="p">,</span> <span class="n">spring_strength_Npm2</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="n">spring_width_m</span><span class="p">)</span>
-        <span class="n">Spring</span><span class="p">(</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">spring_length_m</span><span class="p">,</span> <span class="n">spring_strength_Npm2</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="n">spring_width_m</span><span class="p">)</span>
+        <span class="n">damper_Ns2pm2</span> <span class="o">=</span> <span class="mf">5.0</span>
+        <span class="n">Spring</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">,</span> <span class="n">spring_length_m</span><span class="p">,</span> <span class="n">spring_strength_Npm2</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="n">spring_width_m</span><span class="p">,</span> 
+            <span class="n">damper_Ns2pm2</span><span class="o">=</span><span class="n">damper_Ns2pm2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">])</span>
+        <span class="n">Spring</span><span class="p">(</span><span class="n">p2</span><span class="p">,</span> <span class="n">p3</span><span class="p">,</span> <span class="n">spring_length_m</span><span class="p">,</span> <span class="n">spring_strength_Npm2</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="n">spring_width_m</span><span class="p">,</span> 
+            <span class="n">damper_Ns2pm2</span><span class="o">=</span><span class="n">damper_Ns2pm2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;tan&quot;</span><span class="p">])</span>
+        <span class="n">Spring</span><span class="p">(</span><span class="n">p3</span><span class="p">,</span> <span class="n">p1</span><span class="p">,</span> <span class="n">spring_length_m</span><span class="p">,</span> <span class="n">spring_strength_Npm2</span><span class="p">,</span> <span class="n">width_m</span><span class="o">=</span><span class="n">spring_width_m</span><span class="p">,</span> 
+            <span class="n">damper_Ns2pm2</span><span class="o">=</span><span class="n">damper_Ns2pm2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;gold&quot;</span><span class="p">])</span>
     
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing set up for this key.&quot;</span><span class="p">)</span>
@@ -773,7 +786,10 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="n">myclock</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Clock</span><span class="p">()</span>
 
-    <span class="n">window_dimensions_px</span> <span class="o">=</span> <span class="p">(</span><span class="mi">800</span><span class="p">,</span> <span class="mi">700</span><span class="p">)</span> <span class="c1"># window_width_px, window_height_px</span>
+    <span class="n">aspect_ratio</span> <span class="o">=</span> <span class="mi">8</span><span class="o">/</span><span class="mi">7</span>
+    <span class="n">window_width_px</span> <span class="o">=</span> <span class="mi">900</span>
+    <span class="n">window_height_px</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">window_width_px</span> <span class="o">/</span> <span class="n">aspect_ratio</span><span class="p">)</span>
+    <span class="n">window_dimensions_px</span> <span class="o">=</span> <span class="p">(</span><span class="n">window_width_px</span><span class="p">,</span> <span class="n">window_height_px</span><span class="p">)</span>
 
     <span class="c1"># Create the first user/client and the methods for moving between the screen and the world.</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">window_dimensions_px</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span> <span class="c1"># 10m along the x axis.</span>
@@ -869,7 +885,10 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 
                 <span class="c1"># Erase the blackboard. Change color if stickiness correction is off.</span>
                 <span class="k">if</span> <span class="n">air_table</span><span class="o">.</span><span class="n">correct_for_puck_penetration</span><span class="p">:</span>
-                    <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span><span class="p">:</span>
+                        <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>  <span class="c1"># black outerspace</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">70</span><span class="p">))</span>  <span class="c1"># dark blue sky</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">grey_level</span> <span class="o">=</span> <span class="mi">40</span>
                     <span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="n">grey_level</span><span class="p">,</span><span class="n">grey_level</span><span class="p">,</span><span class="n">grey_level</span><span class="p">))</span>

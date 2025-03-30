@@ -168,7 +168,7 @@ def make_some_pucks(demo):
         spring_strength_Npm2 = 250 # 250
         spring_length_m = 2.5
         spring_width_m = 0.07
-        spring_drag = 0.5 # 0.0
+        spring_drag = 0.5 # default is 0.0
         spring_damper = 5.0
 
         Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
@@ -199,8 +199,7 @@ def make_some_pucks(demo):
 #============================================================
 
 def main():
-    g.make_some_pucks = make_some_pucks
-    game_loop = GameLoop(engine_type="circular", window_width_px=900)
+    game_loop = GameLoop(engine_type="circular", window_width_px=900, make_some_pucks=make_some_pucks)
     game_loop.start(demo_index=7)
 
 #============================================================

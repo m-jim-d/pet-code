@@ -2,7 +2,6 @@
 
 # Filename: A13_2D_jet_forces.py
 
-from re import T
 import sys
 import pygame
 import math

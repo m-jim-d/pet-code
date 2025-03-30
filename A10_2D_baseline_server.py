@@ -136,7 +136,8 @@ class Puck:
         
             
 class Spring:
-    def __init__(self, p1, p2, length_m=3.0, strength_Npm=0.5, spring_color=THECOLORS["yellow"], width_m=0.025):
+    def __init__(self, p1, p2, length_m=3.0, strength_Npm=0.5, width_m=0.025, color=THECOLORS["yellow"], 
+                       damper_Ns2pm2=0.5):
         self.p1 = p1
         self.p2 = p2
         self.p1p2_separation_2d_m = Vec2D(0,0)
@@ -145,13 +146,13 @@ class Spring:
         
         self.length_m = length_m
         self.strength_Npm = strength_Npm
-        self.damper_Ns2pm2 = 0.5 #5.0 #0.05 #0.15
+        self.damper_Ns2pm2 = damper_Ns2pm2
         self.unstretched_width_m = width_m #0.05
         
         self.spring_vertices_2d_m = []
         self.spring_vertices_2d_px = []
         
-        self.spring_color = spring_color
+        self.color = color
         self.draw_as_line = False
         
         air_table.springs.append(self)
@@ -212,10 +213,10 @@ class Spring:
         
         # Draw the spring
         if self.draw_as_line == True:
-            pygame.draw.aaline(game_window.surface, self.spring_color, env.ConvertWorldToScreen(self.p1.pos_2d_m),
+            pygame.draw.aaline(game_window.surface, self.color, env.ConvertWorldToScreen(self.p1.pos_2d_m),
                                                                        env.ConvertWorldToScreen(self.p2.pos_2d_m))
         else:
-            pygame.draw.polygon(game_window.surface, self.spring_color, self.spring_vertices_2d_px)
+            pygame.draw.polygon(game_window.surface, self.color, self.spring_vertices_2d_px)
         
 class AirTable:
     def __init__(self, walls_dic):
@@ -566,6 +567,7 @@ class GameWindow:
     def clear(self):
         # Useful for shifting between the various demos.
         self.surface.fill(THECOLORS["black"])
+        
         pygame.display.update()
 
 #===========================================================
@@ -574,7 +576,9 @@ class GameWindow:
         
 def make_some_pucks( demo):
     game_window.update_caption("Air Table: Demo #" + str(demo)) 
-    
+    air_table.coef_rest_puck =  0.90 # reset to default
+    air_table.coef_rest_table = 0.90 # reset to default
+
     if demo == 1:
         #                   , r_m , density
         Puck(Vec2D(2.5, 7.5), 0.25, 0.3, THECOLORS["orange"])
@@ -620,22 +624,31 @@ def make_some_pucks( demo):
     
         spring_strength_Npm2 = 20.0
         spring_length_m = 1.5
-        Spring(air_table.pucks[0], air_table.pucks[1], spring_length_m, spring_strength_Npm2, width_m=0.2)
+        Spring(air_table.pucks[0], air_table.pucks[1], spring_length_m, spring_strength_Npm2, 
+               width_m=0.2, color=THECOLORS["gold"])
         
     elif demo == 6:
-        Puck(Vec2D(2.00, 3.00),  0.65, 0.3)
-        Puck(Vec2D(3.50, 4.50),  0.65, 0.3)
-        Puck(Vec2D(5.00, 3.00),  0.65, 0.3)
-        
+        air_table.coef_rest_puck = 0.7
+        density = 0.9
+
         # No springs on this one.
-        Puck(Vec2D(3.50, 7.00),  0.95, 0.3)
-    
-        spring_strength_Npm2 = 200.0 #18.0
+        Puck(Vec2D(3.50, 7.00), 0.90, density)
+
+        radius = 0.75
+        p1 = Puck(Vec2D(2.00, 3.00), radius, density)
+        p2 = Puck(Vec2D(3.50, 4.50), radius, density)
+        p3 = Puck(Vec2D(5.00, 3.00), radius, density)
+        
+        spring_strength_Npm2 = 250
         spring_length_m = 2.5
         spring_width_m = 0.07
-        Spring(air_table.pucks[0], air_table.pucks[1], spring_length_m, spring_strength_Npm2, width_m=spring_width_m)
-        Spring(air_table.pucks[1], air_table.pucks[2], spring_length_m, spring_strength_Npm2, width_m=spring_width_m)
-        Spring(air_table.pucks[2], air_table.pucks[0], spring_length_m, spring_strength_Npm2, width_m=spring_width_m)
+        damper_Ns2pm2 = 5.0
+        Spring(p1, p2, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
+            damper_Ns2pm2=damper_Ns2pm2, color=THECOLORS["red"])
+        Spring(p2, p3, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
+            damper_Ns2pm2=damper_Ns2pm2, color=THECOLORS["tan"])
+        Spring(p3, p1, spring_length_m, spring_strength_Npm2, width_m=spring_width_m, 
+            damper_Ns2pm2=damper_Ns2pm2, color=THECOLORS["gold"])
     
     else:
         print("Nothing set up for this key.")
@@ -665,7 +678,10 @@ def main():
 
     myclock = pygame.time.Clock()
 
-    window_dimensions_px = (800, 700) # window_width_px, window_height_px
+    aspect_ratio = 8/7
+    window_width_px = 900
+    window_height_px = math.ceil(window_width_px / aspect_ratio)
+    window_dimensions_px = (window_width_px, window_height_px)
 
     # Create the first user/client and the methods for moving between the screen and the world.
     env = Environment(window_dimensions_px, 10.0) # 10m along the x axis.
@@ -761,7 +777,10 @@ def main():
                 
                 # Erase the blackboard. Change color if stickiness correction is off.
                 if air_table.correct_for_puck_penetration:
-                    game_window.surface.fill((0,0,0))
+                    if not air_table.g_ON:
+                        game_window.surface.fill((0,0,0))  # black outerspace
+                    else:
+                        game_window.surface.fill((20,20,70))  # dark blue sky
                 else:
                     grey_level = 40
                     game_window.surface.fill((grey_level,grey_level,grey_level))

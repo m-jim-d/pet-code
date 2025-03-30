@@ -42,7 +42,9 @@ import A15_globals as g
 
 class GameLoop:
     # window dimensions: (width_px, height_px)
-    def __init__(self, engine_type="box2d", window_width_px=800):
+    def __init__(self, engine_type="box2d", window_width_px=800, make_some_pucks=None):
+        self.make_some_pucks = make_some_pucks
+
         # Demos are best at an aspect ratio of 8/7.
         aspect_ratio_wh = 8/7 # width/height
         window_dimensions_px = (window_width_px, math.ceil(window_width_px / aspect_ratio_wh))
@@ -93,7 +95,7 @@ class GameLoop:
             self.air_table.buildFence() # walls at the window boundaries.
 
         # Initialize demo
-        g.make_some_pucks(demo_index)
+        self.make_some_pucks(demo_index)
         g.game_window.update_caption()
         
         # Setup network server
@@ -152,7 +154,7 @@ class GameLoop:
                 print(demo_index)
                 
                 # Start, or restart a demo.
-                g.make_some_pucks(demo_index)
+                self.make_some_pucks(demo_index)
                 g.game_window.update_caption()
                         
             if (self.env.render_timer_s > self.env.dt_render_limit_s):
