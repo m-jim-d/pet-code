@@ -10,7 +10,7 @@ from A09_vec2d import Vec2D
 from A15_air_table_objects import Puck, Spring
 from A15_game_loop import GameLoop
 
-from A15a_2D_finished_game import two_drone_special__circular
+from A15a_2D_finished_game import two_drone_special__circular, no_drone_custom1__circular
 
 import A15_globals as g
 
@@ -151,7 +151,7 @@ def make_some_pucks(demo):
             c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["gold"])
 
     elif demo == 7:
-        g.air_table.puckPopper_variations(two_drone_special__circular)
+        g.air_table.puckPopper_variations(two_drone_special__circular, custom_1=no_drone_custom1__circular)
 
     elif demo == 8:
         g.env.set_gravity("on")

@@ -51,7 +51,21 @@ def two_drone_special__circular():
     
     # One free standing puck
     Puck( Vec2D(9.0, 4.5), 0.7, density, color=THECOLORS["cyan"], hit_limit=20, c_drag=0.7, show_health=True)
-        
+
+def no_drone_custom1__circular():
+    density = 0.7
+    puck_position_2d_m = g.game_window.center_2d_m
+    tempPuck = Puck(puck_position_2d_m, 1.0, density, 
+        angularVelocity_rps=0.5, rect_fixture=False, show_health=True
+    )
+    Spring(tempPuck, puck_position_2d_m, strength_Npm=300.0, 
+        pin_radius_m=0.03, width_m=0.02, c_drag=10.0)
+
+    radius_m = 0.45
+    set_off_m = radius_m + 0.5
+    init_2d_m = Vec2D(set_off_m, set_off_m)
+    g.air_table.buildControlledPuck(x_m=init_2d_m.x, y_m=init_2d_m.y, r_m=radius_m, client_name='local', sf_abs=False, c_drag=1.5)
+
 def make_some_pucks(demo):
     g.game_window.set_caption("Air-Table Server A15a     Demo #" + str(demo))
     g.env.timestep_fixed = False
@@ -165,7 +179,7 @@ def make_some_pucks(demo):
             c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["gold"])
 
     elif demo == 7:
-        g.air_table.puckPopper_variations(two_drone_special__circular)
+        g.air_table.puckPopper_variations(two_drone_special__circular, custom_1=no_drone_custom1__circular)
         
     elif demo == 8:
         g.env.set_gravity("on")
