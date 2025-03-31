@@ -42,12 +42,11 @@ from pygame.locals import (
     K_RIGHT, K_LEFT
 )
 from pygame.color import THECOLORS
+from Box2D import b2Vec2
 
 from A08_network import RunningAvg, setClientColors
 from A09_vec2d import Vec2D
 import A15_globals as g
-
-from Box2D import b2Vec2
 
 
 def custom_update(self, client_name, state_dict):    

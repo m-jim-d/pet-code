@@ -20,19 +20,17 @@ for different simulation needs.
 """
 
 import random, threading, time, math
-
 from typing import Union, Tuple
 
 import pygame
 from pygame.color import THECOLORS
+from Box2D import (b2World, b2Vec2, b2_dynamicBody, b2AABB, b2QueryCallback, b2ContactListener)
 
 # Vector class
 from A09_vec2d import Vec2D
+from A15_air_table_objects import Wall, Puck, Spring, Gun, Jet
 # Global variables shared across scripts
 import A15_globals as g
-from A15_air_table_objects import Wall, Puck, Spring, Gun, Jet
-
-from Box2D import (b2World, b2Vec2, b2_dynamicBody, b2AABB, b2QueryCallback, b2ContactListener)
 
 
 class AirTable:

@@ -114,12 +114,18 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">Shared global state for the simulation environment.</span>
 
 <span class="sd">This module maintains global references to key simulation components that need to be</span>
-<span class="sd">accessed across different parts of the application.</span>
+<span class="sd">accessed across different parts of the application. While these globals are initially</span>
+<span class="sd">set to None, they are guaranteed to be properly initialized before any code attempts</span>
+<span class="sd">to use them, thanks to the initialization sequence in GameLoop:</span>
 
-<span class="sd">Global Variables:</span>
-<span class="sd">    env: The simulation environment instance</span>
-<span class="sd">    game_window: The main game display window</span>
-<span class="sd">    air_table: The simulation table/arena</span>
+<span class="sd">1. When modules import this file, they get the None values</span>
+<span class="sd">2. GameLoop.__init__() creates the actual objects (Environment, GameWindow, AirTable)</span>
+<span class="sd">3. GameLoop.__init__() assigns these objects to the global variables</span>
+<span class="sd">4. Only then does GameLoop.start() begin calling functions that use these globals</span>
+
+<span class="sd">This pattern helps avoid circular imports while maintaining a clean way to share</span>
+<span class="sd">these essential objects across the application. The globals are effectively read-only</span>
+<span class="sd">after their initial setup by GameLoop.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1"># Global variables shared across scripts</span>

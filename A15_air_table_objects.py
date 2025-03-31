@@ -20,18 +20,16 @@ Walls and Puck supports Box2D integration for advanced physics simulation when e
 
 import math
 import random
-
 from typing import Optional
 
 import pygame
 from pygame.color import THECOLORS
+from Box2D import b2Vec2
 
 # Import the vector class from a local module
 from A09_vec2d import Vec2D
 # Global variables shared across scripts
 import A15_globals as g
-
-from Box2D import b2Vec2
 
 
 class Wall:
