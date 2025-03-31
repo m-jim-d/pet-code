@@ -26,9 +26,8 @@ from typing import Union, Tuple
 import pygame
 from pygame.color import THECOLORS
 
-# Import the vector class from a local module
+# Vector class
 from A09_vec2d import Vec2D
-
 # Global variables shared across scripts
 import A15_globals as g
 from A15_air_table_objects import Wall, Puck, Spring, Gun, Jet

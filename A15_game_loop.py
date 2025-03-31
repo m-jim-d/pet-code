@@ -36,7 +36,6 @@ import pygame
 from A08_network import GameServer, RunningAvg
 from A15_air_table import Box2DAirTable, CircularAirTable, PerfectKissAirTable
 from A15_environment import Client, GameWindow, Environment, signInOut_function, custom_update
-
 # Global variables shared across scripts
 import A15_globals as g
 

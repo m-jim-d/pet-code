@@ -7,7 +7,6 @@ from pygame.color import THECOLORS
 from A09_vec2d import Vec2D
 from A15_air_table_objects import Puck, Spring
 from A15_game_loop import GameLoop
-
 import A15_globals as g
 
 #===========================================================
