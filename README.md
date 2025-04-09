@@ -40,11 +40,30 @@ Executable Scripts:
 - `A10_2D_baseline_server.py`: Basic 2D physics server
 
 ### Game Development (A10_m-A14_m)
-Puck Popper Features:
-- `A11_2D_rotating_tubes.py`: Adds rotating tube objects
-- `A12_2D_tube_jet.py`: Implements jet propulsion through tubes
-- `A13_2D_jet_forces.py`: Enhanced jet force calculations
-- `A14_2D_gun.py`: Adds projectile weapons system
+Modular Game Features:
+- A10 Baseline:
+  - `A10_m_globals.py`: Global constants and settings
+  - `A10_m_game_loop.py`: Main game loop implementation
+  - `A10_m_environment.py`: Game environment management
+  - `A10_m_air_table.py`: Air table physics core
+  - `A10_m_air_table_objects.py`: Basic game objects
+  - `A10_m_server_baseline.py`: Server implementation
+
+- A11 Rotating Tubes:
+  - `A11_m_air_table_objects.py`: Rotating tube mechanics
+  - `A11_m_server_rawtubes.py`: Server-side tube handling
+
+- A12 Jet Propulsion:
+  - `A12_m_air_table_objects.py`: Jet propulsion objects
+  - `A12_m_server_jet.py`: Server-side jet physics
+
+- A13 Enhanced Forces:
+  - `A13_m_air_table_objects.py`: Advanced force calculations
+  - `A13_m_server_jet_forces.py`: Server-side force handling
+
+- A14 Combat System:
+  - `A14_m_air_table_objects.py`: Projectile and weapon objects
+  - `A14_m_server_gun.py`: Server-side combat mechanics
 
 ### Advanced Physics and Final Game Features (A15-A16)
 Core Modules:
@@ -53,6 +72,7 @@ Core Modules:
 - `A15_game_loop.py`: manage the game loop and updates to the state of the air table
 - `A15_environment.py`: Environment management, coordinate systems, and user interaction
 - `A15_globals.py`: Global variables and shared state management
+- `A15_pool_shots.py`: Pool game shot mechanics and trajectory calculations
 
 Game Implementations:
 - `A15a_2D_finished_game.py`: Complete 2D games, Puck Popper and Jello Madness
