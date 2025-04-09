@@ -80,50 +80,6 @@ class AirTable:
         self.delayed_throw = threading.Thread(daemon=True, target=throw_it_later)
         self.delayed_throw.start()
 
-    def pool_trick_shot(self):
-        g.env.set_gravity("off")
-
-        if self.engine == 'box2d':
-            # no fence:
-            self.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
-        else:
-            self.inhibit_wall_collisions = True
-        
-        density = 1.0
-
-        n_pucks = 15
-        radius_m = 0.4
-
-        polygon_radius_m = radius_m / math.sin(math.pi/n_pucks)
-
-        # Place the pucks a little farther out than their touching point.
-        little_extra_m = 0.3
-        center_to_puck_2d_m = Vec2D(0.0, polygon_radius_m + little_extra_m)
-        pin_offset_m = 0.4
-        center_to_pin_2d_m = Vec2D(0.0, polygon_radius_m - pin_offset_m)
-        for i in range(0, n_pucks-2):
-            angle = (360 / n_pucks) * i
-
-            rotated_c_to_puck_2d_m = center_to_puck_2d_m.rotated(angle)
-            puck_position_2d_m = g.game_window.center_2d_m + rotated_c_to_puck_2d_m
-
-            Puck(puck_position_2d_m, radius_m, density, 
-                color=THECOLORS['darkkhaki'], border_px=0,
-                rect_fixture=False,
-                coef_rest=1.0, CR_fixed=True,
-                friction=0, friction_fixed=True)
-
-        # This puck will be flung or bowled by the user at the target stack
-        bowlingBall_density = density
-        bowlingBall_r_m = radius_m
-        # To the right of the first puck.
-        bB_init_pos_2d_m = self.pucks[0].pos_2d_m + Vec2D(4.0, 0.0)
-        p1 = Puck(bB_init_pos_2d_m, bowlingBall_r_m, bowlingBall_density,
-                    coef_rest=1.0, CR_fixed=True,
-                    bullet=True, angularVelocity_rps=0, color=THECOLORS['royalblue'], border_px=0)
-        
-        self.throw_puck(p1, Vec2D(-1, 0) * 4.0, delay_s=1.0)
-
     def buildControlledPuck(self, x_m=1.0, y_m=1.0, pos_2d_m=None, r_m=0.45, density=0.7, c_drag=0.7, 
                                   client_name=None, sf_abs=True, showSpoke=False, drone=False, bullet_age_limit_s=3):
         if (drone): 
@@ -255,7 +211,7 @@ class AirTable:
 
         return {'angle':angleOfGrid, 'speed_mps':speed_mps}
 
-    def throwJello_variations(self):
+    def throwJello_variations(self, demo_index):
         initial_states = [
             {'x_n':4, 'y_n':3, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
             {'x_n':4, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
@@ -268,8 +224,8 @@ class AirTable:
             {'x_n':3, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min':10,'spd_max': 40},
             {'x_n':2, 'y_n':2, 'ang_min':-10, 'ang_max':90, 'spd_min': 0,'spd_max':200}
         ]
-        g.env.demo_variations[8]['count'] = len(initial_states)
-        state = initial_states[g.env.demo_variations[8]['index']]
+        g.env.demo_variations[demo_index]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[demo_index]['index']]
 
         self.game_time_s = 0
         self.jello_tangle_checking_enabled = True
@@ -289,7 +245,7 @@ class AirTable:
             f"  angle = {throw['angle']:.1f}  speed = {throw['speed_mps']:.1f}"
         )
 
-    def targetJello_variations(self):
+    def targetJello_variations(self, demo_index):
         initial_states = [
             {'n_x':4,'n_y':3,'spr':True,'pa_i':1,'pb_i':10},
             {'n_x':4,'n_y':3,'spr':False},
@@ -312,8 +268,8 @@ class AirTable:
             {'n_x':5,'n_y':5,'spr':True,'pa_i':7,'pb_i':17},
             {'n_x':5,'n_y':5,'spr':False}
         ]
-        g.env.demo_variations[9]['count'] = len(initial_states)
-        state = initial_states[g.env.demo_variations[9]['index']]
+        g.env.demo_variations[demo_index]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[demo_index]['index']]
         
         if 'angle' in state:
             angle = state['angle']
@@ -366,7 +322,7 @@ class AirTable:
             f"     pinned = {state['spr']}     angle = {angle}"
         )
 
-    def puckPopper_variations(self, twoDrone_special, custom_1=None, custom_2=None):
+    def puckPopper_variations(self, demo_index, twoDrone_special, custom_1=None, custom_2=None):
         g.env.set_gravity("off")
 
         initial_states = [
@@ -384,8 +340,8 @@ class AirTable:
         if custom_2 is not None:
             initial_states.append({'type':'custom-2'})
 
-        g.env.demo_variations[7]['count'] = len(initial_states)
-        state = initial_states[g.env.demo_variations[7]['index']]
+        g.env.demo_variations[demo_index]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[demo_index]['index']]
                     
         # Box2D drag modeling is slightly different than that in the circular engines. So,
         # c_drag is set higher than the default value, 0.7.

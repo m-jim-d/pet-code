@@ -108,7 +108,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
 <div class="highlight"><pre><span></span><span class="ch">#!/usr/bin/env python3</span>
 
-<span class="c1"># Filename: A15_game_loop.py</span>
+<span class="c1"># Filename: A10_m_game_loop.py</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Game Loop Management for Air Table Physics Simulation</span>
@@ -117,11 +117,11 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">It handles initialization, updates, and rendering for the simulation, supporting multiple physics</span>
 <span class="sd">engines and network play.</span>
 
-<span class="sd">The GameLoop class encapsulates all the common functionality needed by the three primary </span>
-<span class="sd">scripts (A15a, A15c, A16c), including:</span>
+<span class="sd">The GameLoop class encapsulates all the common functionality needed by the primary </span>
+<span class="sd">script, A10_baseline_server.py, including:</span>
 
 <span class="sd">Features:</span>
-<span class="sd">    - Flexible physics engine selection (box2d, circular, circular-perfectKiss)</span>
+<span class="sd">    - Flexible physics engine selection (circular, other...)</span>
 <span class="sd">    - Frame rate control and timing management</span>
 <span class="sd">    - Network server setup and client handling</span>
 <span class="sd">    - Input processing from local and network users</span>
@@ -133,7 +133,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">    GameLoop: Main class that manages the game loop and simulation state</span>
 
 <span class="sd">Usage:</span>
-<span class="sd">    game_loop = GameLoop(engine_type=&quot;box2d&quot;)  # or &quot;circular&quot; or &quot;circular-perfectKiss&quot;</span>
+<span class="sd">    game_loop = GameLoop(engine_type=&quot;circular&quot;)</span>
 <span class="sd">    game_loop.start(demo_index=7)  # Start with specified demo</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -141,15 +141,16 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="kn">import</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">pygame</span>
 
-<span class="kn">from</span> <span class="nn">A08_network</span> <span class="kn">import</span> <span class="n">GameServer</span><span class="p">,</span> <span class="n">RunningAvg</span>
-<span class="kn">from</span> <span class="nn">A15_air_table</span> <span class="kn">import</span> <span class="n">Box2DAirTable</span><span class="p">,</span> <span class="n">CircularAirTable</span><span class="p">,</span> <span class="n">PerfectKissAirTable</span>
-<span class="kn">from</span> <span class="nn">A15_environment</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">GameWindow</span><span class="p">,</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">signInOut_function</span><span class="p">,</span> <span class="n">custom_update</span>
+<span class="kn">from</span> <span class="nn">A08_network</span> <span class="kn">import</span> <span class="n">GameServer</span>
+<span class="kn">from</span> <span class="nn">A10_m_air_table</span> <span class="kn">import</span> <span class="n">CircularAirTable</span>
+<span class="kn">from</span> <span class="nn">A10_m_environment</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">GameWindow</span><span class="p">,</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">signInOut_function</span><span class="p">,</span> <span class="n">custom_update</span>
 <span class="c1"># Global variables shared across scripts</span>
-<span class="kn">import</span> <span class="nn">A15_globals</span> <span class="k">as</span> <span class="nn">g</span>
+<span class="kn">import</span> <span class="nn">A10_m_globals</span> <span class="k">as</span> <span class="nn">g</span>
 
 <span class="k">class</span> <span class="nc">GameLoop</span><span class="p">:</span>
     <span class="c1"># window dimensions: (width_px, height_px)</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engine_type</span><span class="o">=</span><span class="s2">&quot;box2d&quot;</span><span class="p">,</span> <span class="n">window_width_px</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">make_some_pucks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">engine_type</span><span class="o">=</span><span class="s2">&quot;circular&quot;</span><span class="p">,</span> <span class="n">window_width_px</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> 
+                 <span class="n">make_some_pucks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;10&quot;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_some_pucks</span> <span class="o">=</span> <span class="n">make_some_pucks</span>
 
         <span class="c1"># Demos are best at an aspect ratio of 8/7.</span>
@@ -172,12 +173,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="n">walls_dic</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;L_m&quot;</span><span class="p">:</span><span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;R_m&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;B_m&quot;</span><span class="p">:</span><span class="mf">0.0</span><span class="p">,</span> <span class="s2">&quot;T_m&quot;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">y</span><span class="p">}</span>
         
         <span class="c1"># Create appropriate air table type based on engine choice.</span>
-        <span class="k">if</span> <span class="n">engine_type</span> <span class="o">==</span> <span class="s2">&quot;box2d&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="n">Box2DAirTable</span><span class="p">(</span><span class="n">walls_dic</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">engine_type</span> <span class="o">==</span> <span class="s2">&quot;circular&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="n">CircularAirTable</span><span class="p">(</span><span class="n">walls_dic</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">engine_type</span> <span class="o">==</span> <span class="s2">&quot;circular-perfectKiss&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="n">PerfectKissAirTable</span><span class="p">(</span><span class="n">walls_dic</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine_type</span> <span class="o">==</span> <span class="s2">&quot;circular&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="n">CircularAirTable</span><span class="p">(</span><span class="n">walls_dic</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown engine type: </span><span class="si">{</span><span class="n">engine_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">air_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span>
@@ -193,14 +190,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">fnt_gameTimer</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">SysFont</span><span class="p">(</span><span class="s2">&quot;Courier&quot;</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fnt_generalTimer</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">font</span><span class="o">.</span><span class="n">SysFont</span><span class="p">(</span><span class="s2">&quot;Courier&quot;</span><span class="p">,</span> <span class="mi">25</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">pk_collision_cnt</span> <span class="o">=</span> <span class="n">RunningAvg</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">pygame</span><span class="p">,</span> <span class="n">colorScheme</span><span class="o">=</span><span class="s1">&#39;light&#39;</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="kc">None</span>
                     
     <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">demo_index</span><span class="o">=</span><span class="mi">7</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;box2d&quot;</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildFence</span><span class="p">()</span> <span class="c1"># walls at the window boundaries.</span>
-
         <span class="c1"># Initialize demo</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">make_some_pucks</span><span class="p">(</span><span class="n">demo_index</span><span class="p">)</span>
         <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">update_caption</span><span class="p">()</span>
@@ -272,60 +264,38 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="c1"># Control the zoom</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">control_zoom_and_view</span><span class="p">()</span>
                 
+                <span class="c1"># Demonstrate the client control of raw tubes.</span>
+                <span class="k">for</span> <span class="n">tube</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">raw_tubes</span><span class="p">:</span>
+                    <span class="n">tube</span><span class="o">.</span><span class="n">client_rotation_control</span><span class="p">()</span>
+
                 <span class="k">for</span> <span class="n">controlled_puck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">controlled_pucks</span><span class="p">:</span>
                     <span class="c1"># Rotate based on keyboard of the controlling client.</span>
                     <span class="n">controlled_puck</span><span class="o">.</span><span class="n">jet</span><span class="o">.</span><span class="n">client_rotation_control</span><span class="p">()</span>
-                    
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span> <span class="n">controlled_puck</span><span class="o">.</span><span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">drone</span><span class="p">:</span>
-                        <span class="n">controlled_puck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">drone_rotation_control</span><span class="p">()</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">controlled_puck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">client_rotation_control</span><span class="p">()</span>
                     <span class="c1"># Control jets and calculate forces on pucks.</span>
                     <span class="n">controlled_puck</span><span class="o">.</span><span class="n">jet</span><span class="o">.</span><span class="n">turn_jet_forces_onoff</span><span class="p">()</span>
                     
-                    <span class="c1"># Turn gun on/off</span>
-                    <span class="n">controlled_puck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">control_firing</span><span class="p">()</span>
-                    
-                    <span class="c1"># Turn shield on/off</span>
-                    <span class="n">controlled_puck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">control_shield</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">controlled_puck</span><span class="o">.</span><span class="n">gun</span><span class="p">:</span>
+                        <span class="n">controlled_puck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">client_rotation_control</span><span class="p">()</span>
+                        <span class="c1"># Turn gun on/off</span>
+                        <span class="n">controlled_puck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">control_firing</span><span class="p">()</span>
+                        <span class="c1"># Turn shield on/off</span>
+                        <span class="n">controlled_puck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">control_shield</span><span class="p">()</span>
             
             <span class="c1"># Calculate client related cursor-string forces.</span>
             <span class="k">for</span> <span class="n">client_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client_name</span><span class="p">]</span><span class="o">.</span><span class="n">calc_string_forces_on_pucks</span><span class="p">()</span>
-
-            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">!=</span> <span class="s2">&quot;box2d&quot;</span><span class="p">):</span>    
-                <span class="c1"># Drag on puck movement.</span>
-                <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">target_pucks</span><span class="p">:</span>
-                    <span class="n">eachpuck</span><span class="o">.</span><span class="n">calc_regularDragForce</span><span class="p">()</span>
             
             <span class="c1"># Calculate spring forces on pucks.</span>
             <span class="k">for</span> <span class="n">eachspring</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">springs</span><span class="p">:</span>
                 <span class="n">eachspring</span><span class="o">.</span><span class="n">calc_spring_forces_on_pucks</span><span class="p">()</span>
                 
-            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;box2d&quot;</span><span class="p">):</span>
-                <span class="c1"># Apply forces to the pucks.</span>
-                <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">update_TotalForceVectorOnPuck</span><span class="p">(</span><span class="n">eachpuck</span><span class="p">)</span>
-                
-                <span class="c1"># Advance Box2d by a single time step (dt). This calculate movements and</span>
-                <span class="c1"># manages collisions.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">b2d_world</span><span class="o">.</span><span class="n">Step</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">dt_s</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
-                <span class="c1"># Note that self.air_table.b2d_world.ClearForces() has no effect here.</span>
-                
-                <span class="c1"># Get new positions, translational velocities, and rotational speeds, from box2d</span>
-                <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                    <span class="n">eachpuck</span><span class="o">.</span><span class="n">get_Box2d_XandV</span><span class="p">()</span>
-                
-                <span class="c1"># Check for puck-puck contact (Jello tangle).</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">jello_tangle_checking_enabled</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">check_for_jello_tangle</span><span class="p">()</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Apply forces to the pucks and calculate movements.</span>
-                <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">update_TotalForce_Speed_Position</span><span class="p">(</span><span class="n">eachpuck</span><span class="p">)</span>
-                
-                <span class="c1"># Check for puck-wall and puck-puck collisions and make penetration corrections.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">check_for_collisions</span><span class="p">()</span>
+            <span class="c1"># Apply forces to the pucks and calculate movements.</span>
+            <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
+                <span class="n">eachpuck</span><span class="o">.</span><span class="n">calc_regularDragForce</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">update_TotalForce_Speed_Position</span><span class="p">(</span><span class="n">eachpuck</span><span class="p">)</span>
+            
+            <span class="c1"># Check for puck-wall and puck-puck collisions and make penetration corrections.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">check_for_collisions</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">FPS_display</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">tickCount</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">fr_avg</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mf">1.0</span><span class="o">/</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">dt_s</span><span class="p">))</span>
@@ -333,8 +303,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">render_timer_s</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">dt_render_limit_s</span><span class="p">):</span>
                 <span class="c1"># Erase the blackboard.</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">inhibit_screen_clears</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;circular-perfectKiss&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">perfect_kiss</span><span class="p">):</span>
-                        <span class="n">gray_level</span> <span class="o">=</span> <span class="mi">40</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">correct_for_puck_penetration</span><span class="p">):</span>
+                        <span class="n">gray_level</span> <span class="o">=</span> <span class="mi">50</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="n">gray_level</span><span class="p">,</span><span class="n">gray_level</span><span class="p">,</span><span class="n">gray_level</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">g_ON</span><span class="p">:</span>
@@ -342,23 +312,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                         <span class="k">else</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">fill</span><span class="p">((</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">70</span><span class="p">))</span>  <span class="c1"># dark blue</span>
 
-                <span class="c1">#print(f&quot;{len(self.air_table.target_pucks)}, {len(self.air_table.controlled_pucks)}, {len(self.air_table.pucks)}, s:{len(self.air_table.springs)}&quot;)</span>
-
                 <span class="c1"># Display the physics cycle rate.</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">FPS_display</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">fr_avg</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">caution</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">timestep_fixed</span><span class="p">)</span>
-                    
-                <span class="c1"># Display timers.</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">demo_index</span> <span class="o">==</span> <span class="mi">8</span><span class="p">):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">display_number</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">game_time_s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnt_gameTimer</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;gameTimer&#39;</span><span class="p">)</span>
-                
-                <span class="c1"># Display the collision count and timer for the demos where reversibility is well demonstrated.</span>
-                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;circular-perfectKiss&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">perfect_kiss</span> <span class="ow">and</span> <span class="p">(</span><span class="n">demo_index</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]):</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">display_number</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">time_s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fnt_generalTimer</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;generalTimer&#39;</span><span class="p">)</span>
-                    <span class="c1"># Generally, counts up to 100 reverse well. Counts outside the range below will not display correctly.</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">pk_collision_cnt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">collision_count</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="p">(</span><span class="o">-</span><span class="mi">1000</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">pk_collision_cnt</span><span class="o">.</span><span class="n">result</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">):</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">pk_collision_cnt</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="n">width_px</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
                 
                 <span class="c1"># Clean out old bullets.</span>
                 <span class="k">for</span> <span class="n">thisPuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">[:]:</span>  <span class="c1"># [:] indicates a copy </span>
@@ -367,21 +323,21 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">remove_healthless_pucks</span><span class="p">()</span>
                 
-                <span class="c1"># Draw pucks, springs, mouse tethers, and jets.</span>
-                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;box2d&quot;</span><span class="p">):</span>
-                    <span class="k">for</span> <span class="n">eachWall</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">walls</span><span class="p">:</span>
-                        <span class="n">eachWall</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+                <span class="c1"># Draw pucks, springs, mouse tethers, guns, and jets.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
 
                 <span class="k">for</span> <span class="n">eachpuck</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">pucks</span><span class="p">:</span>
                     <span class="n">eachpuck</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
                     <span class="k">if</span> <span class="p">(</span><span class="n">eachpuck</span><span class="o">.</span><span class="n">jet</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">):</span>
                         <span class="k">if</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">jet</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">active</span><span class="p">:</span>
-                            <span class="n">eachpuck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">draw_shield</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">gun</span><span class="p">:</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">draw_shield</span><span class="p">()</span>
                             <span class="n">eachpuck</span><span class="o">.</span><span class="n">jet</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-                            <span class="n">eachpuck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
-                            
+                            <span class="k">if</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">gun</span><span class="p">:</span> <span class="n">eachpuck</span><span class="o">.</span><span class="n">gun</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+
+                <span class="c1"># For a few demos that use raw tubes.            </span>
+                <span class="k">for</span> <span class="n">tube</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">raw_tubes</span><span class="p">:</span>
+                    <span class="n">tube</span><span class="o">.</span><span class="n">draw_tube</span><span class="p">()</span>
+
                 <span class="k">for</span> <span class="n">eachspring</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">springs</span><span class="p">:</span> 
                     <span class="n">eachspring</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
                 
@@ -407,12 +363,6 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="c1"># (determine the age of old bullets to be deleted)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">time_s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">dt_s</span>
             
-            <span class="c1"># Jello madness game timer</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">jello_tangle_checking_enabled</span><span class="p">:</span>
-                <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s2">&quot;box2d&quot;</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">tangle_checker_time_s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">dt_s</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">tangled</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">game_time_s</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">dt_s</span>
-
         <span class="k">return</span> <span class="n">demo_index</span>
 </pre></div>
 </body>

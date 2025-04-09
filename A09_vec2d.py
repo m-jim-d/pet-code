@@ -107,6 +107,10 @@ class Vec2D:
             # None here and catch this in the code following the projection. 
             return self * 0
     
+    # Make a copy of the original vector.
+    def copy(self):
+        return Vec2D(self.x, self.y)
+
     # Rotate 90 degrees counterclockwise.
     def rotate90(self):
         return Vec2D(-self.y, self.x)

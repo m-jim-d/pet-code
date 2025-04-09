@@ -11,7 +11,7 @@ Classes:
     Wall: Static boundary objects with collision detection  
     Puck: Dynamic objects with physics properties (mass, velocity, etc.)  
     Spring: Elastic connections between pucks with customizable properties  
-    RotatingTube: Base class for rotatable attachments (Jet/Gun)  
+    Tube: Base class for rotatable attachments (Jet/Gun)  
     Jet: Propulsion system that can be attached to pucks  
     Gun: Weapon system that can be mounted on pucks  
 
@@ -339,7 +339,7 @@ class Puck:
             pygame.draw.circle(g.game_window.surface, THECOLORS["red"], self.pos_2d_px, life_radius_px, g.env.zoomLineThickness(2))
 
 
-class RotatingTube:
+class Tube:
     def __init__(self, puck, sf_abs=False):
         # Associate the tube with the puck.
         self.puck = puck
@@ -392,9 +392,9 @@ class RotatingTube:
                             self.convert_from_world_to_screen(self.tube_vertices_2d_m, self.puck.pos_2d_m), g.env.zoomLineThickness(line_thickness))
 
 
-class Jet(RotatingTube):
+class Jet(Tube):
     def __init__(self, puck, sf_abs=True):
-        # Associate the jet with the puck (referenced in the RotatingTube class).
+        # Associate the jet with the puck (referenced in the Tube class).
         super().__init__(puck, sf_abs=sf_abs)
         
         # Degrees of rotation per second.
@@ -478,9 +478,9 @@ class Jet(RotatingTube):
                                 self.convert_from_world_to_screen(self.flame_vertices_2d_m, self.puck.pos_2d_m), 0)
                                 
 
-class Gun( RotatingTube):
+class Gun(Tube):
     def __init__(self, puck, sf_abs=True, bullet_age_limit_s=3.0):
-        # Associate the gun with the puck (referenced in the RotatingTube class).
+        # Associate the gun with the puck (referenced in the Tube class).
         super().__init__(puck, sf_abs=sf_abs)
         
         # Degrees of rotation per second.

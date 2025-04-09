@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Filename: A13_2D_jet_forces.py
+# Filename: A12_2D_tube_jet.py
 
 import sys
 import pygame
@@ -25,6 +25,7 @@ from A09_vec2d import Vec2D
 
 from A08_network import GameServer, RunningAvg, setClientColors
 
+
 #=====================================================================
 # Classes
 #=====================================================================
@@ -32,7 +33,7 @@ from A08_network import GameServer, RunningAvg, setClientColors
 class Client:
     def __init__(self, cursor_color):
         self.cursor_location_px: tuple[int, int] = (0,0)   # x_px, y_px
-        self.mouse_button = 1             # 1, 2, or 3
+        self.mouse_button = 1 # 1, 2, or 3
         self.buttonIsStillDown = False
         
         self.active = False
@@ -126,7 +127,7 @@ class Puck:
         
         self.client_name = client_name
         self.jet: Optional['Jet'] = None
-        self.rawtube: Optional['RotatingTube'] = None
+        self.rawtube: Optional['Tube'] = None
 
         air_table.pucks.append(self)
         if self.client_name:
@@ -142,7 +143,7 @@ class Puck:
         self.pos_2d_px = env.ConvertWorldToScreen( self.pos_2d_m)
         
         # Update based on zoom factor
-        self.radius_px = round(env.px_from_m(self.radius_m))
+        self.radius_px = round(env.px_from_m( self.radius_m))
         if (self.radius_px < 3):
             self.radius_px = 3
             
@@ -152,35 +153,36 @@ class Puck:
         pygame.draw.circle(game_window.surface, self.color, self.pos_2d_px, self.radius_px, puck_circle_thickness)
         
             
-class RotatingTube:
-    def __init__(self, puck, sf_abs=True):
+class Tube:
+    def __init__(self, puck):
         # Associate the tube with the puck.
         self.puck = puck
     
         self.color = env.clients[self.puck.client_name].cursor_color
         
         # Degrees of rotation per rendering cycle.
-        self.rotation_deg = 1.8
+        self.rotation_deg = 2.0
         
-        # Scaling factors to manage the aspect ratio of the tube.
-        if sf_abs:  # Absolute
-            self.sf_x = 0.15
-            self.sf_y = 0.50
-        else:       # Relative
-            self.sf_x = 0.15 * (self.puck.radius_m/0.45)
-            self.sf_y = 0.50 * (self.puck.radius_m/0.45)
+        # Scale factor for drawing.
+        self.sf_x = 0.15
+        self.sf_y = 0.50
         
-        # Notice the counter-clockwise drawing pattern. Four vertices for a rectangle.
-        # Each vertex is represented by a vector.
+        # The tube (rectangle)
         self.tube_vertices_2d_m = [Vec2D(-0.50 * self.sf_x, 0.00 * self.sf_y), 
-                                   Vec2D( 0.50 * self.sf_x, 0.00 * self.sf_y), 
-                                   Vec2D( 0.50 * self.sf_x, 1.00 * self.sf_y),
-                                   Vec2D(-0.50 * self.sf_x, 1.00 * self.sf_y)]
-        
-        # Define a normal (1 meter) pointing vector to keep track of the direction of the jet.
-        self.direction_2d_m: Vec2D = Vec2D(0.0, 1.0)
+                                  Vec2D( 0.50 * self.sf_x, 0.00 * self.sf_y), 
+                                  Vec2D( 0.50 * self.sf_x, 1.02 * self.sf_y), 
+                                  Vec2D(-0.50 * self.sf_x, 1.02 * self.sf_y)]
+                                  
+        # A unit vector that points in the direction of the tube.
+        self.direction_2d_m: Vec2D = Vec2D(0,1)
         
         self.client = env.clients[self.puck.client_name]
+    
+    def client_rotation_control(self):
+        if (self.client.key_j == "D"):
+            self.rotate_everything( +1 * self.rotation_deg)
+        if (self.client.key_l == "D"):
+            self.rotate_everything( -1 * self.rotation_deg)
     
     def rotate_vertices(self, vertices_2d_m, angle_deg):
         for vertex_2d_m in vertices_2d_m:
@@ -192,14 +194,7 @@ class RotatingTube:
         
         # Rotate the tube.
         self.rotate_vertices( self.tube_vertices_2d_m, angle_deg)
-        
-    def client_rotation_control(self):
-        # Rotate clockwise (D) and counter-clockwise (A).
-        if (self.client.key_j == "D"):
-            self.rotate_everything( +1 * self.rotation_deg)
-        if (self.client.key_l == "D"):
-            self.rotate_everything( -1 * self.rotation_deg)
-            
+
     def convert_from_world_to_screen(self, vertices_2d_m, base_point_2d_m):
         vertices_2d_px = []
         for vertex_2d_m in vertices_2d_m:
@@ -213,13 +208,13 @@ class RotatingTube:
                             self.convert_from_world_to_screen(self.tube_vertices_2d_m, self.puck.pos_2d_m), 3)
 
 
-class Jet( RotatingTube):
+class Jet(Tube):
     def __init__(self, puck):
-        # Associate the jet with the puck (referenced in the RotatingTube class).
+        # Associate the jet with the puck (referenced in the Tube class).
         super().__init__(puck)
         
         # Degrees of rotation per rendering cycle.
-        self.rotation_deg = 2.0
+        self.rotation_deg = 4.0
         
         self.color = THECOLORS["yellow"]
         
@@ -227,22 +222,16 @@ class Jet( RotatingTube):
         self.flame_vertices_2d_m =[Vec2D(-0.50 * self.sf_x, 1.02 * self.sf_y), 
                                    Vec2D( 0.50 * self.sf_x, 1.02 * self.sf_y), 
                                    Vec2D(-0.00 * self.sf_x, 1.80 * self.sf_y)]
-                                   
-        # Scaler magnitude of jet force.
-        self.jet_force_N = 1.3 * self.puck.mass_kg * abs(air_table.gON_mps2.y)
         
         # Point everything down for starters.
-        self.rotate_everything( 180)
+        self.rotate_everything(180)
 
         self.client = env.clients[self.puck.client_name]
-    
+        
     def turn_jet_forces_onoff(self):
-        if (self.client.key_w == "D"):
-            # Force on puck is in the opposite direction of the jet tube.
-            self.puck.jet_force_2d_N = self.direction_2d_m * (-1) * self.jet_force_N
-        else:    
-            self.puck.jet_force_2d_N = self.direction_2d_m * 0.0
-            
+        # A12 version only displays jet (see draw), no forces applied
+        pass
+    
     def client_rotation_control(self):
         if (self.client.key_a == "D"):
             self.rotate_everything( +1 * self.rotation_deg)
@@ -324,7 +313,7 @@ class Spring:
         else:
             self.draw_as_line = False
         return width_m
-        
+    
     def draw(self):   
         # Change the width to indicate the stretch or compression in the spring. Note, it's good to 
         # do this outside of the main calc loop (using the rendering timer). No need to do all this each
@@ -351,6 +340,7 @@ class Spring:
                                                                        env.ConvertWorldToScreen(self.p2.pos_2d_m))
         else:
             pygame.draw.polygon(game_window.surface, self.spring_color, self.spring_vertices_2d_px)
+
         
 class AirTable:
     def __init__(self, walls_dic):
@@ -458,7 +448,6 @@ class AirTable:
                 
             # Collisions with other pucks. 
             for otherpuck in self.pucks[i+1:]:
-                
                 # Check if the two puck circles are overlapping.
                 
                 # Parallel to the normal
@@ -471,7 +460,7 @@ class AirTable:
                 # Keep this check fast by avoiding square roots.
                 if (p_to_p_m2 < (puck.radius_m + otherpuck.radius_m)**2):
                     self.collision_count += 1
-                    
+                                                            
                     # Use the p_to_p vector (between the two colliding pucks) as projection target for 
                     # normal calculation.
                     
@@ -606,13 +595,13 @@ class Environment:
                 if (event.key == K_ESCAPE):
                     sys.exit()
                 elif (event.key==K_1):            
-                    return 1           
+                    return 1
                 elif (event.key==K_2):                          
                     return 2
                 elif (event.key==K_3):
-                    return 3           
+                    return 3
                 elif (event.key==K_4):
-                    return 4           
+                    return 4
                 elif (event.key==K_5):
                     return 5
                 elif (event.key==K_6):
@@ -641,7 +630,7 @@ class Environment:
                         air_table.coef_rest_table =  0.90
                     air_table.g_ON = not air_table.g_ON
                     print("g", air_table.g_ON)
-                
+                                
                 # Jet keys
                 elif (event.key==K_a):
                     local_user.key_a = 'D'
@@ -702,7 +691,7 @@ class Environment:
             elif event.type == pygame.MOUSEBUTTONUP:
                 local_user.buttonIsStillDown = False
                 local_user.mouse_button = 0
-        
+                    
         if local_user.buttonIsStillDown:
             # This will select a puck when the puck runs into the cursor of the mouse with it's button still down.
             local_user.cursor_location_px = (mouseX, mouseY) = pygame.mouse.get_pos()
@@ -746,7 +735,7 @@ def make_some_pucks(demo):
     game_window.update_caption("Air Table: Demo #" + str(demo))
     
     if demo == 1:
-        #                   ,r_m  ,density
+        #                   , r_m , density
         Puck(Vec2D(2.5, 7.5), 0.25, 0.3, THECOLORS["orange"])
         Puck(Vec2D(6.0, 2.5), 0.45, 0.3)
         Puck(Vec2D(7.5, 2.5), 0.65, 0.3)
@@ -758,7 +747,7 @@ def make_some_pucks(demo):
         grid_size = 4,2
         for j in range(grid_size[0]):
             for k in range(grid_size[1]):
-                if ((j,k) == (1,1)):
+                if ((j,k) == (2,1)):
                     Puck(Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)), 0.75, 0.3, THECOLORS["orange"])
                 else:    
                     Puck(Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)), 0.75, 0.3)
@@ -813,35 +802,33 @@ def make_some_pucks(demo):
         air_table.coef_rest_puck =  0.85
         air_table.coef_rest_table = 0.85
         
-        # Make user/client controllable pucks
-        # for all the active clients.
+        # Create pucks for each client.
         y_puck_position_m = 1.0
         for client_name in env.clients:
             if env.clients[client_name].active:
                 tempPuck = Puck(Vec2D(6.0, y_puck_position_m), 0.45, 0.3, client_name=client_name)
                 
                 # Let the puck reference the jet and the jet reference the puck.
-                tempPuck.jet = Jet( tempPuck)
-                # Same with the raw tube.
-                tempPuck.rawtube = RotatingTube( tempPuck)
-                                
+                tempPuck.jet = Jet(tempPuck)
+                # Same with the tube.
+                tempPuck.rawtube = Tube(tempPuck)
+                
                 # Draw the next one a little higher.
                 y_puck_position_m += 1.2
-        
     else:
         print("Nothing set up for this key.")
-        
+
 def custom_update(self, client_name, state_dict):    
-    self.CS_data[ client_name].cursor_location_px = state_dict['mXY']  # mouse x,y
-    self.CS_data[ client_name].buttonIsStillDown = state_dict['mBd']   # mouse button down (true/false)
-    self.CS_data[ client_name].mouse_button = state_dict['mB']         # mouse button number (1,2,3,0)
+    self.CS_data[client_name].cursor_location_px = state_dict['mXY']  # mouse x,y
+    self.CS_data[client_name].buttonIsStillDown = state_dict['mBd']   # mouse button down (true/false)
+    self.CS_data[client_name].mouse_button = state_dict['mB']         # mouse button number (1,2,3,0)
     
-    self.CS_data[ client_name].key_a = state_dict['a']
-    self.CS_data[ client_name].key_d = state_dict['d']
-    self.CS_data[ client_name].key_w = state_dict['w']
+    self.CS_data[client_name].key_a = state_dict['a']
+    self.CS_data[client_name].key_d = state_dict['d']
+    self.CS_data[client_name].key_w = state_dict['w']
     
-    self.CS_data[ client_name].key_j = state_dict['j']
-    self.CS_data[ client_name].key_l = state_dict['l']
+    self.CS_data[client_name].key_j = state_dict['j']
+    self.CS_data[client_name].key_l = state_dict['l']
 
 def signInOut_function(self, client_name, activate=True):
     if activate:
@@ -849,13 +836,8 @@ def signInOut_function(self, client_name, activate=True):
     else:
         self.CS_data[client_name].active = False
         self.CS_data[client_name].historyXY = []
-        
-#============================================================
-# Main procedural script.
-#============================================================
 
 def main():
-
     # A few globals.
     global env, game_window, air_table
     
@@ -888,8 +870,8 @@ def main():
     for m in range(1,11):
         # Initialize the client list with some clients.
         c_name = 'C' + str(m)
-        env.clients[ c_name] = Client( env.client_colors[ c_name])
-
+        env.clients[c_name] = Client(env.client_colors[c_name])
+    
     # Setup network server.
     if platform.system() == 'Linux':
         local_ip = subprocess.check_output(["hostname", "-I"]).decode().strip()
@@ -903,7 +885,7 @@ def main():
                         signInOut_function=signInOut_function)
 
     while True:
-        dt_physics_s = myclock.tick( framerate_limit) * 1e-3
+        dt_physics_s = myclock.tick(framerate_limit) * 1e-3
         
         # This check avoids problem when dragging the game window.
         if (dt_physics_s < 0.10):
@@ -913,12 +895,7 @@ def main():
             
             # Reset the game based on local user control.
             if demo_index in [0,1,2,3,4,5,6,7,8,9]:
-                print(demo_index)
-                # This should remove all references to the pucks and effectively kill them off. If there were other
-                # variables referring to this list, this would not stop the pucks.
-                
-                # Delete all the objects on the table. Cleaning out these list reference to these objects effectively
-                # deletes the objects. Notice the controlled list must be cleared also.
+                # Delete all the objects on the table.
                 air_table.pucks = []
                 air_table.controlled_pucks = []
                 air_table.springs = []
@@ -927,7 +904,7 @@ def main():
                 game_window.clear()
                 
                 # Reinitialize the demo.
-                make_some_pucks(demo_index)               
+                make_some_pucks(demo_index)
                         
             if (dt_render_s > dt_render_limit_s):
                 # Get input from network clients.
@@ -946,29 +923,29 @@ def main():
                     # Rotate based on keyboard of the controlling client.
                     controlled_puck.jet.client_rotation_control()
                     controlled_puck.rawtube.client_rotation_control()
-                
+                    
                     # Turn jet forces on/off.
                     controlled_puck.jet.turn_jet_forces_onoff()
-            
+                                        
             # Calculate the forces the springs apply on the pucks...
             for eachspring in air_table.springs:
                 eachspring.calc_spring_forces_on_pucks()
                 
             # Apply forces to the pucks and calculate movements.
             for eachpuck in air_table.pucks:
-                air_table.update_TotalForce_Speed_Position( eachpuck, dt_physics_s)
+                air_table.update_TotalForce_Speed_Position(eachpuck, dt_physics_s)
             
             # Check for puck-wall and puck-puck collisions and make penetration corrections.
             air_table.check_for_collisions()
             
-            fr_avg.update( myclock.get_fps())
+            fr_avg.update(myclock.get_fps())
             if (dt_render_s > dt_render_limit_s):
                 
                 # Erase the blackboard.
                 game_window.surface.fill((0,0,0))
 
                 # Now draw pucks, springs, mouse tethers, and jets.
-                fr_avg.draw( game_window.surface, 10, 10)
+                fr_avg.draw(game_window.surface, 10, 10)
                 
                 # Draw boundaries of table.
                 air_table.draw()
@@ -1000,8 +977,5 @@ def main():
             # Keep track of time for deleting old bullets.
             env.time_s += dt_physics_s
 
-#============================================================
-# Run the main program.    
-#============================================================
-        
-main()
+if __name__ == "__main__":
+    main()

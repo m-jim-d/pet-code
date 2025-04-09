@@ -9,6 +9,7 @@ from pygame.color import THECOLORS
 from A09_vec2d import Vec2D
 from A15_air_table_objects import Wall, Puck, Spring
 from A15_game_loop import GameLoop
+from A15_pool_shots import pool_trick_shot, pool_line_of_balls
 import A15_globals as g
 
 #===========================================================
@@ -410,32 +411,38 @@ def make_some_pucks(demo):
             init_2d_m = Vec2D(set_off_m, set_off_m)
             g.air_table.buildControlledPuck(x_m=init_2d_m.x, y_m=init_2d_m.y, r_m=radius_m, client_name='local', sf_abs=False, c_drag=1.5)
 
-        g.air_table.puckPopper_variations(two_drone_special__rectangular, custom_1=rectangle_in_middle)
+        g.air_table.puckPopper_variations(demo, two_drone_special__rectangular, custom_1=rectangle_in_middle)
         
     elif demo == 8:
         g.env.set_gravity("on")
-        g.air_table.throwJello_variations()
+        g.air_table.throwJello_variations(demo)
 
     elif demo == 9:
         g.env.set_gravity("off")
-        g.air_table.targetJello_variations()
+        g.air_table.targetJello_variations(demo)
     
     elif demo == 0:
-        # Demo 0 has three variations showing different puck arrangements and collisions:
+        # Demo 0 has four variations showing different puck arrangements and collisions:
         # a: Dominoes - Creates a row of increasingly larger rectangular pucks,
         #    then throws a small round puck to start a chain reaction
         # b: Pyramid stack - Builds a pyramid of tall rectangular pucks on the ground,
         #    then launches a heavy bowling ball at it
         # c: Billiards trick shot - Arranges circular pucks in a partial ring formation,
         #    with a cue ball that's shot to scatter them
+        # d: Line of balls - Creates a line of identical circular pucks and a cue ball 
+        #    with adjustable vertical offset (0%, 10%, or 50%) to demonstrate different 
+        #    collision patterns
 
         initial_states = [
             {'variation':'a'},
             {'variation':'b'},
-            {'variation':'c'}
+            {'variation':'c'},
+            {'variation':'d', 'offset_percent':0},
+            {'variation':'d', 'offset_percent':10},
+            {'variation':'d', 'offset_percent':50}
         ]
-        g.env.demo_variations[0]['count'] = len(initial_states)
-        state = initial_states[g.env.demo_variations[0]['index']]
+        g.env.demo_variations[demo]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[demo]['index']]
         
         if state['variation'] == 'a':
             g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
@@ -480,7 +487,6 @@ def make_some_pucks(demo):
             y_position_m = puck_half_height_m + (2*puck_half_height_m * y_gap_fraction)
 
             for i in range(n_rows):
-                print(i)
                 for j in range(i, n_rows):
                     Puck(Vec2D(x_position_m, y_position_m), puck_half_width_m, density, 
                         color=THECOLORS['darkkhaki'], border_px=0,
@@ -500,7 +506,13 @@ def make_some_pucks(demo):
             g.air_table.throw_puck(p1, Vec2D(-10, 1.0) * 10, delay_s=2.0)
 
         elif state['variation'] == 'c':
-            g.air_table.pool_trick_shot()
+            g.env.set_gravity("off")
+            pool_trick_shot()
+
+        elif state['variation'] == 'd':
+            g.air_table.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
+            g.env.set_gravity("off")
+            pool_line_of_balls(state['offset_percent'])
 
         g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[0]['index'] + 1}"

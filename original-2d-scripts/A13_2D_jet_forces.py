@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Filename: A14_2D_gun.py
+# Filename: A13_2D_jet_forces.py
 
 import sys
 import pygame
@@ -13,7 +13,7 @@ import platform, subprocess
 from pygame.locals import (
     K_ESCAPE,
     K_a, K_d, K_w,
-    K_i, K_j, K_l,
+    K_j, K_l,
     K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_0,
     K_f, K_g,
     K_n, K_h
@@ -42,10 +42,9 @@ class Client:
         self.key_d = "U"
         self.key_w = "U"
         
-        # Gun
+        # Raw tube
         self.key_j = "U"
         self.key_l = "U"
-        self.key_i = "U"
         
         # Zoom
         self.key_n = "U"
@@ -111,7 +110,6 @@ class Puck:
 
         self.density_kgpm2 = density_kgpm2    # mass per unit area
         self.mass_kg = self.density_kgpm2 * math.pi * self.radius_m ** 2
-        
         self.pos_2d_m = pos_2d_m
         self.vel_2d_mps = Vec2D(0.0,0.0)
         
@@ -128,16 +126,11 @@ class Puck:
         
         self.client_name = client_name
         self.jet: Optional['Jet'] = None
-        self.gun: Optional['Gun'] = None
-        
-        # Bullet data...
-        self.bullet = False
-        self.birth_time_s = env.time_s
-        self.age_limit_s = 3.0
+        self.rawtube: Optional['Tube'] = None
 
-        air_table.pucks.append( self)
+        air_table.pucks.append(self)
         if self.client_name:
-            air_table.controlled_pucks.append( self)
+            air_table.controlled_pucks.append(self)
         
     # If you print an object instance...
     def __str__(self):
@@ -149,7 +142,7 @@ class Puck:
         self.pos_2d_px = env.ConvertWorldToScreen( self.pos_2d_m)
         
         # Update based on zoom factor
-        self.radius_px = round(env.px_from_m( self.radius_m))
+        self.radius_px = round(env.px_from_m(self.radius_m))
         if (self.radius_px < 3):
             self.radius_px = 3
             
@@ -159,7 +152,7 @@ class Puck:
         pygame.draw.circle(game_window.surface, self.color, self.pos_2d_px, self.radius_px, puck_circle_thickness)
         
             
-class RotatingTube:
+class Tube:
     def __init__(self, puck, sf_abs=True):
         # Associate the tube with the puck.
         self.puck = puck
@@ -187,6 +180,8 @@ class RotatingTube:
         # Define a normal (1 meter) pointing vector to keep track of the direction of the jet.
         self.direction_2d_m: Vec2D = Vec2D(0.0, 1.0)
         
+        self.client = env.clients[self.puck.client_name]
+    
     def rotate_vertices(self, vertices_2d_m, angle_deg):
         for vertex_2d_m in vertices_2d_m:
             vertex_2d_m.rotated( angle_deg, sameVector=True)
@@ -197,6 +192,13 @@ class RotatingTube:
         
         # Rotate the tube.
         self.rotate_vertices( self.tube_vertices_2d_m, angle_deg)
+        
+    def client_rotation_control(self):
+        # Rotate clockwise (D) and counter-clockwise (A).
+        if (self.client.key_j == "D"):
+            self.rotate_everything( +1 * self.rotation_deg)
+        if (self.client.key_l == "D"):
+            self.rotate_everything( -1 * self.rotation_deg)
             
     def convert_from_world_to_screen(self, vertices_2d_m, base_point_2d_m):
         vertices_2d_px = []
@@ -211,9 +213,9 @@ class RotatingTube:
                             self.convert_from_world_to_screen(self.tube_vertices_2d_m, self.puck.pos_2d_m), 3)
 
 
-class Jet( RotatingTube):
+class Jet( Tube):
     def __init__(self, puck):
-        # Associate the jet with the puck (referenced in the RotatingTube class).
+        # Associate the jet with the puck (referenced in the Tube class).
         super().__init__(puck)
         
         # Degrees of rotation per rendering cycle.
@@ -233,7 +235,7 @@ class Jet( RotatingTube):
         self.rotate_everything( 180)
 
         self.client = env.clients[self.puck.client_name]
-        
+    
     def turn_jet_forces_onoff(self):
         if (self.client.key_w == "D"):
             # Force on puck is in the opposite direction of the jet tube.
@@ -263,74 +265,11 @@ class Jet( RotatingTube):
                             self.convert_from_world_to_screen(self.tube_vertices_2d_m, self.puck.pos_2d_m), 3)
         
         # Draw the red flame.
-        if (env.clients[self.puck.client_name].key_w == "D"):
+        if (self.client.key_w == "D"):
             pygame.draw.polygon(game_window.surface, THECOLORS["red"], 
                                 self.convert_from_world_to_screen(self.flame_vertices_2d_m, self.puck.pos_2d_m), 0)
-
-
-class Gun( RotatingTube):
-    def __init__(self, puck):
-        # Associate the gun with the puck (referenced in the RotatingTube class).
-        super().__init__(puck)
-        
-        # Degrees of rotation per rendering cycle.
-        self.rotation_deg = 2.0
-        
-        #self.color = THECOLORS["yellow"]
-        self.color = env.clients[self.puck.client_name].cursor_color
-        
-        self.rotate_everything( 45)
-        
-        self.bullet_speed_mps = 5.0
-        self.fire_time_s = env.time_s
-        self.firing_delay_s = 0.1
-        
-        self.testing_gun = False
-
-        self.client = env.clients[self.puck.client_name]
     
-    def client_rotation_control(self):
-        if (self.client.key_j == "D"):
-            self.rotate_everything( +self.rotation_deg)
-        if (self.client.key_l == "D"):
-            self.rotate_everything( -self.rotation_deg)
-    
-    def control_firing(self):
-        if ((self.client.key_i == "D") or self.testing_gun):
-            if ((env.time_s - self.fire_time_s) > self.firing_delay_s):
-                self.fire_gun()
-                # Timestamp the firing event.
-                self.fire_time_s = env.time_s
-                
-    def fire_gun(self):
-        bullet_radius_m = 0.05
-        # Set the initial position of the bullet so that it clears (doesn't collide with) the host puck.
-        initial_position_2d_m = (self.puck.pos_2d_m +
-                                (self.direction_2d_m * (1.1 * self.puck.radius_m + 1.1 * bullet_radius_m)) )
-        temp_bullet = Puck(initial_position_2d_m,  bullet_radius_m, 0.3)
-        
-        # Relative velocity of the bullet: the bullet velocity as seen from the host puck. This is the
-        # speed of the bullet relative to the motion of the host puck (host velocity BEFORE the firing of 
-        # the bullet).
-        bullet_relative_vel_2d_mps = self.direction_2d_m * self.bullet_speed_mps
-        
-        # Absolute velocity of the bullet.
-        temp_bullet.vel_2d_mps = self.puck.vel_2d_mps + bullet_relative_vel_2d_mps
-        
-        temp_bullet.bullet = True
-        temp_bullet.color = env.clients[self.puck.client_name].cursor_color
-        temp_bullet.client_name = self.puck.client_name
-        
-        # Calculate the recoil impulse from firing the gun (opposite the direction of the bullet).
-        self.puck.impulse_2d_Ns = bullet_relative_vel_2d_mps * temp_bullet.mass_kg * (-1)
-    
-    def draw(self):
-        # Draw the gun tube.
-        line_thickness = 3
-        pygame.draw.polygon(game_window.surface, self.color, 
-                 self.convert_from_world_to_screen(self.tube_vertices_2d_m, self.puck.pos_2d_m), line_thickness)
                             
-
 class Spring:
     def __init__(self, p1, p2, length_m=3.0, strength_Npm=0.5, spring_color=THECOLORS["yellow"], width_m=0.025):
         self.p1 = p1
@@ -349,8 +288,7 @@ class Spring:
         
         self.spring_color = spring_color
         self.draw_as_line = False
-        
-        # Add spring to the table's list
+
         air_table.springs.append(self)
     
     def calc_spring_forces_on_pucks(self):
@@ -386,7 +324,7 @@ class Spring:
         else:
             self.draw_as_line = False
         return width_m
-    
+        
     def draw(self):   
         # Change the width to indicate the stretch or compression in the spring. Note, it's good to 
         # do this outside of the main calc loop (using the rendering timer). No need to do all this each
@@ -621,7 +559,7 @@ class Environment:
         # Add a local (non-network) client to the client dictionary.
         self.clients = {'local':Client(THECOLORS["cyan"])}
         self.clients['local'].active = True
-
+        
         self.time_s = 0.0
                               
     # Convert from meters to pixels 
@@ -668,13 +606,13 @@ class Environment:
                 if (event.key == K_ESCAPE):
                     sys.exit()
                 elif (event.key==K_1):            
-                    return 1
+                    return 1           
                 elif (event.key==K_2):                          
                     return 2
                 elif (event.key==K_3):
-                    return 3
+                    return 3           
                 elif (event.key==K_4):
-                    return 4
+                    return 4           
                 elif (event.key==K_5):
                     return 5
                 elif (event.key==K_6):
@@ -712,13 +650,11 @@ class Environment:
                 elif (event.key==K_w):
                     local_user.key_w = 'D'
                 
-                # Gun keys
+                # Raw tube keys
                 elif (event.key==K_j):
                     local_user.key_j = 'D'
                 elif (event.key==K_l):
                     local_user.key_l = 'D'
-                elif (event.key==K_i):
-                    local_user.key_i = 'D'
                     
                 # Zoom keys
                 elif (event.key==K_n):
@@ -738,13 +674,12 @@ class Environment:
                 elif (event.key==K_w):
                     local_user.key_w = 'U'
                 
-                # Gun keys
+                # Raw tube keys
                 elif (event.key==K_j):
                     local_user.key_j = 'U'
                 elif (event.key==K_l):
                     local_user.key_l = 'U'
-                elif (event.key==K_i):
-                    local_user.key_i = 'U'
+                    
                 # Zoom keys
                 elif (event.key==K_n):
                     local_user.key_n = 'U'
@@ -808,13 +743,13 @@ class GameWindow:
 #===========================================================
         
 def make_some_pucks(demo):
-    game_window.update_caption("Air Table V.2: Demo #" + str(demo))
+    game_window.update_caption("Air Table: Demo #" + str(demo))
     
     if demo == 1:
-        #                   , r_m , density
+        #                   ,r_m  ,density
         Puck(Vec2D(2.5, 7.5), 0.25, 0.3, THECOLORS["orange"])
-        Puck(Vec2D(6.0, 2.5), 0.45, 0.3) # maybe not.
-        Puck(Vec2D(7.5, 2.5), 0.65, 0.3) 
+        Puck(Vec2D(6.0, 2.5), 0.45, 0.3)
+        Puck(Vec2D(7.5, 2.5), 0.65, 0.3)
         Puck(Vec2D(2.5, 5.5), 1.65, 0.3)
         Puck(Vec2D(7.5, 7.5), 0.95, 0.3)
     
@@ -839,7 +774,6 @@ def make_some_pucks(demo):
                     Puck(Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)), 0.55, 0.3)
     
     elif demo == 4:
-        #air_table.gON_mps2 = Vec2D(-0.0, -20.0)
         spacing_factor = 1.0
         grid_size = 9,6   #9,6
         for j in range(grid_size[0]):
@@ -858,25 +792,22 @@ def make_some_pucks(demo):
         Spring(air_table.pucks[0], air_table.pucks[1], spring_length_m, spring_strength_Npm2, width_m=0.2)
     
     elif demo == 6:
-        Puck(Vec2D(2.00, 3.00),  0.65, 0.3)
-        Puck(Vec2D(3.50, 4.50),  0.65, 0.3)
-        Puck(Vec2D(5.00, 3.00),  0.65, 0.3)
+        Puck(Vec2D(2.00, 3.00),  0.65, 0.3) 
+        Puck(Vec2D(3.50, 4.50),  0.65, 0.3) 
+        Puck(Vec2D(5.00, 3.00),  0.65, 0.3) 
         
         # No springs on this one.
-        Puck(Vec2D(3.50, 7.00),  0.95, 0.3)
+        Puck(Vec2D(3.50, 7.00),  0.95, 0.3) 
     
-        spring_strength_Npm2 = 200.0 #18.0
+        spring_strength_Npm2 = 200.0
         spring_length_m = 2.5
         spring_width_m = 0.07
-        
-        # Make springs between pucks 0,1,2 in a triangle.
-        # Don't make a spring to puck 3.
         Spring(air_table.pucks[0], air_table.pucks[1],
-              spring_length_m, spring_strength_Npm2, width_m=spring_width_m)
+               spring_length_m, spring_strength_Npm2, width_m=spring_width_m)
         Spring(air_table.pucks[1], air_table.pucks[2],
-              spring_length_m, spring_strength_Npm2, width_m=spring_width_m)
+               spring_length_m, spring_strength_Npm2, width_m=spring_width_m)
         Spring(air_table.pucks[2], air_table.pucks[0],
-              spring_length_m, spring_strength_Npm2, width_m=spring_width_m)
+               spring_length_m, spring_strength_Npm2, width_m=spring_width_m)
     
     elif demo == 7:
         air_table.coef_rest_puck =  0.85
@@ -891,9 +822,9 @@ def make_some_pucks(demo):
                 
                 # Let the puck reference the jet and the jet reference the puck.
                 tempPuck.jet = Jet( tempPuck)
-                # Same with the gun.
-                tempPuck.gun = Gun( tempPuck)
-                
+                # Same with the raw tube.
+                tempPuck.rawtube = Tube( tempPuck)
+                                
                 # Draw the next one a little higher.
                 y_puck_position_m += 1.2
         
@@ -911,7 +842,6 @@ def custom_update(self, client_name, state_dict):
     
     self.CS_data[ client_name].key_j = state_dict['j']
     self.CS_data[ client_name].key_l = state_dict['l']
-    self.CS_data[ client_name].key_i = state_dict['i']
 
 def signInOut_function(self, client_name, activate=True):
     if activate:
@@ -919,7 +849,7 @@ def signInOut_function(self, client_name, activate=True):
     else:
         self.CS_data[client_name].active = False
         self.CS_data[client_name].historyXY = []
-
+        
 #============================================================
 # Main procedural script.
 #============================================================
@@ -938,14 +868,14 @@ def main():
     # Create the first user/client and the methods for moving between the screen and the world.
     env = Environment(window_dimensions_px, 10.0) # 10m along the x axis.
 
-    game_window = GameWindow(window_dimensions_px, 'Air Table Server V.2')
+    game_window = GameWindow(window_dimensions_px, 'Air Table')
 
     # Define the Left, Right, Bottom, and Top boundaries of the game window.
     air_table = AirTable({"L_m":0.0, "R_m":game_window.UR_2d_m.x, "B_m":0.0, "T_m":game_window.UR_2d_m.y})
 
     # Add some pucks to the table.
     demo_index = 7
-    make_some_pucks( demo_index)
+    make_some_pucks(demo_index)
 
     # For displaying a smoothed framerate.
     fr_avg = RunningAvg(300, pygame, colorScheme='light')
@@ -997,7 +927,7 @@ def main():
                 game_window.clear()
                 
                 # Reinitialize the demo.
-                make_some_pucks( demo_index)               
+                make_some_pucks(demo_index)               
                         
             if (dt_render_s > dt_render_limit_s):
                 # Get input from network clients.
@@ -1015,14 +945,10 @@ def main():
                 for controlled_puck in air_table.controlled_pucks:
                     # Rotate based on keyboard of the controlling client.
                     controlled_puck.jet.client_rotation_control()
-                    controlled_puck.gun.client_rotation_control()
-                    
-                    # Turn gun on/off
-                    controlled_puck.gun.control_firing()
-                    
-            # Calculate jet forces on controlled pucks...
-            for controlled_puck in air_table.controlled_pucks:
-                controlled_puck.jet.turn_jet_forces_onoff()
+                    controlled_puck.rawtube.client_rotation_control()
+                
+                    # Turn jet forces on/off.
+                    controlled_puck.jet.turn_jet_forces_onoff()
             
             # Calculate the forces the springs apply on the pucks...
             for eachspring in air_table.springs:
@@ -1041,13 +967,6 @@ def main():
                 # Erase the blackboard.
                 game_window.surface.fill((0,0,0))
 
-                # Clean out old bullets.
-                puck_list_copy = air_table.pucks[:]
-                for thisPuck in puck_list_copy:
-                    if (thisPuck.bullet) and ((env.time_s - thisPuck.birth_time_s) > thisPuck.age_limit_s):
-                        air_table.pucks.remove(thisPuck)
-                        
-                del puck_list_copy
                 # Now draw pucks, springs, mouse tethers, and jets.
                 fr_avg.draw( game_window.surface, 10, 10)
                 
@@ -1056,10 +975,10 @@ def main():
                 
                 for eachpuck in air_table.pucks:
                     eachpuck.draw()
-                    if (eachpuck.jet != None):
+                    if (eachpuck.jet != None) or (eachpuck.rawtube != None):
                         if eachpuck.jet.client.active:
+                            eachpuck.rawtube.draw()
                             eachpuck.jet.draw()
-                            eachpuck.gun.draw()
 
                 for eachspring in air_table.springs: 
                     eachspring.draw()

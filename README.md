@@ -39,7 +39,7 @@ Executable Scripts:
 - `A10_2D_baseline_client.py`: Basic 2D physics client (use this client for all the following servers)
 - `A10_2D_baseline_server.py`: Basic 2D physics server
 
-### Game Development (A11-A14)
+### Game Development (A10_m-A14_m)
 Puck Popper Features:
 - `A11_2D_rotating_tubes.py`: Adds rotating tube objects
 - `A12_2D_tube_jet.py`: Implements jet propulsion through tubes

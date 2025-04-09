@@ -119,7 +119,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">    Wall: Static boundary objects with collision detection  </span>
 <span class="sd">    Puck: Dynamic objects with physics properties (mass, velocity, etc.)  </span>
 <span class="sd">    Spring: Elastic connections between pucks with customizable properties  </span>
-<span class="sd">    RotatingTube: Base class for rotatable attachments (Jet/Gun)  </span>
+<span class="sd">    Tube: Base class for rotatable attachments (Jet/Gun)  </span>
 <span class="sd">    Jet: Propulsion system that can be attached to pucks  </span>
 <span class="sd">    Gun: Weapon system that can be mounted on pucks  </span>
 
@@ -447,7 +447,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="n">pygame</span><span class="o">.</span><span class="n">draw</span><span class="o">.</span><span class="n">circle</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos_2d_px</span><span class="p">,</span> <span class="n">life_radius_px</span><span class="p">,</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">zoomLineThickness</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
 
 
-<span class="k">class</span> <span class="nc">RotatingTube</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">Tube</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">puck</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="c1"># Associate the tube with the puck.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">puck</span> <span class="o">=</span> <span class="n">puck</span>
@@ -500,9 +500,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                             <span class="bp">self</span><span class="o">.</span><span class="n">convert_from_world_to_screen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tube_vertices_2d_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">puck</span><span class="o">.</span><span class="n">pos_2d_m</span><span class="p">),</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">zoomLineThickness</span><span class="p">(</span><span class="n">line_thickness</span><span class="p">))</span>
 
 
-<span class="k">class</span> <span class="nc">Jet</span><span class="p">(</span><span class="n">RotatingTube</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Jet</span><span class="p">(</span><span class="n">Tube</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">puck</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="c1"># Associate the jet with the puck (referenced in the RotatingTube class).</span>
+        <span class="c1"># Associate the jet with the puck (referenced in the Tube class).</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">puck</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="n">sf_abs</span><span class="p">)</span>
         
         <span class="c1"># Degrees of rotation per second.</span>
@@ -586,9 +586,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                                 <span class="bp">self</span><span class="o">.</span><span class="n">convert_from_world_to_screen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flame_vertices_2d_m</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">puck</span><span class="o">.</span><span class="n">pos_2d_m</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
                                 
 
-<span class="k">class</span> <span class="nc">Gun</span><span class="p">(</span> <span class="n">RotatingTube</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Gun</span><span class="p">(</span><span class="n">Tube</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">puck</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bullet_age_limit_s</span><span class="o">=</span><span class="mf">3.0</span><span class="p">):</span>
-        <span class="c1"># Associate the gun with the puck (referenced in the RotatingTube class).</span>
+        <span class="c1"># Associate the gun with the puck (referenced in the Tube class).</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">puck</span><span class="p">,</span> <span class="n">sf_abs</span><span class="o">=</span><span class="n">sf_abs</span><span class="p">)</span>
         
         <span class="c1"># Degrees of rotation per second.</span>

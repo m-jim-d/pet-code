@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Filename: A15_game_loop.py
+# Filename: A10_m_game_loop.py
 
 """
 Game Loop Management for Air Table Physics Simulation
@@ -9,11 +9,11 @@ This module provides a unified game loop implementation for different air table 
 It handles initialization, updates, and rendering for the simulation, supporting multiple physics
 engines and network play.
 
-The GameLoop class encapsulates all the common functionality needed by the three primary 
-scripts (A15a, A15c, A16c), including:
+The GameLoop class encapsulates all the common functionality needed by the primary 
+script, A10_baseline_server.py, including:
 
 Features:
-    - Flexible physics engine selection (box2d, circular, circular-perfectKiss)
+    - Flexible physics engine selection (circular, other...)
     - Frame rate control and timing management
     - Network server setup and client handling
     - Input processing from local and network users
@@ -25,7 +25,7 @@ Classes:
     GameLoop: Main class that manages the game loop and simulation state
 
 Usage:
-    game_loop = GameLoop(engine_type="box2d")  # or "circular" or "circular-perfectKiss"
+    game_loop = GameLoop(engine_type="circular")
     game_loop.start(demo_index=7)  # Start with specified demo
 """
 
@@ -33,15 +33,16 @@ import platform, subprocess
 import socket, math
 import pygame
 
-from A08_network import GameServer, RunningAvg
-from A15_air_table import Box2DAirTable, CircularAirTable, PerfectKissAirTable
-from A15_environment import Client, GameWindow, Environment, signInOut_function, custom_update
+from A08_network import GameServer
+from A10_m_air_table import CircularAirTable
+from A10_m_environment import Client, GameWindow, Environment, signInOut_function, custom_update
 # Global variables shared across scripts
-import A15_globals as g
+import A10_m_globals as g
 
 class GameLoop:
     # window dimensions: (width_px, height_px)
-    def __init__(self, engine_type="box2d", window_width_px=800, make_some_pucks=None):
+    def __init__(self, engine_type="circular", window_width_px=800, 
+                 make_some_pucks=None, version="10"):
         self.make_some_pucks = make_some_pucks
 
         # Demos are best at an aspect ratio of 8/7.
@@ -64,12 +65,8 @@ class GameLoop:
         walls_dic = {"L_m":0.0, "R_m":self.game_window.UR_2d_m.x, "B_m":0.0, "T_m":self.game_window.UR_2d_m.y}
         
         # Create appropriate air table type based on engine choice.
-        if engine_type == "box2d":
-            self.air_table = Box2DAirTable(walls_dic)
-        elif engine_type == "circular":
-            self.air_table = CircularAirTable(walls_dic)
-        elif engine_type == "circular-perfectKiss":
-            self.air_table = PerfectKissAirTable(walls_dic)
+        if engine_type == "circular":
+            self.air_table = CircularAirTable(walls_dic, version=version)
         else:
             raise ValueError(f"Unknown engine type: {engine_type}")
         g.air_table = self.air_table
@@ -85,14 +82,9 @@ class GameLoop:
         self.fnt_gameTimer = pygame.font.SysFont("Courier", 50)
         self.fnt_generalTimer = pygame.font.SysFont("Courier", 25)
 
-        self.pk_collision_cnt = RunningAvg(1, pygame, colorScheme='light')
-
         self.server = None
                     
     def start(self, demo_index=7):
-        if (self.air_table.engine == "box2d"):
-            self.air_table.buildFence() # walls at the window boundaries.
-
         # Initialize demo
         self.make_some_pucks(demo_index)
         g.game_window.update_caption()
@@ -164,60 +156,38 @@ class GameLoop:
                 # Control the zoom
                 self.env.control_zoom_and_view()
                 
+                # Demonstrate the client control of raw tubes.
+                for tube in self.air_table.raw_tubes:
+                    tube.client_rotation_control()
+
                 for controlled_puck in self.air_table.controlled_pucks:
                     # Rotate based on keyboard of the controlling client.
                     controlled_puck.jet.client_rotation_control()
-                    
-                    if self.env.clients[ controlled_puck.client_name].drone:
-                        controlled_puck.gun.drone_rotation_control()
-                    else:
-                        controlled_puck.gun.client_rotation_control()
                     # Control jets and calculate forces on pucks.
                     controlled_puck.jet.turn_jet_forces_onoff()
                     
-                    # Turn gun on/off
-                    controlled_puck.gun.control_firing()
-                    
-                    # Turn shield on/off
-                    controlled_puck.gun.control_shield()
+                    if controlled_puck.gun:
+                        controlled_puck.gun.client_rotation_control()
+                        # Turn gun on/off
+                        controlled_puck.gun.control_firing()
+                        # Turn shield on/off
+                        controlled_puck.gun.control_shield()
             
             # Calculate client related cursor-string forces.
             for client_name in self.env.clients:
                 self.env.clients[client_name].calc_string_forces_on_pucks()
-
-            if (self.air_table.engine != "box2d"):    
-                # Drag on puck movement.
-                for eachpuck in self.air_table.target_pucks:
-                    eachpuck.calc_regularDragForce()
             
             # Calculate spring forces on pucks.
             for eachspring in self.air_table.springs:
                 eachspring.calc_spring_forces_on_pucks()
                 
-            if (self.air_table.engine == "box2d"):
-                # Apply forces to the pucks.
-                for eachpuck in self.air_table.pucks:
-                    self.air_table.update_TotalForceVectorOnPuck(eachpuck)
-                
-                # Advance Box2d by a single time step (dt). This calculate movements and
-                # manages collisions.
-                self.air_table.b2d_world.Step( self.air_table.dt_s, 10, 10)
-                # Note that self.air_table.b2d_world.ClearForces() has no effect here.
-                
-                # Get new positions, translational velocities, and rotational speeds, from box2d
-                for eachpuck in self.air_table.pucks:
-                    eachpuck.get_Box2d_XandV()
-                
-                # Check for puck-puck contact (Jello tangle).
-                if self.air_table.jello_tangle_checking_enabled:
-                    self.air_table.check_for_jello_tangle()
-            else:
-                # Apply forces to the pucks and calculate movements.
-                for eachpuck in self.air_table.pucks:
-                    self.air_table.update_TotalForce_Speed_Position(eachpuck)
-                
-                # Check for puck-wall and puck-puck collisions and make penetration corrections.
-                self.air_table.check_for_collisions()
+            # Apply forces to the pucks and calculate movements.
+            for eachpuck in self.air_table.pucks:
+                eachpuck.calc_regularDragForce()
+                self.air_table.update_TotalForce_Speed_Position(eachpuck)
+            
+            # Check for puck-wall and puck-puck collisions and make penetration corrections.
+            self.air_table.check_for_collisions()
 
             if self.air_table.FPS_display and (self.env.tickCount > 10):
                 self.env.fr_avg.update(1.0/abs(self.air_table.dt_s))
@@ -225,8 +195,8 @@ class GameLoop:
             if (self.env.render_timer_s > self.env.dt_render_limit_s):
                 # Erase the blackboard.
                 if not self.env.inhibit_screen_clears:
-                    if (self.air_table.engine == "circular-perfectKiss" and self.air_table.perfect_kiss):
-                        gray_level = 40
+                    if (not self.air_table.correct_for_puck_penetration):
+                        gray_level = 50
                         self.game_window.surface.fill((gray_level,gray_level,gray_level))
                     else:
                         if not self.air_table.g_ON:
@@ -234,23 +204,9 @@ class GameLoop:
                         else:
                             self.game_window.surface.fill((20,20,70))  # dark blue
 
-                #print(f"{len(self.air_table.target_pucks)}, {len(self.air_table.controlled_pucks)}, {len(self.air_table.pucks)}, s:{len(self.air_table.springs)}")
-
                 # Display the physics cycle rate.
                 if self.air_table.FPS_display:
                     self.env.fr_avg.draw( self.game_window.surface, 10, 10, caution=self.env.timestep_fixed)
-                    
-                # Display timers.
-                if (demo_index == 8):
-                    self.game_window.display_number(self.air_table.game_time_s, self.fnt_gameTimer, mode='gameTimer')
-                
-                # Display the collision count and timer for the demos where reversibility is well demonstrated.
-                if (self.air_table.engine == "circular-perfectKiss") and self.air_table.perfect_kiss and (demo_index in [1,2,3,4]):
-                    self.game_window.display_number(self.air_table.time_s, self.fnt_generalTimer, mode='generalTimer')
-                    # Generally, counts up to 100 reverse well. Counts outside the range below will not display correctly.
-                    self.pk_collision_cnt.update(self.air_table.collision_count)
-                    if (-1000 < self.pk_collision_cnt.result < 10000):
-                        self.pk_collision_cnt.draw( self.game_window.surface, 10, 40, width_px=45, fill=4)
                 
                 # Clean out old bullets.
                 for thisPuck in self.air_table.pucks[:]:  # [:] indicates a copy 
@@ -259,21 +215,21 @@ class GameLoop:
 
                 self.env.remove_healthless_pucks()
                 
-                # Draw pucks, springs, mouse tethers, and jets.
-                if (self.air_table.engine == "box2d"):
-                    for eachWall in self.air_table.walls:
-                        eachWall.draw()
-                else:
-                    self.air_table.draw()
+                # Draw pucks, springs, mouse tethers, guns, and jets.
+                self.air_table.draw()
 
                 for eachpuck in self.air_table.pucks:
                     eachpuck.draw()
                     if (eachpuck.jet != None):
                         if eachpuck.jet.client.active:
-                            eachpuck.gun.draw_shield()
+                            if eachpuck.gun: eachpuck.gun.draw_shield()
                             eachpuck.jet.draw()
-                            eachpuck.gun.draw()
-                            
+                            if eachpuck.gun: eachpuck.gun.draw()
+
+                # For a few demos that use raw tubes.            
+                for tube in self.air_table.raw_tubes:
+                    tube.draw_tube()
+
                 for eachspring in self.air_table.springs: 
                     eachspring.draw()
                 
@@ -299,10 +255,4 @@ class GameLoop:
             # (determine the age of old bullets to be deleted)
             self.air_table.time_s += self.air_table.dt_s
             
-            # Jello madness game timer
-            if self.air_table.jello_tangle_checking_enabled:
-                if (self.air_table.engine == "box2d"): self.air_table.tangle_checker_time_s += self.air_table.dt_s
-                if self.air_table.tangled:
-                    self.air_table.game_time_s += self.air_table.dt_s
-
         return demo_index

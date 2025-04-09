@@ -7,6 +7,7 @@ from pygame.color import THECOLORS
 from A09_vec2d import Vec2D
 from A15_air_table_objects import Puck, Spring
 from A15_game_loop import GameLoop
+from A15_pool_shots import pool_trick_shot, pool_line_of_balls
 import A15_globals as g
 
 #===========================================================
@@ -178,17 +179,18 @@ def make_some_pucks(demo):
             c_drag=spring_drag, c_damp=spring_damper, color=THECOLORS["gold"])
 
     elif demo == 7:
-        g.air_table.puckPopper_variations(two_drone_special__circular, custom_1=no_drone_custom1__circular)
+        g.air_table.puckPopper_variations(demo, two_drone_special__circular, custom_1=no_drone_custom1__circular)
         
     elif demo == 8:
         g.env.set_gravity("on")
-        g.air_table.throwJello_variations()
+        g.air_table.throwJello_variations(demo)
 
     elif demo == 9:
-        g.air_table.targetJello_variations()
+        g.air_table.targetJello_variations(demo)
 
     elif demo == 0:
-        g.air_table.pool_trick_shot()
+        g.env.set_gravity("off")
+        pool_trick_shot()
 
     else:
         print("Nothing set up for this key.")
