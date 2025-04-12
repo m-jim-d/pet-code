@@ -8,6 +8,7 @@ from A09_vec2d import Vec2D
 from A10_m_air_table_objects import Puck, Spring
 from A10_m_game_loop import GameLoop
 import A10_m_globals as g
+import A15_air_table
 from A15_pool_shots import pool_line_of_balls, pool_trick_shot
 
 #===========================================================
@@ -36,6 +37,7 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
     g.air_table.coef_rest = 1.00
     g.air_table.time_s = 0.0
 
+    g.air_table.inhibit_all_puck_collisions = False
     g.air_table.inhibit_wall_collisions = False
 
     # Each demo will have a single variation unless specified.
@@ -126,7 +128,11 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
         if customDemo7: 
             customDemo7()
         else:
+            Puck(Vec2D(1.00, 2.00),  0.4, 0.3, coef_rest=1.0)
             Puck(Vec2D(2.00, 3.00),  0.4, 0.3, coef_rest=1.0)
+            Puck(Vec2D(3.00, 4.00),  0.4, 0.3, coef_rest=1.0)
+            Puck(Vec2D(4.00, 5.00),  0.4, 0.3, coef_rest=1.0)
+            
             p1 = Puck(Vec2D(6.00, 7.00),  0.4, 0.3, coef_rest=1.0, color=THECOLORS["orange"])
             g.air_table.throw_puck(p1, Vec2D(-1, -1) * 5.0, delay_s=1.0)
 
@@ -145,6 +151,14 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
 
     elif demo == 9:
         pool_trick_shot()
+
+    elif demo == 0:
+        g.air_table.inhibit_all_puck_collisions = True
+        n_pucks = 500
+        base_v_2d_mps = Vec2D(1,1)
+        for i in range(n_pucks):
+            v_2d_mps = base_v_2d_mps.rotated(i * 360 / n_pucks)
+            Puck(g.game_window.center_2d_m, 0.1, 0.3, vel_2d_mps=v_2d_mps, coef_rest=1.0, border_px=0)
 
     else:
         print("Nothing set up for this key.")

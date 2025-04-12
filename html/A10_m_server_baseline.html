@@ -116,6 +116,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="kn">from</span> <span class="nn">A10_m_air_table_objects</span> <span class="kn">import</span> <span class="n">Puck</span><span class="p">,</span> <span class="n">Spring</span>
 <span class="kn">from</span> <span class="nn">A10_m_game_loop</span> <span class="kn">import</span> <span class="n">GameLoop</span>
 <span class="kn">import</span> <span class="nn">A10_m_globals</span> <span class="k">as</span> <span class="nn">g</span>
+<span class="kn">import</span> <span class="nn">A15_air_table</span>
 <span class="kn">from</span> <span class="nn">A15_pool_shots</span> <span class="kn">import</span> <span class="n">pool_line_of_balls</span><span class="p">,</span> <span class="n">pool_trick_shot</span>
 
 <span class="c1">#===========================================================</span>
@@ -144,6 +145,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">coef_rest</span> <span class="o">=</span> <span class="mf">1.00</span>
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">time_s</span> <span class="o">=</span> <span class="mf">0.0</span>
 
+    <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">inhibit_all_puck_collisions</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">inhibit_wall_collisions</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Each demo will have a single variation unless specified.</span>
@@ -234,7 +236,11 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="k">if</span> <span class="n">customDemo7</span><span class="p">:</span> 
             <span class="n">customDemo7</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">1.00</span><span class="p">,</span> <span class="mf">2.00</span><span class="p">),</span>  <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
             <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">2.00</span><span class="p">,</span> <span class="mf">3.00</span><span class="p">),</span>  <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">3.00</span><span class="p">,</span> <span class="mf">4.00</span><span class="p">),</span>  <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">4.00</span><span class="p">,</span> <span class="mf">5.00</span><span class="p">),</span>  <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            
             <span class="n">p1</span> <span class="o">=</span> <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">6.00</span><span class="p">,</span> <span class="mf">7.00</span><span class="p">),</span>  <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;orange&quot;</span><span class="p">])</span>
             <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">throw_puck</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">Vec2D</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">5.0</span><span class="p">,</span> <span class="n">delay_s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
 
@@ -253,6 +259,14 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
         <span class="n">pool_trick_shot</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">inhibit_all_puck_collisions</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">n_pucks</span> <span class="o">=</span> <span class="mi">500</span>
+        <span class="n">base_v_2d_mps</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_pucks</span><span class="p">):</span>
+            <span class="n">v_2d_mps</span> <span class="o">=</span> <span class="n">base_v_2d_mps</span><span class="o">.</span><span class="n">rotated</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">360</span> <span class="o">/</span> <span class="n">n_pucks</span><span class="p">)</span>
+            <span class="n">Puck</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">center_2d_m</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">vel_2d_mps</span><span class="o">=</span><span class="n">v_2d_mps</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">border_px</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing set up for this key.&quot;</span><span class="p">)</span>

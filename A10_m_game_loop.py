@@ -196,8 +196,8 @@ class GameLoop:
                 # Erase the blackboard.
                 if not self.env.inhibit_screen_clears:
                     if (not self.air_table.correct_for_puck_penetration):
-                        gray_level = 50
-                        self.game_window.surface.fill((gray_level,gray_level,gray_level))
+                        yellow_level = 50
+                        self.game_window.surface.fill((yellow_level,yellow_level,0))
                     else:
                         if not self.air_table.g_ON:
                             self.game_window.surface.fill((0,0,0))  # black
