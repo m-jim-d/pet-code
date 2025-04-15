@@ -7,7 +7,7 @@ from pygame.color import THECOLORS
 from A09_vec2d import Vec2D
 from A15_air_table_objects import Puck, Spring
 from A15_game_loop import GameLoop
-from A15_pool_shots import pool_trick_shot, pool_line_of_balls
+from A15_pool_shots import pool_trick_shot, pool_line_of_balls, burst_of_pucks
 import A15_globals as g
 
 #===========================================================
@@ -65,25 +65,21 @@ def no_drone_custom1__circular():
     set_off_m = radius_m + 0.5
     init_2d_m = Vec2D(set_off_m, set_off_m)
     g.air_table.buildControlledPuck(x_m=init_2d_m.x, y_m=init_2d_m.y, r_m=radius_m, client_name='local', sf_abs=False, c_drag=1.5)
-
-def make_some_pucks(demo):
+    
+def make_some_pucks(demo, specials=None):
     g.game_window.set_caption("Air-Table Server A15a     Demo #" + str(demo))
     g.env.timestep_fixed = False
 
-    # This removes all references to pucks and walls and effectively deletes them. 
+    # This removes all references to pucks and walls and effectively deletes them.
     for eachpuck in g.air_table.pucks[:]:
         eachpuck.delete()
-    if g.air_table.engine == "box2d":
-        for eachWall in g.air_table.walls[:]:
-            if not eachWall.fence:
-                eachWall.delete()
 
     # Most of the demos don't need the tangle checker.
     g.air_table.jello_tangle_checking_enabled = False
     
     # Make sure the throwing thread is not still running.
     g.air_table.delayed_throw = None
-        
+    
     # Now just black out the screen.
     g.game_window.clear()
 
@@ -91,19 +87,25 @@ def make_some_pucks(demo):
     g.env.tickCount = 0
     g.air_table.coef_rest = 1.00
     g.air_table.time_s = 0.0
-
+    
+    g.env.inhibit_screen_clears = False
     g.air_table.inhibit_wall_collisions = False
+    g.air_table.inhibit_all_puck_collisions = False
 
     # Each demo will have a single variation unless specified.
     g.env.demo_variations[demo]['count'] = 1
 
     g.env.set_gravity("off")
+    
+    g.air_table.resetFence()
+    
+    demo_in_specials = False
 
     if demo == 1:
         #    position       , r_m , density
         Puck(Vec2D(2.5, 7.5), 0.25, 0.3, color=THECOLORS["orange"])
         Puck(Vec2D(6.0, 2.5), 0.45, 0.3)
-        Puck(Vec2D(7.5, 2.5), 0.65, 0.3) 
+        Puck(Vec2D(7.5, 2.5), 0.65, 0.3)
         Puck(Vec2D(2.5, 5.5), 1.65, 0.3)
         Puck(Vec2D(7.5, 7.5), 0.95, 0.3)
     
@@ -187,13 +189,59 @@ def make_some_pucks(demo):
 
     elif demo == 9:
         g.air_table.targetJello_variations(demo)
-
+    
     elif demo == 0:
-        g.env.set_gravity("off")
-        pool_trick_shot()
+        initial_states = [
+            {'variation':'a'},
+
+            {'variation':'b', 'offset_percent':0},
+            {'variation':'b', 'offset_percent':10},
+            {'variation':'b', 'offset_percent':50},
+
+            {'variation':'c', 'n_pucks':8},
+            {'variation':'c', 'n_pucks':32},
+            {'variation':'c', 'n_pucks':64},
+            {'variation':'c', 'n_pucks':100},
+            {'variation':'c', 'n_pucks':500},
+            {'variation':'c', 'n_pucks':1000},
+            {'variation':'c', 'n_pucks':2000}
+        ]
+        g.env.demo_variations[demo]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[demo]['index']]
+        
+        extra_note = ""
+        
+        if state['variation'] == 'a':
+            g.air_table.inhibit_wall_collisions = True
+            g.env.set_gravity("off")
+            pool_trick_shot()
+
+            extra_note = "polygon setup"
+
+        elif state['variation'] == 'b':
+            g.air_table.inhibit_wall_collisions = True
+            g.env.set_gravity("off")
+            pool_line_of_balls(state['offset_percent'])
+
+            extra_note = f"offset % = {state['offset_percent']}"
+        
+        elif state['variation'] == 'c':
+            g.env.set_gravity("off")
+            g.air_table.makeSquareFence()
+
+            burst_of_pucks(state['n_pucks'])
+            extra_note = f"n_pucks = {state['n_pucks']}"
+
+        g.game_window.set_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo_variations[demo]['index'] + 1}    {extra_note}"
+        )
+        
+    elif specials:
+        demo_in_specials = specials(demo)
 
     else:
-        print("Nothing set up for this key.")
+        if not demo_in_specials: 
+            print("Nothing set up for this key.")
 
 #============================================================
 # main procedural script

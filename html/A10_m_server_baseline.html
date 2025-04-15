@@ -117,7 +117,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="kn">from</span> <span class="nn">A10_m_game_loop</span> <span class="kn">import</span> <span class="n">GameLoop</span>
 <span class="kn">import</span> <span class="nn">A10_m_globals</span> <span class="k">as</span> <span class="nn">g</span>
 <span class="kn">import</span> <span class="nn">A15_air_table</span>
-<span class="kn">from</span> <span class="nn">A15_pool_shots</span> <span class="kn">import</span> <span class="n">pool_line_of_balls</span><span class="p">,</span> <span class="n">pool_trick_shot</span>
+<span class="kn">from</span> <span class="nn">A15_pool_shots</span> <span class="kn">import</span> <span class="n">pool_line_of_balls</span><span class="p">,</span> <span class="n">pool_trick_shot</span><span class="p">,</span> <span class="n">burst_of_pucks</span>
 
 <span class="c1">#===========================================================</span>
 <span class="c1"># Functions</span>
@@ -152,6 +152,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">resetFence</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="c1">#    position       , r_m , density</span>
@@ -236,7 +238,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="k">if</span> <span class="n">customDemo7</span><span class="p">:</span> 
             <span class="n">customDemo7</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">1.00</span><span class="p">,</span> <span class="mf">2.00</span><span class="p">),</span>  <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">makeSquareFence</span><span class="p">()</span>
+            <span class="c1">#Puck(Vec2D(1.00, 2.00),  0.4, 0.3, coef_rest=1.0)</span>
             <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">2.00</span><span class="p">,</span> <span class="mf">3.00</span><span class="p">),</span>  <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
             <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">3.00</span><span class="p">,</span> <span class="mf">4.00</span><span class="p">),</span>  <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
             <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">4.00</span><span class="p">,</span> <span class="mf">5.00</span><span class="p">),</span>  <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
@@ -257,16 +260,34 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
         <span class="n">pool_line_of_balls</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;offset_percent&#39;</span><span class="p">])</span>
 
+        <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span> <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">caption</span> <span class="o">+</span> 
+            <span class="sa">f</span><span class="s2">&quot;     Variation </span><span class="si">{</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">     offset % = </span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;offset_percent&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">9</span><span class="p">:</span>
         <span class="n">pool_trick_shot</span><span class="p">()</span>
 
     <span class="k">elif</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">inhibit_all_puck_collisions</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">n_pucks</span> <span class="o">=</span> <span class="mi">500</span>
-        <span class="n">base_v_2d_mps</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_pucks</span><span class="p">):</span>
-            <span class="n">v_2d_mps</span> <span class="o">=</span> <span class="n">base_v_2d_mps</span><span class="o">.</span><span class="n">rotated</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">360</span> <span class="o">/</span> <span class="n">n_pucks</span><span class="p">)</span>
-            <span class="n">Puck</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">center_2d_m</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">vel_2d_mps</span><span class="o">=</span><span class="n">v_2d_mps</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">border_px</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">initial_states</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span> <span class="mi">32</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span> <span class="mi">8</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">}</span>
+        <span class="p">]</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_states</span><span class="p">)</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="n">initial_states</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]]</span>
+        
+        <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">makeSquareFence</span><span class="p">()</span>
+
+        <span class="n">burst_of_pucks</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">])</span>
+
+        <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span> <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">caption</span> <span class="o">+</span> 
+            <span class="sa">f</span><span class="s2">&quot;     Variation </span><span class="si">{</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">     n_pucks = </span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Nothing set up for this key.&quot;</span><span class="p">)</span>

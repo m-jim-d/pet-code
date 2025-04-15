@@ -9,7 +9,7 @@ from A10_m_air_table_objects import Puck, Spring
 from A10_m_game_loop import GameLoop
 import A10_m_globals as g
 import A15_air_table
-from A15_pool_shots import pool_line_of_balls, pool_trick_shot
+from A15_pool_shots import pool_line_of_balls, pool_trick_shot, burst_of_pucks
 
 #===========================================================
 # Functions
@@ -44,6 +44,8 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
     g.env.demo_variations[demo]['count'] = 1
 
     g.env.set_gravity("off")
+
+    g.air_table.resetFence()
 
     if demo == 1:
         #    position       , r_m , density
@@ -128,7 +130,8 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
         if customDemo7: 
             customDemo7()
         else:
-            Puck(Vec2D(1.00, 2.00),  0.4, 0.3, coef_rest=1.0)
+            g.air_table.makeSquareFence()
+            #Puck(Vec2D(1.00, 2.00),  0.4, 0.3, coef_rest=1.0)
             Puck(Vec2D(2.00, 3.00),  0.4, 0.3, coef_rest=1.0)
             Puck(Vec2D(3.00, 4.00),  0.4, 0.3, coef_rest=1.0)
             Puck(Vec2D(4.00, 5.00),  0.4, 0.3, coef_rest=1.0)
@@ -149,16 +152,34 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
 
         pool_line_of_balls(state['offset_percent'])
 
+        g.game_window.set_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo_variations[demo]['index'] + 1}     offset % = {state['offset_percent']}"
+        )
+
     elif demo == 9:
         pool_trick_shot()
 
     elif demo == 0:
-        g.air_table.inhibit_all_puck_collisions = True
-        n_pucks = 500
-        base_v_2d_mps = Vec2D(1,1)
-        for i in range(n_pucks):
-            v_2d_mps = base_v_2d_mps.rotated(i * 360 / n_pucks)
-            Puck(g.game_window.center_2d_m, 0.1, 0.3, vel_2d_mps=v_2d_mps, coef_rest=1.0, border_px=0)
+        initial_states = [
+            {'n_pucks': 500},
+            {'n_pucks': 100},
+            {'n_pucks': 32},
+            {'n_pucks': 16},
+            {'n_pucks': 8},
+            {'n_pucks': 4},
+            {'n_pucks': 2000},
+            {'n_pucks': 1000}
+        ]
+        g.env.demo_variations[demo]['count'] = len(initial_states)
+        state = initial_states[g.env.demo_variations[demo]['index']]
+        
+        g.air_table.makeSquareFence()
+
+        burst_of_pucks(state['n_pucks'])
+
+        g.game_window.set_caption( g.game_window.caption + 
+            f"     Variation {g.env.demo_variations[demo]['index'] + 1}     n_pucks = {state['n_pucks']}"
+        )
 
     else:
         print("Nothing set up for this key.")

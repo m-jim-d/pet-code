@@ -46,8 +46,8 @@ class GameLoop:
         self.make_some_pucks = make_some_pucks
 
         # Demos are best at an aspect ratio of 8/7.
-        aspect_ratio_wh = 8/7 # width/height
-        window_dimensions_px = (window_width_px, math.ceil(window_width_px / aspect_ratio_wh))
+        self.aspect_ratio_wh = 8/7 # width/height
+        window_dimensions_px = (window_width_px, math.ceil(window_width_px / self.aspect_ratio_wh))
         
         pygame.init()
         
@@ -55,7 +55,7 @@ class GameLoop:
         # The 10 parameter is in meters and indicates the the width of the world and establishes the
         # relationship between screen pixels and world meters. Similar to the aspect ratio, currently, the
         # positioning of the objects in the demos is best if this stays at 10.
-        self.env = Environment(window_dimensions_px, 10.0)
+        self.env = Environment(window_dimensions_px, 10.0, self.aspect_ratio_wh)
         g.env = self.env
 
         self.game_window = GameWindow('Air Table Server')

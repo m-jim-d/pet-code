@@ -9,7 +9,7 @@ from pygame.color import THECOLORS
 from A09_vec2d import Vec2D
 from A15_air_table_objects import Wall, Puck, Spring
 from A15_game_loop import GameLoop
-from A15_pool_shots import pool_trick_shot, pool_line_of_balls
+from A15_pool_shots import pool_trick_shot, pool_line_of_balls, burst_of_pucks
 import A15_globals as g
 
 #===========================================================
@@ -49,6 +49,8 @@ def make_some_pucks(demo):
 
     # Each demo will have a single variation unless specified.
     g.env.demo_variations[demo]['count'] = 1
+
+    g.air_table.resetFence()
 
     if demo == 1:
         g.env.set_gravity("off")
@@ -437,13 +439,21 @@ def make_some_pucks(demo):
             {'variation':'a'},
             {'variation':'b'},
             {'variation':'c'},
+            
             {'variation':'d', 'offset_percent':0},
             {'variation':'d', 'offset_percent':10},
-            {'variation':'d', 'offset_percent':50}
+            {'variation':'d', 'offset_percent':50},
+
+            {'variation':'e', 'n_pucks':8},
+            {'variation':'e', 'n_pucks':32},
+            {'variation':'e', 'n_pucks':64},
+            {'variation':'e', 'n_pucks':128}
         ]
         g.env.demo_variations[demo]['count'] = len(initial_states)
         state = initial_states[g.env.demo_variations[demo]['index']]
         
+        extra_note = ""
+
         if state['variation'] == 'a':
             g.air_table.buildFence(onoff={'L':True,'R':True,'T':False,'B':True})
             g.env.set_gravity("on")
@@ -513,9 +523,18 @@ def make_some_pucks(demo):
             g.air_table.buildFence(onoff={'L':False,'R':False,'T':False,'B':False})
             g.env.set_gravity("off")
             pool_line_of_balls(state['offset_percent'])
+            extra_note = f"offset_percent = {state['offset_percent']}"
+
+        elif state['variation'] == 'e':
+            g.env.set_gravity("off")
+            g.air_table.makeSquareFence()
+            g.air_table.buildFence(onoff={'L':True,'R':True,'T':True,'B':True})
+
+            burst_of_pucks(state['n_pucks'], speed_mps=3, radius_m=0.1)
+            extra_note = f"n_pucks = {state['n_pucks']}"
 
         g.game_window.set_caption( g.game_window.caption + 
-            f"     Variation {g.env.demo_variations[0]['index'] + 1}"
+            f"     Variation {g.env.demo_variations[demo]['index'] + 1}    {extra_note}"
         )
             
     else:

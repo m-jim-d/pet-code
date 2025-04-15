@@ -220,6 +220,32 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
               <span class="n">bullet</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">puck_parms</span><span class="p">)</span>
     
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">throw_puck</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">Vec2D</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">4.0</span><span class="p">,</span> <span class="n">delay_s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">burst_of_pucks</span><span class="p">(</span><span class="n">n_pucks</span><span class="p">,</span> <span class="n">speed_mps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">radius_m</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+    <span class="n">Puck</span><span class="p">,</span> <span class="n">g</span> <span class="o">=</span> <span class="n">get_Puck_and_g</span><span class="p">()</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">inhibit_all_puck_collisions</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">puck_parms</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;border_px&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s1">&#39;coef_rest&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="s1">&#39;CR_fixed&#39;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;box2d&#39;</span><span class="p">:</span>
+        <span class="n">puck_parms</span><span class="p">[</span><span class="s1">&#39;friction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">puck_parms</span><span class="p">[</span><span class="s1">&#39;friction_fixed&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">puck_parms</span><span class="p">[</span><span class="s1">&#39;angularVelocity_rps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">puck_parms</span><span class="p">[</span><span class="s1">&#39;groupIndex&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+    
+    <span class="n">base_v_2d_mps</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="n">speed_mps</span><span class="p">,</span> <span class="n">speed_mps</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_pucks</span><span class="p">):</span>
+        <span class="n">v_2d_mps</span> <span class="o">=</span> <span class="n">base_v_2d_mps</span><span class="o">.</span><span class="n">rotated</span><span class="p">(</span><span class="n">i</span> <span class="o">*</span> <span class="mi">360</span> <span class="o">/</span> <span class="n">n_pucks</span><span class="p">)</span>
+        <span class="n">Puck</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">center_2d_m</span><span class="p">,</span> <span class="n">radius_m</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">vel_2d_mps</span><span class="o">=</span><span class="n">v_2d_mps</span><span class="p">,</span>
+                <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s1">&#39;lavender&#39;</span><span class="p">],</span> <span class="o">**</span><span class="n">puck_parms</span><span class="p">)</span>
 </pre></div>
 </body>
 </html>

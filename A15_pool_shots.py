@@ -112,3 +112,29 @@ def pool_trick_shot():
               bullet=True, **puck_parms)
     
     g.air_table.throw_puck(p1, Vec2D(-1, 0) * 4.0, delay_s=1.0)
+
+def burst_of_pucks(n_pucks, speed_mps=1, radius_m=0.05):
+    Puck, g = get_Puck_and_g()
+
+    g.air_table.inhibit_all_puck_collisions = True
+
+    puck_parms = {
+        'border_px': 0,
+        'coef_rest': 1.0,
+        'CR_fixed': True
+    }
+
+    if g.air_table.engine == 'box2d':
+        puck_parms['friction'] = 0
+        puck_parms['friction_fixed'] = True
+        puck_parms['angularVelocity_rps'] = 0
+        puck_parms['groupIndex'] = -1
+        
+    else:
+        pass
+    
+    base_v_2d_mps = Vec2D(speed_mps, speed_mps)
+    for i in range(n_pucks):
+        v_2d_mps = base_v_2d_mps.rotated(i * 360 / n_pucks)
+        Puck(g.game_window.center_2d_m, radius_m, 1.5, vel_2d_mps=v_2d_mps,
+                color=THECOLORS['lavender'], **puck_parms)

@@ -263,7 +263,7 @@ class GameWindow:
 
 
 class Environment:
-    def __init__(self, screen_tuple_px, length_x_m):
+    def __init__(self, screen_tuple_px, length_x_m, aspect_ratio_wh):
         self.screenSize_2d_px = Vec2D(screen_tuple_px)
         self.viewOffset_2d_px = Vec2D(0,0)
         self.viewZoom = 1
@@ -272,6 +272,9 @@ class Environment:
         self.px_to_m = length_x_m/float(self.screenSize_2d_px.x)
         self.m_to_px = (float(self.screenSize_2d_px.x)/length_x_m)
         
+        self.length_x_m = length_x_m
+        self.aspect_ratio_wh = aspect_ratio_wh
+
         self.client_colors = setClientColors()
                               
         # Initialize the client dictionary with a local (non-network) client.
@@ -444,7 +447,10 @@ class Environment:
                     print("all translational speeds set to zero")
                 
                 elif (event.key==K_r):
-                    print("Feature is not available here. Mainly intended for use with PerfectKissAirTable, A15c.")
+                    # Reverse the velocity of all the pucks...
+                    for puck in g.air_table.pucks:
+                        puck.set_pos_and_vel(puck.pos_2d_m, puck.vel_2d_mps * (-1))
+                    print("puck velocities have been reversed")
 
                 elif (event.key==K_g):
                     # Toggle the logical flag for g.

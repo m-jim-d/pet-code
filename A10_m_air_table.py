@@ -46,7 +46,8 @@ class AirTable:
         
         self.springs = []
         
-        self.walls_dic = walls_dic
+        self.walls_dic_atBirth = walls_dic.copy()
+        self.walls_dic = walls_dic.copy()
         
         self.collision_count = 0
         self.coef_rest = 1.0
@@ -68,6 +69,15 @@ class AirTable:
         self.engine = "not yet established"
 
         self.delayed_throw = None
+
+    def resetFence(self):
+        self.walls_dic = self.walls_dic_atBirth.copy()
+
+    def makeSquareFence(self):
+        # Make a square fence.
+        xy_diff_m = (g.env.length_x_m - (g.env.length_x_m / g.env.aspect_ratio_wh))
+        self.walls_dic['L_m'] = 0 + (xy_diff_m / 2.0)
+        self.walls_dic['R_m'] = g.env.length_x_m - (xy_diff_m / 2.0)
 
     def throw_puck(self, puck, velocity_2d_mps, delay_s=1.0):
         def throw_it_later():
