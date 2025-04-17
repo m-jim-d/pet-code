@@ -165,7 +165,8 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
             {'n_pucks': 8},
             {'n_pucks': 16},
             {'n_pucks': 32},
-            {'n_pucks': 100},
+            {'n_pucks': 64},
+            {'n_pucks': 128},
             {'n_pucks': 500},
             {'n_pucks': 1000},
             {'n_pucks': 2000}

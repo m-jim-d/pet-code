@@ -31,9 +31,7 @@ def setup_pool_shot():
     Puck(Vec2D(4.0,                 4.30), 0.45, 0.3,                            coef_rest=1.0, CR_fixed=True, 
                vel_2d_mps=Vec2D(   0.0, 0.0))
     
-def make_some_pucks(demo):
-    g.game_window.set_caption("Perfect Kiss Air-Table Server A15c     Demo #" + str(demo))
-    
+def make_some_pucks(demo):    
     g.air_table.correct_for_wall_penetration = True
     g.air_table.correct_for_puck_penetration = True
     g.air_table.collision_count = 0
@@ -66,7 +64,7 @@ def make_some_pucks(demo):
         else:
             return False
 
-    A15a_make_some_pucks(demo, specials=demos_for_perfectKiss)
+    A15a_make_some_pucks(demo, specials=demos_for_perfectKiss, caption="A15c")
 
 #============================================================
 # main procedural script

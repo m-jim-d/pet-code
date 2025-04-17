@@ -195,14 +195,18 @@ class GameLoop:
             if (self.env.render_timer_s > self.env.dt_render_limit_s):
                 # Erase the blackboard.
                 if not self.env.inhibit_screen_clears:
-                    if (not self.air_table.correct_for_puck_penetration):
-                        yellow_level = 50
-                        self.game_window.surface.fill((yellow_level,yellow_level,0))
-                    else:
-                        if not self.air_table.g_ON:
-                            self.game_window.surface.fill((0,0,0))  # black
+                    if self.air_table.correct_for_puck_penetration:
+                        yellow_level = 20
+                        if self.air_table.g_ON:
+                            self.game_window.surface.fill((yellow_level,yellow_level,70)) # dark blue
                         else:
-                            self.game_window.surface.fill((20,20,70))  # dark blue
+                            self.game_window.surface.fill((0,0,0)) # black
+                    else:
+                        yellow_level = 40
+                        if self.air_table.g_ON:
+                            self.game_window.surface.fill((yellow_level,yellow_level,70)) # gray blue
+                        else:
+                            self.game_window.surface.fill((yellow_level,yellow_level,yellow_level)) # gray
 
                 # Display the physics cycle rate.
                 if self.air_table.FPS_display:

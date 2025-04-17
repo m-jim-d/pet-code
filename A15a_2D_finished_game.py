@@ -66,8 +66,8 @@ def no_drone_custom1__circular():
     init_2d_m = Vec2D(set_off_m, set_off_m)
     g.air_table.buildControlledPuck(x_m=init_2d_m.x, y_m=init_2d_m.y, r_m=radius_m, client_name='local', sf_abs=False, c_drag=1.5)
     
-def make_some_pucks(demo, specials=None):
-    g.game_window.set_caption("Air-Table Server A15a     Demo #" + str(demo))
+def make_some_pucks(demo, specials=None, caption="A15a"):
+    g.game_window.set_caption(f"Air-Table Server {caption} {g.air_table.engine}    Demo #" + str(demo))
     g.env.timestep_fixed = False
 
     # This removes all references to pucks and walls and effectively deletes them.
@@ -198,13 +198,17 @@ def make_some_pucks(demo, specials=None):
             {'variation':'b', 'offset_percent':10},
             {'variation':'b', 'offset_percent':50},
 
+            {'variation':'c', 'n_pucks':4},
             {'variation':'c', 'n_pucks':8},
+            {'variation':'c', 'n_pucks':16},
             {'variation':'c', 'n_pucks':32},
             {'variation':'c', 'n_pucks':64},
-            {'variation':'c', 'n_pucks':100},
+            {'variation':'c', 'n_pucks':128},
             {'variation':'c', 'n_pucks':500},
             {'variation':'c', 'n_pucks':1000},
-            {'variation':'c', 'n_pucks':2000}
+            {'variation':'c', 'n_pucks':2000},
+
+            {'variation':'d'}
         ]
         g.env.demo_variations[demo]['count'] = len(initial_states)
         state = initial_states[g.env.demo_variations[demo]['index']]
@@ -232,10 +236,29 @@ def make_some_pucks(demo, specials=None):
             burst_of_pucks(state['n_pucks'])
             extra_note = f"n_pucks = {state['n_pucks']}"
 
+        elif state['variation'] == 'd':
+            g.air_table.makeSquareFence()
+
+            radius_m = 0.4
+
+            x_m = g.game_window.center_2d_m.x
+            y_m = g.game_window.UR_2d_m.y - radius_m
+            cue_pos_2d_m = Vec2D(x_m, y_m)
+
+            p1 = Puck(cue_pos_2d_m, radius_m, 0.3, coef_rest=1.0, color=THECOLORS["orange"])
+            g.air_table.throw_puck(p1, Vec2D(-1, -1) * 5.0, delay_s=1.0)
+
+            # Group of target pucks
+            target_pos_2d_m = cue_pos_2d_m - Vec2D(2.00, 2.00)
+
+            for i in range(2):
+                Puck(target_pos_2d_m, radius_m, 0.3, coef_rest=1.0)
+                target_pos_2d_m -= Vec2D(1.00, 1.00)
+
         g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[demo]['index'] + 1}    {extra_note}"
         )
-        
+
     elif specials:
         demo_in_specials = specials(demo)
 

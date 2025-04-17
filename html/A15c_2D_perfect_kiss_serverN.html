@@ -139,9 +139,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">Puck</span><span class="p">(</span><span class="n">Vec2D</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span>                 <span class="mf">4.30</span><span class="p">),</span> <span class="mf">0.45</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span>                            <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">CR_fixed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
                <span class="n">vel_2d_mps</span><span class="o">=</span><span class="n">Vec2D</span><span class="p">(</span>   <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">))</span>
     
-<span class="k">def</span> <span class="nf">make_some_pucks</span><span class="p">(</span><span class="n">demo</span><span class="p">):</span>
-    <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="s2">&quot;Perfect Kiss Air-Table Server A15c     Demo #&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">demo</span><span class="p">))</span>
-    
+<span class="k">def</span> <span class="nf">make_some_pucks</span><span class="p">(</span><span class="n">demo</span><span class="p">):</span>    
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">correct_for_wall_penetration</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">correct_for_puck_penetration</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">collision_count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -174,7 +172,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="n">A15a_make_some_pucks</span><span class="p">(</span><span class="n">demo</span><span class="p">,</span> <span class="n">specials</span><span class="o">=</span><span class="n">demos_for_perfectKiss</span><span class="p">)</span>
+    <span class="n">A15a_make_some_pucks</span><span class="p">(</span><span class="n">demo</span><span class="p">,</span> <span class="n">specials</span><span class="o">=</span><span class="n">demos_for_perfectKiss</span><span class="p">,</span> <span class="n">caption</span><span class="o">=</span><span class="s2">&quot;A15c&quot;</span><span class="p">)</span>
 
 <span class="c1">#============================================================</span>
 <span class="c1"># main procedural script</span>
