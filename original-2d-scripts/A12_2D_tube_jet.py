@@ -2,6 +2,9 @@
 
 # Filename: A12_2D_tube_jet.py
 
+# Run from the parent directory.
+# python -m original-2d-scripts.A12_2D_tube_jet
+
 import sys
 import pygame
 import math

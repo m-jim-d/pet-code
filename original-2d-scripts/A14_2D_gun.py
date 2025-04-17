@@ -2,6 +2,9 @@
 
 # Filename: A14_2D_gun.py
 
+# Run from the parent directory.
+# python -m original-2d-scripts.A14_2D_gun
+
 import sys
 import pygame
 import math

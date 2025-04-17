@@ -2,6 +2,9 @@
 
 # Filename: A10_2D_baseline_server.py
 
+# Run from the parent directory.
+# python -m original-2d-scripts.A10_2D_baseline_server
+
 import sys
 import pygame
 import math

@@ -2,6 +2,9 @@
 
 # Filename: A13_2D_jet_forces.py
 
+# Run from the parent directory.
+# python -m original-2d-scripts.A13_2D_jet_forces
+
 import sys
 import pygame
 import math

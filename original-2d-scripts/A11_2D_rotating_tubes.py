@@ -2,6 +2,9 @@
 
 # Filename: A11_2D_rotating_tubes.py
 
+# Run from the parent directory.
+# python -m original-2d-scripts.A11_2D_rotating_tubes
+
 import sys
 import pygame
 import math
