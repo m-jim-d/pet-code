@@ -27,6 +27,8 @@ def make_some_pucks(demo):
     for eachWall in g.air_table.walls[:]:
         if not eachWall.fence:
             eachWall.delete()
+
+    g.air_table.resetFence()
     g.air_table.buildFence() # a complete perimeter fence
 
     # Most of the demos don't need the tangle checker.
@@ -49,8 +51,6 @@ def make_some_pucks(demo):
 
     # Each demo will have a single variation unless specified.
     g.env.demo_variations[demo]['count'] = 1
-
-    g.air_table.resetFence()
 
     if demo == 1:
         g.env.set_gravity("off")
@@ -447,7 +447,9 @@ def make_some_pucks(demo):
             {'variation':'e', 'n_pucks':8},
             {'variation':'e', 'n_pucks':32},
             {'variation':'e', 'n_pucks':64},
-            {'variation':'e', 'n_pucks':128}
+            {'variation':'e', 'n_pucks':128},
+
+            {'variation':'f'}
         ]
         g.env.demo_variations[demo]['count'] = len(initial_states)
         state = initial_states[g.env.demo_variations[demo]['index']]
@@ -532,6 +534,30 @@ def make_some_pucks(demo):
 
             burst_of_pucks(state['n_pucks'], speed_mps=3, radius_m=0.1)
             extra_note = f"n_pucks = {state['n_pucks']}"
+
+        elif state['variation'] == 'f':
+            g.env.set_gravity("off")
+            g.air_table.makeSquareFence()
+            g.air_table.buildFence(onoff={'L':True,'R':True,'T':True,'B':True})
+
+            radius_m = 0.4
+
+            x_m = g.game_window.center_2d_m.x
+            y_m = g.game_window.UR_2d_m.y - radius_m
+            cue_pos_2d_m = Vec2D(x_m, y_m)
+
+            # Now adjust the cue ball position so that it is not touching the wall.
+            cue_pos_2d_m -= Vec2D(0.1, 0.1)
+
+            p1 = Puck(cue_pos_2d_m, radius_m, 0.3, coef_rest=1.0, friction=0.0, color=THECOLORS["orange"], showSpoke=False)
+            g.air_table.throw_puck(p1, Vec2D(-1, -1) * 2.0, delay_s=1.0)
+
+            # Group of target pucks
+            target_pos_2d_m = cue_pos_2d_m - Vec2D(2.00, 2.00)
+
+            for i in range(2):
+                Puck(target_pos_2d_m, radius_m, 0.3, coef_rest=1.0, friction=0.0, showSpoke=False)
+                target_pos_2d_m -= Vec2D(1.00, 1.00)
 
         g.game_window.set_caption( g.game_window.caption + 
             f"     Variation {g.env.demo_variations[demo]['index'] + 1}    {extra_note}"

@@ -40,6 +40,10 @@ class AirTable:
         self.g_2d_mps2 = self.gOFF_2d_mps2
         self.g_ON = False
         
+        # For pucks that don't have fixed restitutions, this sets a limit for their
+        # restitution when gravity is toggled on.
+        self.gON_coef_rest_max = 0.85
+        
         self.pucks = []
         self.raw_tubes = []
         self.controlled_pucks = []

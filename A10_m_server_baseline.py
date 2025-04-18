@@ -131,13 +131,25 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
             customDemo7()
         else:
             g.air_table.makeSquareFence()
-            #Puck(Vec2D(1.00, 2.00),  0.4, 0.3, coef_rest=1.0)
-            Puck(Vec2D(2.00, 3.00),  0.4, 0.3, coef_rest=1.0)
-            Puck(Vec2D(3.00, 4.00),  0.4, 0.3, coef_rest=1.0)
-            Puck(Vec2D(4.00, 5.00),  0.4, 0.3, coef_rest=1.0)
-            
-            p1 = Puck(Vec2D(6.00, 7.00),  0.4, 0.3, coef_rest=1.0, color=THECOLORS["orange"])
-            g.air_table.throw_puck(p1, Vec2D(-1, -1) * 5.0, delay_s=1.0)
+
+            radius_m = 0.4
+
+            x_m = g.game_window.center_2d_m.x
+            y_m = g.game_window.UR_2d_m.y - radius_m
+            cue_pos_2d_m = Vec2D(x_m, y_m)
+
+            # Now adjust the cue ball position so that it is not touching the wall.
+            cue_pos_2d_m -= Vec2D(0.1, 0.1)
+
+            p1 = Puck(cue_pos_2d_m, radius_m, 0.3, coef_rest=1.0, color=THECOLORS["orange"])
+            g.air_table.throw_puck(p1, Vec2D(-1, -1) * 3.0, delay_s=1.0)
+
+            # Group of target pucks
+            target_pos_2d_m = cue_pos_2d_m - Vec2D(2.00, 2.00)
+
+            for i in range(2):
+                Puck(target_pos_2d_m, radius_m, 0.3, coef_rest=1.0)
+                target_pos_2d_m -= Vec2D(1.00, 1.00)
 
     elif demo == 8:
         initial_states = [

@@ -39,6 +39,10 @@ class AirTable:
         self.gOFF_2d_mps2 = Vec2D(-0.0, -0.0)
         self.g_2d_mps2 = self.gOFF_2d_mps2
         self.g_ON = False
+
+        # For pucks that don't have fixed restitutions, this sets a limit for their
+        # restitution when gravity is toggled on.
+        self.gON_coef_rest_max = 0.85
         
         self.pucks = []
         self.controlled_pucks = []
@@ -912,7 +916,7 @@ class Box2DAirTable(AirTable):
         fenceColor = THECOLORS['orangered1']
         border_px = 2
         # A nudge of 1 pixel is applied to top and left walls to keep them out of view.
-        nudge_m = g.env.px_to_m * 1 
+        nudge_m = g.env.px_to_m * 1 # 1; 0 for no nudge
         # Left and right walls
         if onoff['L']: 
             Wall( Vec2D( self.walls_dic["L_m"] - (width_m + nudge_m), self.walls_dic["T_m"]/2.0), 

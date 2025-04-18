@@ -135,6 +135,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="k">for</span> <span class="n">eachWall</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">walls</span><span class="p">[:]:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">eachWall</span><span class="o">.</span><span class="n">fence</span><span class="p">:</span>
             <span class="n">eachWall</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+    <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">resetFence</span><span class="p">()</span>
     <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildFence</span><span class="p">()</span> <span class="c1"># a complete perimeter fence</span>
 
     <span class="c1"># Most of the demos don&#39;t need the tangle checker.</span>
@@ -157,8 +159,6 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
     <span class="c1"># Each demo will have a single variation unless specified.</span>
     <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-
-    <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">resetFence</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">demo</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
@@ -555,7 +555,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
             <span class="p">{</span><span class="s1">&#39;variation&#39;</span><span class="p">:</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span><span class="mi">8</span><span class="p">},</span>
             <span class="p">{</span><span class="s1">&#39;variation&#39;</span><span class="p">:</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span><span class="mi">32</span><span class="p">},</span>
             <span class="p">{</span><span class="s1">&#39;variation&#39;</span><span class="p">:</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span><span class="mi">64</span><span class="p">},</span>
-            <span class="p">{</span><span class="s1">&#39;variation&#39;</span><span class="p">:</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span><span class="mi">128</span><span class="p">}</span>
+            <span class="p">{</span><span class="s1">&#39;variation&#39;</span><span class="p">:</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;n_pucks&#39;</span><span class="p">:</span><span class="mi">128</span><span class="p">},</span>
+
+            <span class="p">{</span><span class="s1">&#39;variation&#39;</span><span class="p">:</span><span class="s1">&#39;f&#39;</span><span class="p">}</span>
         <span class="p">]</span>
         <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">initial_states</span><span class="p">)</span>
         <span class="n">state</span> <span class="o">=</span> <span class="n">initial_states</span><span class="p">[</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]]</span>
@@ -640,6 +642,30 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
             <span class="n">burst_of_pucks</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">],</span> <span class="n">speed_mps</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">radius_m</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
             <span class="n">extra_note</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;n_pucks = </span><span class="si">{</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;n_pucks&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="k">elif</span> <span class="n">state</span><span class="p">[</span><span class="s1">&#39;variation&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">set_gravity</span><span class="p">(</span><span class="s2">&quot;off&quot;</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">makeSquareFence</span><span class="p">()</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">buildFence</span><span class="p">(</span><span class="n">onoff</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;L&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span><span class="s1">&#39;T&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">})</span>
+
+            <span class="n">radius_m</span> <span class="o">=</span> <span class="mf">0.4</span>
+
+            <span class="n">x_m</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">center_2d_m</span><span class="o">.</span><span class="n">x</span>
+            <span class="n">y_m</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">UR_2d_m</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">radius_m</span>
+            <span class="n">cue_pos_2d_m</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="n">x_m</span><span class="p">,</span> <span class="n">y_m</span><span class="p">)</span>
+
+            <span class="c1"># Now adjust the cue ball position so that it is not touching the wall.</span>
+            <span class="n">cue_pos_2d_m</span> <span class="o">-=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+
+            <span class="n">p1</span> <span class="o">=</span> <span class="n">Puck</span><span class="p">(</span><span class="n">cue_pos_2d_m</span><span class="p">,</span> <span class="n">radius_m</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">friction</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;orange&quot;</span><span class="p">],</span> <span class="n">showSpoke</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">air_table</span><span class="o">.</span><span class="n">throw_puck</span><span class="p">(</span><span class="n">p1</span><span class="p">,</span> <span class="n">Vec2D</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">delay_s</span><span class="o">=</span><span class="mf">1.0</span><span class="p">)</span>
+
+            <span class="c1"># Group of target pucks</span>
+            <span class="n">target_pos_2d_m</span> <span class="o">=</span> <span class="n">cue_pos_2d_m</span> <span class="o">-</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mf">2.00</span><span class="p">,</span> <span class="mf">2.00</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                <span class="n">Puck</span><span class="p">(</span><span class="n">target_pos_2d_m</span><span class="p">,</span> <span class="n">radius_m</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">coef_rest</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">friction</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">showSpoke</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">target_pos_2d_m</span> <span class="o">-=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="mf">1.00</span><span class="p">,</span> <span class="mf">1.00</span><span class="p">)</span>
 
         <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span> <span class="n">g</span><span class="o">.</span><span class="n">game_window</span><span class="o">.</span><span class="n">caption</span> <span class="o">+</span> 
             <span class="sa">f</span><span class="s2">&quot;     Variation </span><span class="si">{</span><span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">demo_variations</span><span class="p">[</span><span class="n">demo</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">    </span><span class="si">{</span><span class="n">extra_note</span><span class="si">}</span><span class="s2">&quot;</span>

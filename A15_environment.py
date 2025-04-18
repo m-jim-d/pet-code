@@ -439,7 +439,7 @@ class Environment:
         
         self.length_x_m = length_x_m
         self.aspect_ratio_wh = aspect_ratio_wh
-        
+
         self.client_colors = setClientColors()
                               
         # Initialize the client dictionary with a local (non-network) client.
@@ -551,9 +551,9 @@ class Environment:
             g.air_table.g_2d_mps2 = g.air_table.gON_2d_mps2
             for each_puck in g.air_table.pucks:
                 if not each_puck.CR_fixed:
-                    each_puck.coef_rest = each_puck.coef_rest_atBirth
+                    each_puck.coef_rest = min(each_puck.coef_rest_atBirth, g.air_table.gON_coef_rest_max)
                     if each_puck.b2d_body:
-                        each_puck.b2d_body.fixtures[0].restitution = each_puck.coef_rest_atBirth
+                        each_puck.b2d_body.fixtures[0].restitution = min(each_puck.coef_rest_atBirth,  g.air_table.gON_coef_rest_max)
 
                 # Box2d only
                 if not each_puck.friction_fixed:
@@ -692,6 +692,12 @@ class Environment:
                 # Jet keys
                 elif (event.key==K_a):
                     local_user.key_a = 'D'
+                    
+                    if local_user.key_shift == 'D':
+                        for puck in g.air_table.pucks[:]:
+                            if (puck.selected):
+                                print(f"coef rest = {puck.coef_rest}")
+                    
                 elif (event.key==K_s):
                     local_user.key_s = 'D'
                 elif (event.key==K_d):

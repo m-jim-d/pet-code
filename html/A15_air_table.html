@@ -147,6 +147,10 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="bp">self</span><span class="o">.</span><span class="n">gOFF_2d_mps2</span> <span class="o">=</span> <span class="n">Vec2D</span><span class="p">(</span><span class="o">-</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">g_2d_mps2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gOFF_2d_mps2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">g_ON</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># For pucks that don&#39;t have fixed restitutions, this sets a limit for their</span>
+        <span class="c1"># restitution when gravity is toggled on.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gON_coef_rest_max</span> <span class="o">=</span> <span class="mf">0.85</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">pucks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">controlled_pucks</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1020,7 +1024,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         <span class="n">fenceColor</span> <span class="o">=</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s1">&#39;orangered1&#39;</span><span class="p">]</span>
         <span class="n">border_px</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="c1"># A nudge of 1 pixel is applied to top and left walls to keep them out of view.</span>
-        <span class="n">nudge_m</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">px_to_m</span> <span class="o">*</span> <span class="mi">1</span> 
+        <span class="n">nudge_m</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">px_to_m</span> <span class="o">*</span> <span class="mi">1</span> <span class="c1"># 1; 0 for no nudge</span>
         <span class="c1"># Left and right walls</span>
         <span class="k">if</span> <span class="n">onoff</span><span class="p">[</span><span class="s1">&#39;L&#39;</span><span class="p">]:</span> 
             <span class="n">Wall</span><span class="p">(</span> <span class="n">Vec2D</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls_dic</span><span class="p">[</span><span class="s2">&quot;L_m&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">width_m</span> <span class="o">+</span> <span class="n">nudge_m</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls_dic</span><span class="p">[</span><span class="s2">&quot;T_m&quot;</span><span class="p">]</span><span class="o">/</span><span class="mf">2.0</span><span class="p">),</span> 

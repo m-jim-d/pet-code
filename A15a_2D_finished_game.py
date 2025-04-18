@@ -70,9 +70,11 @@ def make_some_pucks(demo, specials=None, caption="A15a"):
     g.game_window.set_caption(f"Air-Table Server {caption} {g.air_table.engine}    Demo #" + str(demo))
     g.env.timestep_fixed = False
 
-    # This removes all references to pucks and walls and effectively deletes them.
+    # This removes all references to pucks and effectively deletes them.
     for eachpuck in g.air_table.pucks[:]:
         eachpuck.delete()
+
+    g.air_table.resetFence()
 
     # Most of the demos don't need the tangle checker.
     g.air_table.jello_tangle_checking_enabled = False
@@ -96,8 +98,6 @@ def make_some_pucks(demo, specials=None, caption="A15a"):
     g.env.demo_variations[demo]['count'] = 1
 
     g.env.set_gravity("off")
-    
-    g.air_table.resetFence()
     
     demo_in_specials = False
 
@@ -245,8 +245,11 @@ def make_some_pucks(demo, specials=None, caption="A15a"):
             y_m = g.game_window.UR_2d_m.y - radius_m
             cue_pos_2d_m = Vec2D(x_m, y_m)
 
+            # Now adjust the cue ball position so that it is not touching the wall.
+            cue_pos_2d_m -= Vec2D(0.1, 0.1)
+
             p1 = Puck(cue_pos_2d_m, radius_m, 0.3, coef_rest=1.0, color=THECOLORS["orange"])
-            g.air_table.throw_puck(p1, Vec2D(-1, -1) * 5.0, delay_s=1.0)
+            g.air_table.throw_puck(p1, Vec2D(-1, -1) * 2.0, delay_s=1.0)
 
             # Group of target pucks
             target_pos_2d_m = cue_pos_2d_m - Vec2D(2.00, 2.00)
