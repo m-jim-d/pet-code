@@ -48,12 +48,28 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
     g.air_table.resetFence()
 
     if demo == 1:
+        puck_parms = {
+            'border_px': 2,
+            'coef_rest': 1.0
+        }
+
+        group1_v_2d_mps = Vec2D(0,-1.0)
         #    position       , r_m , density
-        Puck(Vec2D(2.5, 7.5), 0.25, 0.3, color=THECOLORS["orange"])
-        Puck(Vec2D(6.0, 2.5), 0.45, 0.3)
-        Puck(Vec2D(7.5, 2.5), 0.65, 0.3) 
-        Puck(Vec2D(2.5, 5.5), 1.65, 0.3)
-        Puck(Vec2D(7.5, 7.5), 0.95, 0.3)
+        Puck(Vec2D(2.5, 7.5), 0.25, 0.3, vel_2d_mps=group1_v_2d_mps, **puck_parms, color=THECOLORS["orange"])
+        Puck(Vec2D(2.5, 5.5), 1.65, 0.3, vel_2d_mps=group1_v_2d_mps, **puck_parms)
+
+        Puck(Vec2D(6.0, g.game_window.UR_2d_m.y - 0.30), 0.25, 0.3, vel_2d_mps=Vec2D(-0.105,0), **puck_parms)
+        
+        group2_v_2d_mps = Vec2D(0, 1.0)
+        Puck(Vec2D(6.0, 1.5), 0.40, 0.3, vel_2d_mps=group2_v_2d_mps, **puck_parms)
+        Puck(Vec2D(6.0, 3.0), 0.20, 0.3, vel_2d_mps=group2_v_2d_mps, **puck_parms)
+        Puck(Vec2D(6.0, 4.5), 0.10, 0.3, vel_2d_mps=group2_v_2d_mps, **puck_parms)
+        
+        group3_v_2d_mps = Vec2D(0, 2.0)
+        Puck(Vec2D(8.5, 1.0), 0.40, 0.3, vel_2d_mps=group3_v_2d_mps, **puck_parms)
+        Puck(Vec2D(8.5, 2.2), 0.40, 0.3, vel_2d_mps=group3_v_2d_mps, **puck_parms)
+        Puck(Vec2D(8.5, 3.4), 0.40, 0.3, vel_2d_mps=group3_v_2d_mps, **puck_parms)
+        Puck(Vec2D(8.5, 4.6), 0.40, 0.3, vel_2d_mps=group3_v_2d_mps, **puck_parms)
     
     elif demo == 2:
         spacing_factor = 2.0
@@ -91,7 +107,7 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
                 
                 Puck(Vec2D(spacing_factor*(j+1), spacing_factor*(k+1)), radius_m=0.25, density_kgpm2=1.0, 
                            color=puck_color_value,
-                           CR_fixed=False, coef_rest=0.9)
+                           CR_fixed=False, coef_rest=0.85)
     
     elif demo == 5:
         p1 = Puck(Vec2D(2.00, 3.00),  0.4, 0.3)

@@ -24,7 +24,9 @@ from typing import Union, Tuple
 
 import pygame
 from pygame.color import THECOLORS
-from Box2D import (b2World, b2Vec2, b2_dynamicBody, b2AABB, b2QueryCallback, b2ContactListener)
+import Box2D
+from Box2D import (b2World, b2Vec2, b2_dynamicBody, b2AABB, b2QueryCallback, 
+                   b2ContactListener)
 
 # Vector class
 from A09_vec2d import Vec2D
@@ -906,6 +908,8 @@ class Box2DAirTable(AirTable):
 
         # Create the Box2D world
         self.b2d_world = b2World(gravity=(-0.0, -0.0), doSleep=True, contactListener=myContactListener(self))
+
+        print("pybox2d version: ", Box2D.__version__)
 
     def buildFence(self, onoff={'L':True,'R':True,'T':True,'B':True}):
         for eachWall in self.walls[:]:
