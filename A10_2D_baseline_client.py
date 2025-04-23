@@ -2,7 +2,7 @@
 
 # Filename: A10_2D_baseline_client.py
 
-import sys, os, time
+import sys, os, time, platform
 import pygame
 
 # PyGame Constants
@@ -35,9 +35,27 @@ def update_client_window():
         if client.running:
             print(f"Screen dimensions from server: {client.window_xy_px}")
     
-    # Update window caption
+    # Update window caption with Linux compatibility
     if client.running and client.client_name is not None:
-        pygame.display.set_caption("Client: " + client.client_name)
+        caption = "Client: " + client.client_name
+        # Try standard Pygame method
+        pygame.display.set_caption(caption)
+        
+        # Additional Linux-specific window title update
+        if platform.system() == 'Linux':
+            try:
+                # Try to get the X11 display and window
+                if 'DISPLAY' in os.environ:  # Only try X11 if running in X environment
+                    import Xlib.display
+                    x_display = Xlib.display.Display()
+                    x_window = x_display.get_input_focus().focus
+                    if x_window:
+                        x_window.set_wm_name(caption)
+                        x_display.sync()
+            except ImportError:
+                print("Import error. Try this: 'pip install python-xlib'.")
+            except Exception:
+                pass  # Any other X11 related error
 
 def checkforUserInput(client_state):
     global backGroundColor
