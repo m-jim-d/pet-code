@@ -27,7 +27,20 @@ from A08_network import GameClient, RunningAvg, setClientColors
 def signoff(client_state):
     sys.exit()
     
+def update_client_window():
+    global mydisplay
+    # Update window dimensions if needed
+    if client.window_xy_px != mydisplay.get_size():
+        mydisplay = pygame.display.set_mode(client.window_xy_px)
+        if client.running:
+            print(f"Screen dimensions from server: {client.window_xy_px}")
+    
+    # Update window caption
+    if client.running and client.client_name is not None:
+        pygame.display.set_caption("Client: " + client.client_name)
+
 def checkforUserInput(client_state):
+    global backGroundColor
     
     # Get all the events since the last call to get().
     for event in pygame.event.get():
@@ -38,14 +51,24 @@ def checkforUserInput(client_state):
                 signoff(client_state)
             
             elif (event.key==K_c):
-                mydisplay.fill(THECOLORS["yellow"])  
+                if client_state['lrs'] == 'D':
+                    if not client.running:
+                        if client.reconnect():
+                            update_client_window()
+                            # Update client ID in state
+                            client_state['ID'] = client.id
+                else:
+                    if (backGroundColor == THECOLORS["black"]):
+                        backGroundColor = THECOLORS["darkslategray"]
+                    else:
+                        backGroundColor = THECOLORS["black"]
             
-            elif (event.key==K_1):            
+            elif (event.key==K_1):
                 return 1
-            elif (event.key==K_2):                          
+            elif (event.key==K_2):
                 return 2
             elif (event.key==K_3):
-                return 3   
+                return 3
             
             elif (event.key==K_a):
                 client_state['a'] = 'D'
@@ -69,6 +92,7 @@ def checkforUserInput(client_state):
                 
             elif (event.key==K_LSHIFT or event.key==K_RSHIFT):
                 client_state['lrs'] = 'D' # left or right shift key
+
             elif (event.key==K_TAB and (client_state['lrs'] == 'D')):
                 if (client_state['socl'] == 'T'):
                     client_state['socl'] = 'F' # select-off-center lock
@@ -132,7 +156,7 @@ def checkforUserInput(client_state):
 #=======================================================================
 
 def main():
-    global mydisplay
+    global mydisplay, client, backGroundColor
 
     # Parse parameters provided in the command line.
     # This description string (and parameter help) gets displayed if help is requested (-h added after the filename).
@@ -147,6 +171,7 @@ def main():
     pygame.init()
 
     client_colors = setClientColors()
+    backGroundColor = THECOLORS["black"]
 
     # Clock to control the framerate.
     myclock = pygame.time.Clock()
@@ -154,15 +179,8 @@ def main():
     client = GameClient( host=args.serverIP, port=8888)
     client.connect()
 
-    # If the connection fails, the client's default window dimensions are used.
     mydisplay = pygame.display.set_mode(client.window_xy_px)
-    if client.running:
-        print(f"Screen dimensions from server: {client.window_xy_px}")
-    else:
-        print(f"Default dimensions for client: {client.window_xy_px}")
-
-    if client.running and client.client_name is not None:
-        pygame.display.set_caption( "Client: " + client.client_name)
+    update_client_window()
 
     # Initialize client state dictionary.
     client_state = {'ID': client.id,
@@ -194,7 +212,7 @@ def main():
         
         if (flip_timer > 0.2):
             # Background
-            mydisplay.fill( THECOLORS["black"])
+            mydisplay.fill( backGroundColor)
             
             fr_avg.draw( mydisplay, 150, 50)
                         

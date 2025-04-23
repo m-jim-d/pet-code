@@ -234,6 +234,31 @@ class GameServer:
         for client_socket in list(self.clients.keys()):
             self.remove_client(client_socket)
         self.server_socket.close()
+        
+    def disconnect_all_network_clients(self):
+        """
+        Disconnect all currently connected network clients.
+        
+        This will:
+        1. Close each client's socket
+        2. Remove client from the clients dictionary
+        3. Call signInOut_function if provided
+        
+        Note: Client handler threads will detect the closed socket and
+        clean up their resources automatically.
+        """
+        # Make a copy of keys since we'll be modifying the dictionary
+        client_sockets = list(self.clients.keys())
+        for client_socket in client_sockets:
+            if client_socket != self.server_socket:  # Don't remove the server socket
+                try:
+                    client_socket.close()  # Just close the socket
+                except:
+                    pass  # Socket might already be closed
+        
+        # Reset client counter since all clients are disconnected
+        self.client_counter = 0
+        print("All network clients disconnected")
 
 
 class GameClient:
@@ -290,6 +315,28 @@ class GameClient:
             print(f"Connection failed: {e}")
             return False
     
+    def reconnect(self):
+        """
+        Reconnect to server after server restart.
+        
+        Cleans up old socket and creates a fresh connection.
+        Useful when server has been restarted and client needs to reconnect.
+        
+        Returns:
+            bool: True if reconnection successful, False otherwise
+        """
+        try:
+            # Clean up old socket
+            self.client_socket.close()
+        except:
+            pass  # Socket might already be closed
+            
+        # Create fresh socket
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.running = False
+        return self.connect()
+
     def send_state(self, state):
         """
         Serialize and send client's current input state to server

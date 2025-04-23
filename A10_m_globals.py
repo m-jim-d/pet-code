@@ -24,3 +24,4 @@ after their initial setup by GameLoop.
 env = None
 game_window = None
 air_table = None
+game_loop = None

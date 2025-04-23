@@ -572,6 +572,7 @@ def make_some_pucks(demo):
 
 def main():
     game_loop = GameLoop(engine_type="box2d", window_width_px=900, make_some_pucks=make_some_pucks)
+    g.game_loop = game_loop
     game_loop.start(demo_index=7)
 
 #============================================================

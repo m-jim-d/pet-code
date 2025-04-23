@@ -701,7 +701,10 @@ class Environment:
                 elif (event.key==K_s):
                     local_user.key_s = 'D'
                 elif (event.key==K_d):
-                    local_user.key_d = 'D'
+                    if local_user.key_shift == 'D' and local_user.key_ctrl == 'D':
+                        g.game_loop.server.disconnect_all_network_clients()
+                    else:
+                        local_user.key_d = 'D'
                 elif (event.key==K_w):
                     local_user.key_w = 'D'
                 
