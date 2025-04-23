@@ -110,7 +110,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
 <span class="c1"># Filename: A10_2D_baseline_client.py</span>
 
-<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">platform</span>
 <span class="kn">import</span> <span class="nn">pygame</span>
 
 <span class="c1"># PyGame Constants</span>
@@ -135,7 +135,38 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="k">def</span> <span class="nf">signoff</span><span class="p">(</span><span class="n">client_state</span><span class="p">):</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
     
+<span class="k">def</span> <span class="nf">update_client_window</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">mydisplay</span>
+    <span class="c1"># Update window dimensions if needed</span>
+    <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span> <span class="o">!=</span> <span class="n">mydisplay</span><span class="o">.</span><span class="n">get_size</span><span class="p">():</span>
+        <span class="n">mydisplay</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Screen dimensions from server: </span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+    <span class="c1"># Update window caption with Linux compatibility</span>
+    <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">running</span> <span class="ow">and</span> <span class="n">client</span><span class="o">.</span><span class="n">client_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">caption</span> <span class="o">=</span> <span class="s2">&quot;Client: &quot;</span> <span class="o">+</span> <span class="n">client</span><span class="o">.</span><span class="n">client_name</span>
+        <span class="c1"># Try standard Pygame method</span>
+        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span><span class="n">caption</span><span class="p">)</span>
+        
+        <span class="c1"># Additional Linux-specific window title update</span>
+        <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Linux&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Try to get the X11 display and window</span>
+                <span class="k">if</span> <span class="s1">&#39;DISPLAY&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>  <span class="c1"># Only try X11 if running in X environment</span>
+                    <span class="kn">import</span> <span class="nn">Xlib.display</span>
+                    <span class="n">x_display</span> <span class="o">=</span> <span class="n">Xlib</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">Display</span><span class="p">()</span>
+                    <span class="n">x_window</span> <span class="o">=</span> <span class="n">x_display</span><span class="o">.</span><span class="n">get_input_focus</span><span class="p">()</span><span class="o">.</span><span class="n">focus</span>
+                    <span class="k">if</span> <span class="n">x_window</span><span class="p">:</span>
+                        <span class="n">x_window</span><span class="o">.</span><span class="n">set_wm_name</span><span class="p">(</span><span class="n">caption</span><span class="p">)</span>
+                        <span class="n">x_display</span><span class="o">.</span><span class="n">sync</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Import error. Try this: &#39;pip install python-xlib&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># Any other X11 related error</span>
+
 <span class="k">def</span> <span class="nf">checkforUserInput</span><span class="p">(</span><span class="n">client_state</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">backGroundColor</span>
     
     <span class="c1"># Get all the events since the last call to get().</span>
     <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">pygame</span><span class="o">.</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">():</span>
@@ -146,14 +177,24 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="n">signoff</span><span class="p">(</span><span class="n">client_state</span><span class="p">)</span>
             
             <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_c</span><span class="p">):</span>
-                <span class="n">mydisplay</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;yellow&quot;</span><span class="p">])</span>  
+                <span class="k">if</span> <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;lrs&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">client</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">reconnect</span><span class="p">():</span>
+                            <span class="n">update_client_window</span><span class="p">()</span>
+                            <span class="c1"># Update client ID in state</span>
+                            <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;ID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">id</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">backGroundColor</span> <span class="o">==</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">]):</span>
+                        <span class="n">backGroundColor</span> <span class="o">=</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;darkslategray&quot;</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">backGroundColor</span> <span class="o">=</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">]</span>
             
-            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_1</span><span class="p">):</span>            
+            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_1</span><span class="p">):</span>
                 <span class="k">return</span> <span class="mi">1</span>
-            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_2</span><span class="p">):</span>                          
+            <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_2</span><span class="p">):</span>
                 <span class="k">return</span> <span class="mi">2</span>
             <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_3</span><span class="p">):</span>
-                <span class="k">return</span> <span class="mi">3</span>   
+                <span class="k">return</span> <span class="mi">3</span>
             
             <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_a</span><span class="p">):</span>
                 <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
@@ -177,6 +218,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 
             <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_LSHIFT</span> <span class="ow">or</span> <span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_RSHIFT</span><span class="p">):</span>
                 <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;lrs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span> <span class="c1"># left or right shift key</span>
+
             <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_TAB</span> <span class="ow">and</span> <span class="p">(</span><span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;lrs&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="p">(</span><span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;socl&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;T&#39;</span><span class="p">):</span>
                     <span class="n">client_state</span><span class="p">[</span><span class="s1">&#39;socl&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span> <span class="c1"># select-off-center lock</span>
@@ -240,7 +282,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="c1">#=======================================================================</span>
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="k">global</span> <span class="n">mydisplay</span>
+    <span class="k">global</span> <span class="n">mydisplay</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">backGroundColor</span>
 
     <span class="c1"># Parse parameters provided in the command line.</span>
     <span class="c1"># This description string (and parameter help) gets displayed if help is requested (-h added after the filename).</span>
@@ -255,6 +297,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">pygame</span><span class="o">.</span><span class="n">init</span><span class="p">()</span>
 
     <span class="n">client_colors</span> <span class="o">=</span> <span class="n">setClientColors</span><span class="p">()</span>
+    <span class="n">backGroundColor</span> <span class="o">=</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">]</span>
 
     <span class="c1"># Clock to control the framerate.</span>
     <span class="n">myclock</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">Clock</span><span class="p">()</span>
@@ -262,15 +305,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
     <span class="n">client</span> <span class="o">=</span> <span class="n">GameClient</span><span class="p">(</span> <span class="n">host</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">serverIP</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8888</span><span class="p">)</span>
     <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 
-    <span class="c1"># If the connection fails, the client&#39;s default window dimensions are used.</span>
     <span class="n">mydisplay</span> <span class="o">=</span> <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_mode</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Screen dimensions from server: </span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Default dimensions for client: </span><span class="si">{</span><span class="n">client</span><span class="o">.</span><span class="n">window_xy_px</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">client</span><span class="o">.</span><span class="n">running</span> <span class="ow">and</span> <span class="n">client</span><span class="o">.</span><span class="n">client_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">pygame</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">set_caption</span><span class="p">(</span> <span class="s2">&quot;Client: &quot;</span> <span class="o">+</span> <span class="n">client</span><span class="o">.</span><span class="n">client_name</span><span class="p">)</span>
+    <span class="n">update_client_window</span><span class="p">()</span>
 
     <span class="c1"># Initialize client state dictionary.</span>
     <span class="n">client_state</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ID&#39;</span><span class="p">:</span> <span class="n">client</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
@@ -302,7 +338,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
         
         <span class="k">if</span> <span class="p">(</span><span class="n">flip_timer</span> <span class="o">&gt;</span> <span class="mf">0.2</span><span class="p">):</span>
             <span class="c1"># Background</span>
-            <span class="n">mydisplay</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span> <span class="n">THECOLORS</span><span class="p">[</span><span class="s2">&quot;black&quot;</span><span class="p">])</span>
+            <span class="n">mydisplay</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span> <span class="n">backGroundColor</span><span class="p">)</span>
             
             <span class="n">fr_avg</span><span class="o">.</span><span class="n">draw</span><span class="p">(</span> <span class="n">mydisplay</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
                         

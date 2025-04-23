@@ -809,7 +809,10 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_s</span><span class="p">):</span>
                     <span class="n">local_user</span><span class="o">.</span><span class="n">key_s</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_d</span><span class="p">):</span>
-                    <span class="n">local_user</span><span class="o">.</span><span class="n">key_d</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
+                    <span class="k">if</span> <span class="n">local_user</span><span class="o">.</span><span class="n">key_shift</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span> <span class="ow">and</span> <span class="n">local_user</span><span class="o">.</span><span class="n">key_ctrl</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
+                        <span class="n">g</span><span class="o">.</span><span class="n">game_loop</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">disconnect_all_network_clients</span><span class="p">()</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">local_user</span><span class="o">.</span><span class="n">key_d</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="n">K_w</span><span class="p">):</span>
                     <span class="n">local_user</span><span class="o">.</span><span class="n">key_w</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span>
                 

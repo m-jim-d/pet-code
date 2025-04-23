@@ -132,7 +132,9 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
 <span class="kn">import</span> <span class="nn">pygame</span>
 <span class="kn">from</span> <span class="nn">pygame.color</span> <span class="kn">import</span> <span class="n">THECOLORS</span>
-<span class="kn">from</span> <span class="nn">Box2D</span> <span class="kn">import</span> <span class="p">(</span><span class="n">b2World</span><span class="p">,</span> <span class="n">b2Vec2</span><span class="p">,</span> <span class="n">b2_dynamicBody</span><span class="p">,</span> <span class="n">b2AABB</span><span class="p">,</span> <span class="n">b2QueryCallback</span><span class="p">,</span> <span class="n">b2ContactListener</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">Box2D</span>
+<span class="kn">from</span> <span class="nn">Box2D</span> <span class="kn">import</span> <span class="p">(</span><span class="n">b2World</span><span class="p">,</span> <span class="n">b2Vec2</span><span class="p">,</span> <span class="n">b2_dynamicBody</span><span class="p">,</span> <span class="n">b2AABB</span><span class="p">,</span> <span class="n">b2QueryCallback</span><span class="p">,</span> 
+                   <span class="n">b2ContactListener</span><span class="p">)</span>
 
 <span class="c1"># Vector class</span>
 <span class="kn">from</span> <span class="nn">A09_vec2d</span> <span class="kn">import</span> <span class="n">Vec2D</span>
@@ -1014,6 +1016,8 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 
         <span class="c1"># Create the Box2D world</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">b2d_world</span> <span class="o">=</span> <span class="n">b2World</span><span class="p">(</span><span class="n">gravity</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0</span><span class="p">),</span> <span class="n">doSleep</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">contactListener</span><span class="o">=</span><span class="n">myContactListener</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;pybox2d version: &quot;</span><span class="p">,</span> <span class="n">Box2D</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">buildFence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">onoff</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;L&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span><span class="s1">&#39;R&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span><span class="s1">&#39;T&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span><span class="s1">&#39;B&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">}):</span>
         <span class="k">for</span> <span class="n">eachWall</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">walls</span><span class="p">[:]:</span>
