@@ -49,7 +49,7 @@ def make_some_pucks(demo, customDemo7=None, version="10"):
 
     if demo == 1:
         puck_parms = {
-            'border_px': 2,
+            'border_px': 3,
             'coef_rest': 1.0
         }
 

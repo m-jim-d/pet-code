@@ -197,7 +197,7 @@ class GameServer:
             addr, client_name = self.clients[client_socket]
             if (self.signInOut_function):
                 self.signInOut_function(client_name, activate=False)
-            print(f"Client {client_name} ({addr}) disconnected")
+            print(f"Client {client_name} ({addr}) disconnected\n", end='')  # Add newline but avoid double spacing
             client_socket.close()
             del self.clients[client_socket]
                 
