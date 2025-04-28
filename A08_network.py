@@ -36,6 +36,7 @@ import select
 import threading
 import time
 import types
+import sys
 from pygame.color import THECOLORS
 
 def setClientColors():
@@ -247,6 +248,11 @@ class GameServer:
         Note: Client handler threads will detect the closed socket and
         clean up their resources automatically.
         """
+        # Check if running on MacOS
+        if sys.platform == 'darwin':
+            print("Warning: Mass disconnect not supported on MacOS. Restart the server to disconnect clients.")
+            return
+            
         # Make a copy of keys since we'll be modifying the dictionary
         client_sockets = list(self.clients.keys())
         for client_socket in client_sockets:
