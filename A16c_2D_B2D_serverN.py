@@ -15,7 +15,7 @@ import A15_globals as g
 #===========================================================
 # Functions
 #===========================================================
-        
+
 def make_some_pucks(demo):
     g.game_window.set_caption("PyBox2D Air-Table Server A16c     Demo #" + str(demo))
     g.env.timestep_fixed = False

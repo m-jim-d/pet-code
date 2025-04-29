@@ -144,6 +144,7 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="kn">import</span> <span class="nn">threading</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">pygame.color</span> <span class="kn">import</span> <span class="n">THECOLORS</span>
 
 <span class="k">def</span> <span class="nf">setClientColors</span><span class="p">():</span>
@@ -355,6 +356,11 @@ body .il { color: #ae81ff } /* Literal.Number.Integer.Long */
 <span class="sd">        Note: Client handler threads will detect the closed socket and</span>
 <span class="sd">        clean up their resources automatically.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if running on MacOS</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;darwin&#39;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: Mass disconnect not supported on MacOS. Restart the server to disconnect clients.&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+            
         <span class="c1"># Make a copy of keys since we&#39;ll be modifying the dictionary</span>
         <span class="n">client_sockets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">for</span> <span class="n">client_socket</span> <span class="ow">in</span> <span class="n">client_sockets</span><span class="p">:</span>
